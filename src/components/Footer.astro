@@ -1,0 +1,34 @@
+---
+const footerLinks = [
+  { label: 'Protocol', href: '#x402' },
+  { label: 'Documentation', href: 'https://github.com/qntx', external: true },
+  { label: 'Audits', href: '#about' },
+  { label: 'Telemetry', href: '#ecosystem' },
+];
+---
+
+<footer class="w-full bg-[#000000] text-white py-12">
+  <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+    <!-- Brand / Copyright -->
+    <div class="font-code-sm text-code-sm text-neutral-400 text-center md:text-left">
+      QuantX Labs | &copy; 2025 QuantX Labs. Open source under Apache 2.0. Built on Monad.
+    </div>
+
+    <!-- Right-aligned links with Active Status Indicator -->
+    <div class="flex flex-wrap items-center justify-center gap-6 font-code-sm text-code-sm">
+      {footerLinks.map((link) => (
+        <a
+          class="text-neutral-400 hover:text-white transition-colors duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          href={link.href}
+          {...(link.external ? { rel: 'noreferrer', target: '_blank' } : {})}
+        >
+          {link.label}
+        </a>
+      ))}
+      <div class="inline-flex items-center gap-1.5 text-neutral-300">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span>Status</span>
+      </div>
+    </div>
+  </div>
+</footer>

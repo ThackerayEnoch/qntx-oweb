@@ -1,0 +1,51 @@
+---
+import Logo from "../components/Logo.astro";
+
+const navLinks = [
+  { label: 'x402 Protocol', href: '#x402' },
+  { label: 'Ecosystem', href: '#ecosystem' },
+  { label: 'About', href: '#about' },
+  { label: 'Docs', href: 'https://github.com/qntx', external: true },
+];
+---
+
+<header class="fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-6xl rounded-full z-50 bg-white/90 backdrop-blur-md border border-neutral-200/80 shadow-sm transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]">
+  <div class="flex justify-between items-center px-4 py-2.5 w-full">
+    <Logo href="/" label="QNTX home" class="h-10 w-auto text-black overflow-visible" />
+
+    <!-- Navigation Links -->
+    <nav class="hidden md:flex items-center gap-6">
+      {navLinks.map((link) => (
+        <a
+          class="font-body-sm text-body-sm text-neutral-600 hover:text-black transition-colors duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          href={link.href}
+          {...(link.external ? { rel: 'noreferrer', target: '_blank' } : {})}
+        >
+          {link.label}
+        </a>
+      ))}
+    </nav>
+
+    <!-- Trailing Action Pill / Buttons -->
+    <div class="flex items-center gap-3">
+      <a
+        class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-neutral-200 bg-neutral-50 font-code-sm text-code-sm text-neutral-900 hover:border-black transition-colors duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        href="https://github.com/qntx"
+        rel="noreferrer"
+        target="_blank"
+      >
+        <span class="material-symbols-outlined text-xs leading-none" data-icon="star">star</span>
+        <span class="font-medium">1.8k</span>
+      </a>
+      <a
+        class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-black text-white rounded-full font-code-sm text-code-sm font-medium hover:bg-neutral-800 active:scale-[0.98] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        href="https://github.com/qntx"
+        rel="noreferrer"
+        target="_blank"
+      >
+        <span>Deploy Gateway</span>
+        <span class="material-symbols-outlined text-xs leading-none" data-icon="terminal">terminal</span>
+      </a>
+    </div>
+  </div>
+</header>

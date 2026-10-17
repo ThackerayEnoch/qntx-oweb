@@ -1,0 +1,17 @@
+<svg viewBox="90 90 332 332" xmlns="http://www.w3.org/2000/svg">
+  <title>QNTX</title>
+  <style>
+    path {
+      fill: #000;
+    }
+    @media (prefers-color-scheme: dark) {
+      path {
+        fill: #fff;
+      }
+    }
+  </style>
+  <path
+    fill-rule="evenodd"
+    d="M179.2,102.4L332.8,102.4A76.8,76.8 0 0 1 409.6,179.2L409.6,332.8A76.8,76.8 0 0 0 332.8,409.6L179.2,409.6A76.8,76.8 0 0 1 102.4,332.8L102.4,179.2A76.8,76.8 0 0 1 179.2,102.4Z M204.8,204.8L307.2,204.8L307.2,307.2L204.8,307.2Z"
+  />
+</svg>

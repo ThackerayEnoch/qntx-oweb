@@ -1,0 +1,59 @@
+---
+import ThesisCard from './ThesisCard.astro';
+
+const withoutX402 = {
+  badge: 'STATUS QUO // LEGACY',
+  title: 'Without x402',
+  description:
+    'Agents rely on human credit cards and manual top-ups. When balance hits zero, agents halt.',
+  items: [
+    'Centralized API keys & custody vulnerability',
+    'Manual human billing dependency',
+    'Hard rate limits & pre-funded balance traps',
+  ],
+};
+
+const withX402 = {
+  badge: 'x402 SPEC // MACHINE-NATIVE',
+  title: 'With x402',
+  description:
+    'Machine-native micropayments. Self-custodial wallets enable agents to earn and spend independently.',
+  items: [
+    'Sub-cent gasless settlement per call',
+    'Deterministic cryptographic key control',
+    'Zero human in the loop required',
+  ],
+};
+---
+
+<section class="w-full py-24 bg-neutral-50" id="x402">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="font-code-sm text-code-sm text-neutral-500 tracking-wider uppercase mb-3" data-scramble>
+      [ 01 // THESIS ]
+    </div>
+    <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-zinc-950 tracking-tight font-semibold mb-2">
+      x402 Protocol: Financial Autonomy for AI.
+    </h2>
+    <p class="font-code-lg text-code-lg text-neutral-600 mb-12">
+      Intelligence is ready. Financial autonomy is not.
+    </p>
+
+    <!-- Contrast Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+      <ThesisCard
+        badge={withoutX402.badge}
+        title={withoutX402.title}
+        description={withoutX402.description}
+        items={withoutX402.items}
+        theme="light"
+      />
+      <ThesisCard
+        badge={withX402.badge}
+        title={withX402.title}
+        description={withX402.description}
+        items={withX402.items}
+        theme="dark"
+      />
+    </div>
+  </div>
+</section>

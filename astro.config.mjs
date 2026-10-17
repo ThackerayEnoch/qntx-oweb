@@ -1,3 +1,4 @@
+import tailwindcss from "@tailwindcss/vite";
 // @ts-check
 import { defineConfig } from "astro/config";
 
@@ -9,12 +10,16 @@ export default defineConfig({
         "@": "/src",
       },
     },
+
     server: {
       host: true,
       port: 4321,
     },
+
     build: {
       target: "esnext",
     },
+
+    plugins: [tailwindcss()],
   },
 });

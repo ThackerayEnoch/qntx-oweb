@@ -1,0 +1,83 @@
+---
+import RepoCard from './RepoCard.astro';
+
+const repos = [
+  {
+    name: 'qntx/r402',
+    href: 'https://github.com/qntx/r402',
+    tags: ['Rust'],
+    description: 'Rust SDK for the x402 payment protocol.',
+    colSpan: '',
+  },
+  {
+    name: 'qntx/openai & qntx/openai-python',
+    href: 'https://github.com/qntx/openai',
+    tags: ['TypeScript', 'Python'],
+    description: 'Drop-in OpenAI clients with transparent HTTP 402 micropayment support.',
+    colSpan: 'md:col-span-2',
+  },
+  {
+    name: 'qntx/facilitator',
+    href: 'https://github.com/qntx/facilitator',
+    tags: ['Rust'],
+    description:
+      'Production-ready x402 facilitator server handling payment verification, gas sponsorship, and settlement.',
+    colSpan: 'md:col-span-2',
+  },
+  {
+    name: 'qntx/kobe',
+    href: 'https://github.com/qntx/kobe',
+    tags: ['Rust'],
+    description: 'Lightweight, no_std multi-chain HD wallet derivation library.',
+    colSpan: '',
+  },
+  {
+    name: 'qntx/qmd',
+    href: 'https://github.com/qntx/qmd',
+    tags: ['Rust'],
+    description: 'Lightweight local search engine designed for AI agents.',
+    colSpan: '',
+  },
+  {
+    name: 'qntx/ks',
+    href: 'https://github.com/qntx/ks',
+    tags: ['Rust'],
+    description: 'Local-first, age-encrypted secret manager for autonomous agents.',
+    colSpan: '',
+  },
+  {
+    name: 'qntx/nostr',
+    href: 'https://github.com/qntx/nostr',
+    tags: ['TS', 'Rust'],
+    description: 'Nostr protocol implementation and SDK for decentralized agent communication.',
+    colSpan: '',
+  },
+];
+---
+
+<section class="py-24 bg-white" id="ecosystem">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="font-code-sm text-code-sm text-neutral-500 tracking-wider uppercase mb-3" data-scramble>
+      [ 02 // REPOSITORIES ]
+    </div>
+    <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-zinc-950 tracking-tight font-semibold mb-2">
+      Open-Source Primitives.
+    </h2>
+    <p class="font-body-md text-body-md text-neutral-600 mb-12">
+      Production-ready SDKs, wallets, and tooling built for machine-to-machine economies.
+    </p>
+
+    <!-- Bento Grid (7 Items) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {repos.map((repo) => (
+        <RepoCard
+          name={repo.name}
+          href={repo.href}
+          tags={repo.tags}
+          description={repo.description}
+          colSpan={repo.colSpan}
+        />
+      ))}
+    </div>
+  </div>
+</section>
