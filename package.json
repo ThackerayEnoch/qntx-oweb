@@ -1,17 +1,26 @@
 {
   "name": "qntx-oweb",
-  "type": "module",
   "version": "0.0.1",
-  "engines": {
-    "node": ">=22.22.0"
-  },
+  "type": "module",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "check": "astro check",
+    "lint": "oxlint",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check"
   },
   "dependencies": {
     "astro": "^7.4.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@qntx/oxfmt": "^1.1.1",
+    "@qntx/oxlint": "^1.1.1",
+    "typescript": "^6.0.2"
+  },
+  "engines": {
+    "node": ">=22.22.0"
   }
 }

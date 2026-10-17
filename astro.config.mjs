@@ -1,5 +1,20 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig } from "astro/config";
 
-// https://astro.build/config
-export default defineConfig({});
+export default defineConfig({
+  // 构建与解析配置
+  vite: {
+    resolve: {
+      alias: {
+        "@": "/src",
+      },
+    },
+    server: {
+      host: true,
+      port: 4321,
+    },
+    build: {
+      target: "esnext",
+    },
+  },
+});
