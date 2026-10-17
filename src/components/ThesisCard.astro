@@ -13,22 +13,22 @@ const isDark = theme === 'dark';
 
 <div
   class={isDark
-    ? 'bg-black text-white p-8 rounded-2xl border border-neutral-800 shadow-sm flex flex-col justify-between transition-colors duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]'
-    : 'bg-white border border-neutral-200 text-neutral-900 p-8 rounded-2xl flex flex-col justify-between shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-colors duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]'}
+    ? 'bg-black text-white p-8 md:p-9 rounded-2xl border border-neutral-800 shadow-sm flex flex-col justify-between transition-colors duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]'
+    : 'bg-white border border-neutral-200 text-neutral-900 p-8 md:p-9 rounded-2xl flex flex-col justify-between shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-colors duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]'}
 >
   <div>
     <div
       class={isDark
-        ? 'inline-block font-label-tag text-label-tag tracking-wider text-neutral-300 uppercase mb-4 px-2 py-0.5 border border-neutral-800 rounded bg-[#111111]'
-        : 'inline-block font-label-tag text-label-tag tracking-wider text-neutral-600 uppercase mb-4 px-2 py-0.5 border border-neutral-200 rounded bg-neutral-50'}
+        ? 'inline-block font-label-tag text-label-tag tracking-wider text-neutral-300 uppercase mb-4 px-2.5 py-1 border border-neutral-800 rounded bg-[#111111]'
+        : 'inline-block font-label-tag text-label-tag tracking-wider text-neutral-600 uppercase mb-4 px-2.5 py-1 border border-neutral-200 rounded bg-neutral-50'}
       data-scramble
     >
       {badge}
     </div>
     <h3
       class={isDark
-        ? 'font-headline-md text-headline-md text-white font-medium mb-3'
-        : 'font-headline-md text-headline-md text-zinc-950 font-medium mb-3'}
+        ? 'font-headline-md text-headline-md text-white font-medium mb-3.5'
+        : 'font-headline-md text-headline-md text-zinc-950 font-medium mb-3.5'}
     >
       {title}
     </h3>
@@ -42,11 +42,11 @@ const isDark = theme === 'dark';
   </div>
   <div
     class={isDark
-      ? 'pt-6 border-t border-neutral-800 space-y-2.5 font-code-sm text-code-sm text-neutral-300'
-      : 'pt-6 border-t border-neutral-200 space-y-2.5 font-code-sm text-code-sm text-neutral-600'}
+      ? 'pt-6 border-t border-neutral-800 space-y-3 font-code-sm text-code-sm text-neutral-300'
+      : 'pt-6 border-t border-neutral-200 space-y-3 font-code-sm text-code-sm text-neutral-600'}
   >
     {items.map((item) => (
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2.5">
         <span
           class={isDark
             ? 'w-1.5 h-1.5 rounded-full bg-white shrink-0'

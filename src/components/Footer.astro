@@ -7,15 +7,15 @@ const footerLinks = [
 ];
 ---
 
-<footer class="w-full bg-[#000000] text-white py-12">
-  <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+<footer class="w-full bg-[#000000] text-white py-6 md:py-7">
+  <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
     <!-- Brand / Copyright -->
     <div class="font-code-sm text-code-sm text-neutral-400 text-center md:text-left">
       QuantX Labs | &copy; 2025 QuantX Labs. Open source under Apache 2.0. Built on Monad.
     </div>
 
     <!-- Right-aligned links with Active Status Indicator -->
-    <div class="flex flex-wrap items-center justify-center gap-6 font-code-sm text-code-sm">
+    <div class="flex flex-wrap items-center justify-center gap-7 font-code-sm text-code-sm">
       {footerLinks.map((link) => (
         <a
           class="text-neutral-400 hover:text-white transition-colors duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
@@ -25,7 +25,7 @@ const footerLinks = [
           {link.label}
         </a>
       ))}
-      <div class="inline-flex items-center gap-1.5 text-neutral-300">
+      <div class="inline-flex items-center gap-2 text-neutral-300">
         <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
         <span>Status</span>
       </div>

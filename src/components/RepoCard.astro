@@ -11,13 +11,13 @@ const { href, name, tags, description, colSpan = '' } = Astro.props;
 ---
 
 <a
-  class={`group bg-white border border-neutral-200 hover:border-neutral-900 p-6 rounded-2xl transition-colors duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col justify-between ${colSpan}`.trim()}
+  class={`group bg-white border border-neutral-200 hover:border-neutral-900 p-5 md:p-5.5 rounded-xl transition-colors duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col justify-between ${colSpan}`.trim()}
   href={href}
   rel="noreferrer"
   target="_blank"
 >
   <div>
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center justify-between mb-3">
       <div class="flex items-center gap-2 font-code-lg text-code-lg font-medium text-zinc-950">
         <span class="material-symbols-outlined text-sm leading-none" data-icon="folder_code">folder_code</span>
         <span>{name}</span>
@@ -36,11 +36,11 @@ const { href, name, tags, description, colSpan = '' } = Astro.props;
         </div>
       )}
     </div>
-    <p class="font-body-sm text-body-sm text-neutral-600 mb-6">
+    <p class="font-body-sm text-body-sm text-neutral-600 mb-4 leading-relaxed">
       {description}
     </p>
   </div>
-  <div class="flex items-center gap-1 font-code-sm text-code-sm text-neutral-500 group-hover:text-black transition-colors duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]">
+  <div class="flex items-center gap-1.5 font-code-sm text-code-sm text-neutral-500 group-hover:text-black transition-colors duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]">
     <span>View Source</span>
     <span
       class="material-symbols-outlined text-xs leading-none transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[2px]"

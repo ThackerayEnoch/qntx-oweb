@@ -9,12 +9,14 @@ const navLinks = [
 ];
 ---
 
-<header class="fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-6xl rounded-full z-50 bg-white/90 backdrop-blur-md border border-neutral-200/80 shadow-sm transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]">
-  <div class="flex justify-between items-center px-4 py-2.5 w-full">
-    <Logo href="/" label="QNTX home" class="h-10 w-auto text-black overflow-visible" />
+<header class="fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-7xl rounded-full z-50 bg-white/90 backdrop-blur-md border border-neutral-200/80 shadow-sm transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]">
+  <div class="flex justify-between items-center pl-6 pr-3 py-2 w-full">
+    <div class="flex items-center h-8">
+      <Logo href="/" label="QNTX home" class="h-10 w-auto -my-1 text-black overflow-visible" />
+    </div>
 
     <!-- Navigation Links -->
-    <nav class="hidden md:flex items-center gap-6">
+    <nav class="hidden md:flex items-center gap-7">
       {navLinks.map((link) => (
         <a
           class="font-body-sm text-body-sm text-neutral-600 hover:text-black transition-colors duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
@@ -27,9 +29,9 @@ const navLinks = [
     </nav>
 
     <!-- Trailing Action Pill / Buttons -->
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2.5">
       <a
-        class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-neutral-200 bg-neutral-50 font-code-sm text-code-sm text-neutral-900 hover:border-black transition-colors duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-neutral-200 bg-neutral-50 font-code-sm text-code-sm text-neutral-900 hover:border-black transition-colors duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
         href="https://github.com/qntx"
         rel="noreferrer"
         target="_blank"
@@ -38,7 +40,7 @@ const navLinks = [
         <span class="font-medium">1.8k</span>
       </a>
       <a
-        class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-black text-white rounded-full font-code-sm text-code-sm font-medium hover:bg-neutral-800 active:scale-[0.98] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        class="inline-flex items-center gap-1.5 px-4.5 py-2 bg-black text-white rounded-full font-code-sm text-code-sm font-medium hover:bg-neutral-800 active:scale-[0.98] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
         href="https://github.com/qntx"
         rel="noreferrer"
         target="_blank"
