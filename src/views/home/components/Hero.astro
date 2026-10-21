@@ -1,5 +1,7 @@
 ---
-const command = 'npm i @qntx/openai';
+import { heroData } from '../home.data';
+
+const { statusPill, headline, subtitle, tagline, actions, command, terminalNote } = heroData;
 ---
 
 <section class="relative pt-24 pb-16 md:pt-30 md:pb-24 bg-white overflow-hidden" id="hero">
@@ -17,7 +19,7 @@ const command = 'npm i @qntx/openai';
     >
       <span class="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-pulse"></span>
       <span class="font-label-tag text-label-tag tracking-wider text-neutral-700 uppercase" data-scramble>
-        x402 Protocol v0.1 Live on Monad Testnet
+        {statusPill}
       </span>
     </div>
 
@@ -26,7 +28,7 @@ const command = 'npm i @qntx/openai';
       class="hero-enter font-display text-display-mobile md:text-display tracking-tight text-zinc-950 max-w-4xl xl:max-w-5xl font-semibold mb-6"
       style="animation-delay: 70ms;"
     >
-      Building the Economic Layer for Autonomous AI Agents.
+      {headline}
     </h1>
 
     <!-- Step 2 (140ms): Subtitle -->
@@ -34,7 +36,7 @@ const command = 'npm i @qntx/openai';
       class="hero-enter font-body-lg text-body-lg text-neutral-600 max-w-2xl xl:max-w-3xl mb-2.5"
       style="animation-delay: 140ms;"
     >
-      Open protocols and infrastructure for AI agents to transact, collaborate, govern, and evolve autonomously on-chain.
+      {subtitle}
     </p>
 
     <!-- Step 3 (210ms): Tagline -->
@@ -42,7 +44,7 @@ const command = 'npm i @qntx/openai';
       class="hero-enter font-code-lg text-code-lg text-neutral-500 font-medium mb-11"
       style="animation-delay: 210ms;"
     >
-      Agents earn. Agents pay. Agents scale.
+      {tagline}
     </p>
 
     <!-- Step 4 (280ms): Action Buttons (Rounded-full) -->
@@ -50,24 +52,19 @@ const command = 'npm i @qntx/openai';
       class="hero-enter flex flex-wrap items-center gap-4 mb-14"
       style="animation-delay: 280ms;"
     >
-      <a
-        class="px-8 py-3.5 bg-black text-white rounded-full font-code-sm text-code-sm font-medium hover:bg-neutral-800 transition-colors duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center gap-2"
-        href="https://github.com/qntx"
-        rel="noreferrer"
-        target="_blank"
-      >
-        <span>Explore GitHub</span>
-        <span class="material-symbols-outlined text-sm leading-none" data-icon="arrow_outward">arrow_outward</span>
-      </a>
-      <a
-        class="px-8 py-3.5 bg-white text-zinc-950 border border-neutral-300 rounded-full font-code-sm text-code-sm font-medium hover:border-black transition-colors duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center gap-2"
-        href="https://github.com/qntx"
-        rel="noreferrer"
-        target="_blank"
-      >
-        <span>Developer Docs</span>
-        <span class="material-symbols-outlined text-sm leading-none" data-icon="description">description</span>
-      </a>
+      {actions.map((action) => (
+        <a
+          class={action.variant === 'primary'
+            ? 'px-8 py-3.5 bg-black text-white rounded-full font-code-sm text-code-sm font-medium hover:bg-neutral-800 transition-colors duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center gap-2'
+            : 'px-8 py-3.5 bg-white text-zinc-950 border border-neutral-300 rounded-full font-code-sm text-code-sm font-medium hover:border-black transition-colors duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center gap-2'}
+          href={action.href}
+          rel="noreferrer"
+          target="_blank"
+        >
+          <span>{action.label}</span>
+          <span class="material-symbols-outlined text-sm leading-none" data-icon={action.icon}>{action.icon}</span>
+        </a>
+      ))}
     </div>
 
     <!-- Step 5 (350ms): Terminal Box with Blinking Cursor & Micro-Animation -->
@@ -99,7 +96,7 @@ const command = 'npm i @qntx/openai';
           </div>
         </div>
         <div class="text-neutral-500 text-xs">
-          # Transparent HTTP 402 micropayments on Monad Permit2
+          {terminalNote}
         </div>
       </div>
     </div>

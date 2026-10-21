@@ -1,11 +1,7 @@
 ---
-interface Props {
-  badge: string;
-  title: string;
-  description: string;
-  items: string[];
-  theme?: 'light' | 'dark';
-}
+import type { ThesisCardData } from '../home.types';
+
+type Props = ThesisCardData;
 
 const { badge, title, description, items, theme = 'light' } = Astro.props;
 const isDark = theme === 'dark';

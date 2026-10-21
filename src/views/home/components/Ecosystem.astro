@@ -1,0 +1,33 @@
+---
+import RepoCard from './RepoCard.astro';
+import { ecosystemData } from '../home.data';
+
+const { sectionTag, title, subtitle, repos } = ecosystemData;
+---
+
+<section class="py-24 bg-white" id="ecosystem">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="font-code-sm text-code-sm text-neutral-500 tracking-wider uppercase mb-3" data-scramble>
+      {sectionTag}
+    </div>
+    <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-zinc-950 tracking-tight font-semibold mb-2">
+      {title}
+    </h2>
+    <p class="font-body-md text-body-md text-neutral-600 mb-12">
+      {subtitle}
+    </p>
+
+    <!-- Bento Grid (7 Items) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {repos.map((repo) => (
+        <RepoCard
+          name={repo.name}
+          href={repo.href}
+          tags={repo.tags}
+          description={repo.description}
+          colSpan={repo.colSpan}
+        />
+      ))}
+    </div>
+  </div>
+</section>

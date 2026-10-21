@@ -1,0 +1,26 @@
+---
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import Divider from '@/components/Divider.astro';
+
+import Hero from './components/Hero.astro';
+import Thesis from './components/Thesis.astro';
+import Ecosystem from './components/Ecosystem.astro';
+import About from './components/About.astro';
+import Cta from './components/Cta.astro';
+---
+
+<Header />
+<main>
+  <Hero />
+  <Divider theme="light" />
+  <Thesis />
+  <Divider theme="light" />
+  <Ecosystem />
+  <Divider theme="dark" />
+  <About />
+  <Divider theme="dark" />
+  <Cta />
+  <Divider theme="dark" />
+</main>
+<Footer />

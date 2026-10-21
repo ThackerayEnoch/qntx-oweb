@@ -1,11 +1,7 @@
 ---
-interface Props {
-  href: string;
-  name: string;
-  tags: string[];
-  description: string;
-  colSpan?: string;
-}
+import type { RepoItem } from '../home.types';
+
+type Props = RepoItem;
 
 const { href, name, tags, description, colSpan = '' } = Astro.props;
 ---
