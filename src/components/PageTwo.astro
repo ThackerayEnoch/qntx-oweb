@@ -1,5 +1,5 @@
 ---
-// PageTwo.astro - Page 02: Open Primitives & Real-time ASCII Swarm Matrix
+// PageTwo.astro - Page 02: Foundational Primitives & Interactive Swarm Mesh
 ---
 
 <section id="page-2" class="min-h-[calc(100vh-3rem)] flex flex-col justify-between py-6 sm:py-8">
@@ -11,14 +11,14 @@
       <span class="tracking-wider uppercase text-neutral-900 font-medium">[ 02 // PRIMITIVES ]</span>
     </div>
     <div class="text-neutral-400">
-      <span>MIT OPEN ARCHITECTURE</span>
+      <span>OPEN ARCHITECTURE</span>
     </div>
   </div>
 
-  <div class="my-auto py-4 space-y-6">
+  <div class="my-auto py-3 sm:py-5 space-y-5">
     
-    <!-- 4 Primitives Cards (Clean White Architectural Spec) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 font-mono">
+    <!-- 4 Architectural Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono">
       
       <!-- Core Runtime -->
       <a
@@ -98,37 +98,38 @@
 
     </div>
 
-    <!-- Live ASCII Swarm Grid (Visual Matrix Representation) -->
-    <div class="border border-black/10 bg-white p-4 font-mono shadow-2xs">
-      <div class="flex items-center justify-between border-b border-black/8 pb-2 mb-3 text-[11px] text-neutral-500">
+    <!-- Interactive Swarm Canvas -->
+    <div class="border border-black/10 bg-white font-mono shadow-2xs overflow-hidden">
+      <div class="flex items-center justify-between border-b border-black/8 px-3.5 py-2 text-[11px] text-neutral-500">
         <div class="flex items-center gap-2">
-          <span class="text-neutral-400">[ SWARM MESH TOPOLOGY ]</span>
+          <span class="text-neutral-400 select-none">[ SWARM TOPOLOGY ]</span>
+          <span class="text-neutral-900 font-medium">DECENTRALIZED MESH</span>
         </div>
         <div class="text-neutral-400 text-[10px]">
-          INTER-AGENT DYNAMICS
+          INTERACTIVE_P2P
         </div>
       </div>
 
-      <div class="overflow-x-auto py-1 flex justify-center no-scrollbar select-none">
-        <pre
-          id="ascii-swarm-grid"
-          class="font-mono text-xs sm:text-sm leading-relaxed text-neutral-900 tracking-widest text-center"
-          aria-label="ASCII Swarm Node Grid"
-        ></pre>
+      <div class="relative w-full h-[150px] sm:h-[180px] bg-white cursor-pointer">
+        <canvas
+          id="qntx-swarm-canvas"
+          class="w-full h-full block"
+          aria-label="Interactive decentralized agent swarm mesh"
+        ></canvas>
       </div>
 
-      <div class="flex items-center justify-between border-t border-black/6 pt-2 mt-2 text-[10px] text-neutral-400">
-        <span>TOPOLOGY: DECENTRALIZED</span>
-        <span class="text-emerald-700">ACTIVE: 100%</span>
+      <div class="flex items-center justify-between border-t border-black/6 px-3.5 py-1.5 text-[10px] text-neutral-400">
+        <span>CLICK NODE TO PULSE</span>
+        <span class="text-emerald-700">TOPOLOGY: ADAPTIVE</span>
       </div>
     </div>
 
   </div>
 
   <!-- Minimalist Technical Footer -->
-  <footer class="pt-4 border-t border-black/10 flex flex-wrap items-center justify-between gap-4 font-mono text-[11px] text-neutral-500">
+  <footer class="pt-3 border-t border-black/10 flex flex-wrap items-center justify-between gap-4 font-mono text-[11px] text-neutral-500">
     <div class="flex items-center gap-3">
-      <span class="text-neutral-950 font-display">[ QNTX ]</span>
+      <span class="text-neutral-950 font-display font-medium">[ QNTX ]</span>
       <span>QNANTX RESEARCH</span>
       <span class="hidden sm:inline text-neutral-400">MIT LICENSE</span>
     </div>

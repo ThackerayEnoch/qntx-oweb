@@ -1,46 +1,46 @@
 ---
-// PageOne.astro - Page 01: Core Spec & Horizontal ASCII Unfold
+// PageOne.astro - Page 01: The Kinetic ASCII Monument & Horizontal Unfold
 ---
 
 <section id="page-1" class="min-h-[calc(100vh-3rem)] flex flex-col justify-between py-6 sm:py-8 border-b border-black/8">
   
-  <!-- Section Header / Technical Coordinates -->
+  <!-- Technical Line: Coordinates & Protocol Status -->
   <div class="flex items-center justify-between border-b border-black/10 pb-2 text-[11px] font-mono text-neutral-500">
     <div class="flex items-center gap-2">
       <span class="text-emerald-600">■</span>
-      <span class="tracking-wider uppercase text-neutral-900 font-medium">[ 01 // CORE UNFOLD ]</span>
+      <span class="tracking-wider uppercase text-neutral-900 font-medium">[ 01 // HORIZONTAL UNFOLD ]</span>
     </div>
     <div class="flex items-center gap-3 text-neutral-400">
-      <span class="hidden sm:inline">RFC-0402</span>
-      <span>RUNTIME_OK</span>
+      <span class="hidden sm:inline">COORDINATE: 00..76</span>
+      <span>READY</span>
     </div>
   </div>
 
-  <!-- Centerpiece: Horizontal Unfolding ASCII Canvas & Tagline -->
-  <div class="my-auto py-4 space-y-5">
+  <!-- Centerpiece: Kinetic ASCII Sculpture & Unfolding Controls -->
+  <div class="my-auto py-3 sm:py-5 space-y-4 sm:space-y-6">
     
-    <!-- ASCII Stage Container -->
-    <div class="border border-black/12 bg-white p-4 sm:p-6 shadow-xs relative">
+    <!-- Stage Box -->
+    <div class="border border-black/12 bg-white shadow-2xs relative">
       
-      <!-- Top Stage Bar: Scrubbing & Controls -->
-      <div class="flex items-center justify-between border-b border-black/8 pb-2.5 mb-4 text-[11px] font-mono text-neutral-500">
+      <!-- Stage Top Bar: Controls -->
+      <div class="flex items-center justify-between border-b border-black/8 px-3.5 py-2 text-[11px] font-mono text-neutral-500">
         <div class="flex items-center gap-2">
-          <span class="text-neutral-400">STAGE:</span>
-          <span class="text-neutral-900 font-display">ASCII // HORIZON</span>
+          <span class="text-neutral-400 select-none">STAGE:</span>
+          <span class="text-neutral-950 font-display">ASCII // HORIZON</span>
           <span id="unfold-pct" class="text-emerald-700 ml-1 font-semibold">100%</span>
         </div>
 
         <div class="flex items-center gap-3">
           <label class="hidden sm:flex items-center gap-2 text-neutral-400">
-            <span>EXPAND:</span>
+            <span class="select-none">EXPAND:</span>
             <input
               id="unfold-slider"
               type="range"
-              min="8"
+              min="0"
               max="100"
               value="100"
-              class="w-20 sm:w-28 accent-neutral-900 cursor-pointer h-1.5 bg-neutral-200"
-              aria-label="Horizontal ASCII expansion slider"
+              class="w-24 sm:w-32 accent-neutral-950 cursor-pointer h-1.5 bg-neutral-200"
+              aria-label="Horizontal expansion phase slider"
             />
           </label>
 
@@ -48,43 +48,43 @@
             id="unfold-replay-btn"
             type="button"
             class="px-2 py-0.5 border border-black/15 bg-neutral-50 hover:bg-neutral-900 hover:text-white transition-all cursor-pointer font-mono text-[10px] uppercase text-neutral-700"
-            title="Replay horizontal ASCII unfolding animation"
+            title="Replay horizontal unfolding animation (or press Space)"
           >
             REPLAY ↺
           </button>
         </div>
       </div>
 
-      <!-- The Horizontal Unfolding ASCII Artwork -->
-      <div class="overflow-x-auto select-none py-2 flex justify-center no-scrollbar">
-        <pre
-          id="ascii-unfold-display"
-          class="font-mono text-[10px] sm:text-[13px] md:text-[15px] lg:text-[16px] leading-[1.15] text-neutral-950 whitespace-pre tracking-normal text-center select-none"
-          aria-label="QNTX Horizontal Unfolding ASCII Art"
-        ></pre>
+      <!-- The Real-Time Kinetic ASCII Canvas -->
+      <div class="relative w-full h-[280px] sm:h-[340px] md:h-[400px] bg-white cursor-crosshair overflow-hidden">
+        <canvas
+          id="qntx-ascii-canvas"
+          class="w-full h-full block"
+          aria-label="Interactive QNTX ASCII horizontal unfolding animation"
+        ></canvas>
       </div>
 
-      <!-- Bottom Frame Micro Coordinate -->
-      <div class="flex items-center justify-between border-t border-black/6 pt-2 mt-3 text-[10px] font-mono text-neutral-400">
-        <span>X_BOUND: 00..54</span>
-        <span class="hidden sm:inline">KINETIC_INTERPOLATION</span>
+      <!-- Stage Bottom Coordinate Ruler -->
+      <div class="flex items-center justify-between border-t border-black/6 px-3.5 py-1.5 text-[10px] font-mono text-neutral-400">
+        <span>GRID: SQUARE_HALFTONE</span>
+        <span class="hidden sm:inline">GRAVITATIONAL_MOUSE_TRACKING</span>
         <span>SYS // 2026</span>
       </div>
 
     </div>
 
-    <!-- Impact Statement (Extremely Minimal Words) -->
-    <div class="text-center space-y-1.5 pt-2">
-      <h1 class="font-display text-lg sm:text-2xl md:text-3xl text-neutral-950 uppercase tracking-widest font-normal">
-        Autonomous Agent Protocol
+    <!-- Minimal Impact Statement -->
+    <div class="text-center space-y-1 pt-1">
+      <h1 class="font-display text-base sm:text-xl md:text-2xl text-neutral-950 uppercase tracking-widest font-normal">
+        Economic Layer for Autonomous AI Agents
       </h1>
       <p class="font-mono text-xs text-neutral-500 uppercase tracking-widest">
-        Compute. Transact. Evolve.
+        Compute. Coordinate. Settle.
       </p>
     </div>
 
     <!-- Drop-in Quick Install Chip -->
-    <div class="flex justify-center pt-1">
+    <div class="flex justify-center pt-0.5">
       <div class="inline-flex items-center gap-3 px-3 py-1.5 border border-black/15 bg-white shadow-2xs font-mono text-xs">
         <span class="text-neutral-400 select-none">$</span>
         <span id="cmd-text" class="text-neutral-900 font-medium select-all">bun add @qntx/core</span>
@@ -101,50 +101,10 @@
 
   </div>
 
-  <!-- LiveData Telemetry Bar (Machine-to-Machine Heartbeat) -->
-  <div class="border border-black/10 bg-white p-3.5 sm:p-4 shadow-xs">
-    
-    <!-- Telemetry Ticker Header -->
-    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-black/10 pb-2 mb-2.5 font-mono text-[11px]">
-      <div class="flex items-center gap-2">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 pulse-emerald"></span>
-        <span class="text-neutral-900 font-display tracking-wider">LIVEDATA // TELEMETRY PULSE</span>
-      </div>
-
-      <div class="flex items-center gap-4 text-neutral-600">
-        <div>TPS: <span id="stat-tps" class="text-emerald-700 font-bold font-mono">3,420</span></div>
-        <div>LATENCY: <span id="stat-latency" class="text-neutral-900 font-mono">4.2ms</span></div>
-        <div class="hidden sm:inline">NODES: <span id="stat-agents" class="text-neutral-900 font-mono font-medium">14,820</span></div>
-      </div>
-    </div>
-
-    <!-- Live Transaction Stream & ASCII Waveform Oscilloscope -->
-    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center font-mono">
-      <!-- Live Transaction Feed -->
-      <div class="md:col-span-8 overflow-hidden">
-        <div id="live-tx-feed" class="space-y-1 text-xs" aria-live="polite"></div>
-      </div>
-
-      <!-- Real-time ASCII Oscilloscope -->
-      <div class="md:col-span-4 border-t md:border-t-0 md:border-l border-black/10 pt-2 md:pt-0 md:pl-4">
-        <pre
-          id="ascii-waveform"
-          class="font-mono text-xs leading-none text-neutral-900 select-none py-1"
-          aria-label="Live ASCII waveform chart"
-        ></pre>
-        <div class="text-[10px] text-neutral-400 pt-1.5 border-t border-black/8 flex justify-between">
-          <span>SPECTRUM:</span>
-          <span class="text-emerald-700 select-none">■ ■ ▪ ■ ■ ▪ ■ ■</span>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Bottom Page Navigation Hint -->
-  <div class="pt-4 flex items-center justify-between font-mono text-[11px] text-neutral-400">
+  <!-- Bottom Page Navigation Cue -->
+  <div class="pt-2 flex items-center justify-between font-mono text-[11px] text-neutral-400">
     <div class="flex items-center gap-2">
-      <span class="text-neutral-900">01</span>
+      <span class="text-neutral-950 font-medium">01</span>
       <span class="text-neutral-300">──▪──</span>
       <span>02</span>
     </div>
