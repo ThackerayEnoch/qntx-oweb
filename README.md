@@ -81,14 +81,14 @@ qntx-oweb/
 
 ## 🛠️ Tech Stack
 
-| Technology | Purpose |
-| :--- | :--- |
-| **[Astro](https://astro.build/)** | Web framework optimized for content and performance |
-| **[Tailwind CSS v4](https://tailwindcss.com/)** | Utility-first CSS framework (via `@tailwindcss/vite`) |
-| **[TypeScript](https://www.typescriptlang.org/)** | Type safety across configurations and content models |
-| **[Bun](https://bun.sh/)** | Blazing-fast JavaScript/TypeScript runtime & package manager |
-| **[Oxlint](https://oxc.rs/) & [Oxfmt](https://oxc.rs/)** | Ultra-fast linter and code formatter |
-| **[GitHub Actions](https://github.com/features/actions)** | Automated static build and GitHub Pages deployment |
+| Technology                                                | Purpose                                                      |
+| :-------------------------------------------------------- | :----------------------------------------------------------- |
+| **[Astro](https://astro.build/)**                         | Web framework optimized for content and performance          |
+| **[Tailwind CSS v4](https://tailwindcss.com/)**           | Utility-first CSS framework (via `@tailwindcss/vite`)        |
+| **[TypeScript](https://www.typescriptlang.org/)**         | Type safety across configurations and content models         |
+| **[Bun](https://bun.sh/)**                                | Blazing-fast JavaScript/TypeScript runtime & package manager |
+| **[Oxlint](https://oxc.rs/) & [Oxfmt](https://oxc.rs/)**  | Ultra-fast linter and code formatter                         |
+| **[GitHub Actions](https://github.com/features/actions)** | Automated static build and GitHub Pages deployment           |
 
 ---
 
@@ -121,9 +121,11 @@ Visit [`http://localhost:4321`](http://localhost:4321) in your browser.
 
 > [!TIP]
 > To run the dev server in the background:
+>
 > ```bash
 > bun run astro dev --background
 > ```
+>
 > Use `astro dev status`, `astro dev logs`, and `astro dev stop` to manage the background process.
 
 ### 4. Build for production
@@ -144,29 +146,29 @@ bun run preview
 
 ## 📜 Available Scripts
 
-| Command | Action |
-| :--- | :--- |
-| `bun run dev` | Starts the Astro development server (`localhost:4321`) |
-| `bun run build` | Compiles static site to `./dist/` for production |
-| `bun run preview` | Runs local HTTP server to preview `./dist/` |
-| `bun run check` | Validates Astro files and TypeScript types via `@astrojs/check` |
-| `bun run lint` | Runs `oxlint` for high-speed static code analysis |
-| `bun run format` | Formats all source files with `oxfmt` |
-| `bun run format:check` | Verifies code formatting compliance |
+| Command                | Action                                                          |
+| :--------------------- | :-------------------------------------------------------------- |
+| `bun run dev`          | Starts the Astro development server (`localhost:4321`)          |
+| `bun run build`        | Compiles static site to `./dist/` for production                |
+| `bun run preview`      | Runs local HTTP server to preview `./dist/`                     |
+| `bun run check`        | Validates Astro files and TypeScript types via `@astrojs/check` |
+| `bun run lint`         | Runs `oxlint` for high-speed static code analysis               |
+| `bun run format`       | Formats all source files with `oxfmt`                           |
+| `bun run format:check` | Verifies code formatting compliance                             |
 
 ---
 
 ## 🌐 QuantX Ecosystem Repositories
 
-| Repository | Stack | Description |
-| :--- | :--- | :--- |
-| **[qntx/r402](https://github.com/qntx/r402)** | Rust | Rust SDK for the x402 payment protocol. |
-| **[qntx/openai](https://github.com/qntx/openai)** | TS / Python | Drop-in OpenAI clients with transparent HTTP 402 micropayment support. |
-| **[qntx/facilitator](https://github.com/qntx/facilitator)** | Rust | Production-ready facilitator server handling payment verification, gas sponsorship, and settlement. |
-| **[qntx/kobe](https://github.com/qntx/kobe)** | Rust | Lightweight, `no_std` multi-chain HD wallet derivation library. |
-| **[qntx/qmd](https://github.com/qntx/qmd)** | Rust | Lightweight local search engine designed for AI agents. |
-| **[qntx/ks](https://github.com/qntx/ks)** | Rust | Local-first, age-encrypted secret manager for autonomous agents. |
-| **[qntx/nostr](https://github.com/qntx/nostr)** | TS / Rust | Nostr protocol implementation and SDK for decentralized agent communication. |
+| Repository                                                  | Stack       | Description                                                                                         |
+| :---------------------------------------------------------- | :---------- | :-------------------------------------------------------------------------------------------------- |
+| **[qntx/r402](https://github.com/qntx/r402)**               | Rust        | Rust SDK for the x402 payment protocol.                                                             |
+| **[qntx/openai](https://github.com/qntx/openai)**           | TS / Python | Drop-in OpenAI clients with transparent HTTP 402 micropayment support.                              |
+| **[qntx/facilitator](https://github.com/qntx/facilitator)** | Rust        | Production-ready facilitator server handling payment verification, gas sponsorship, and settlement. |
+| **[qntx/kobe](https://github.com/qntx/kobe)**               | Rust        | Lightweight, `no_std` multi-chain HD wallet derivation library.                                     |
+| **[qntx/qmd](https://github.com/qntx/qmd)**                 | Rust        | Lightweight local search engine designed for AI agents.                                             |
+| **[qntx/ks](https://github.com/qntx/ks)**                   | Rust        | Local-first, age-encrypted secret manager for autonomous agents.                                    |
+| **[qntx/nostr](https://github.com/qntx/nostr)**             | TS / Rust   | Nostr protocol implementation and SDK for decentralized agent communication.                        |
 
 ---
 
@@ -216,6 +218,7 @@ bun run format
 ## 🚀 部署与 CI/CD
 
 本项目通过 GitHub Actions 进行自动化持续集成与部署：
+
 - 配置文件位于 [`.github/workflows/astro.yml`](./.github/workflows/astro.yml)。
 - 当代码合并至 `master` 分支时，工作流自动配置 Bun 环境、安装依赖、编译生成静态文件，并发布至 **GitHub Pages**。
 

@@ -1,88 +1,110 @@
 ---
+// Header.astro - Ultra-minimalist ASCII Control Bar
 ---
 
-<header class="sticky top-0 z-50 w-full bg-[#fafafa]/90 backdrop-blur-md border-b border-black/10">
-  <div class="max-w-[1100px] mx-auto px-4 sm:px-6 h-13 flex items-center justify-between gap-4">
+<header class="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-xs border-b border-black/8 px-4 sm:px-6">
+  <div class="max-w-[1140px] mx-auto h-12 flex items-center justify-between gap-4 text-xs font-mono">
     
-    <!-- Brand / ASCII Mark -->
-    <div class="flex items-center gap-2.5">
-      <a href="#page-1" class="flex items-center gap-1.5 group">
-        <span class="font-display text-neutral-900 text-base font-normal tracking-wide group-hover:text-emerald-700 transition-colors">
-          [ QNTX ]
-        </span>
+    <!-- Left: Identity -->
+    <div class="flex items-center gap-3">
+      <a href="#page-1" class="flex items-center gap-2 text-neutral-950 font-display text-sm tracking-wider hover:opacity-80 transition-opacity">
+        <span class="w-1.5 h-1.5 rounded-xs bg-emerald-600 pulse-emerald inline-block"></span>
+        <span>QNTX</span>
       </a>
-
-      <!-- Live Monad Status Pill -->
-      <div class="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 border border-emerald-600/25 bg-emerald-50 text-emerald-700 font-mono text-[10px]">
-        <span class="w-1 h-1 rounded-full bg-emerald-600 pulse-dot"></span>
-        <span>MONAD</span>
-      </div>
+      <span class="hidden md:inline text-[11px] text-neutral-400 border-l border-black/10 pl-3">
+        [ SYSTEM SPEC ]
+      </span>
     </div>
 
-    <!-- Center Look Switcher (ascii-magic signature feature) -->
-    <div class="flex items-center gap-1 border border-black/10 p-0.5 bg-neutral-200/50">
-      <span class="text-[10px] text-neutral-500 font-mono uppercase px-1.5 hidden md:inline">LOOK:</span>
+    <!-- Center: Look Selector (Squares / ASCII / Dots / Blocks / Binary) -->
+    <nav class="flex items-center gap-1.5 overflow-x-auto py-1 no-scrollbar" aria-label="ASCII Look Switcher">
       <button
         type="button"
-        class="ascii-btn active text-[11px] h-6 px-2"
+        class="look-btn active"
         data-look-btn="squares"
         aria-pressed="true"
-        title="Render with Squares character look"
+        title="Switch to Squares characters"
       >
-        ·▪■ Squares
+        <span class="select-none text-emerald-700">·▪■</span>
+        <span class="hidden sm:inline">Squares</span>
       </button>
+
       <button
         type="button"
-        class="ascii-btn text-[11px] h-6 px-2"
+        class="look-btn"
         data-look-btn="ascii"
         aria-pressed="false"
-        title="Render with ASCII character look"
+        title="Switch to ASCII characters"
       >
-        #/! ASCII
+        <span class="select-none text-neutral-400">*#$</span>
+        <span class="hidden sm:inline">ASCII</span>
       </button>
+
       <button
         type="button"
-        class="ascii-btn text-[11px] h-6 px-2 hidden sm:inline-flex"
-        data-look-btn="binary"
-        aria-pressed="false"
-        title="Render with Binary character look"
-      >
-        01 Binary
-      </button>
-      <button
-        type="button"
-        class="ascii-btn text-[11px] h-6 px-2 hidden lg:inline-flex"
+        class="look-btn"
         data-look-btn="dots"
         aria-pressed="false"
-        title="Render with Dots character look"
+        title="Switch to Halftone Dots"
       >
-        ·•● Dots
+        <span class="select-none text-neutral-400">·•●</span>
+        <span class="hidden sm:inline">Dots</span>
       </button>
-    </div>
 
-    <!-- Navigation & Quick Links -->
-    <div class="flex items-center gap-2">
-      <nav class="hidden md:flex items-center gap-1 font-mono text-xs">
-        <a href="#page-1" class="px-2 py-1 text-neutral-500 hover:text-neutral-900 transition-colors">
-          [01 CORE]
-        </a>
-        <a href="#page-2" class="px-2 py-1 text-neutral-500 hover:text-neutral-900 transition-colors">
-          [02 STACK]
-        </a>
-      </nav>
+      <button
+        type="button"
+        class="look-btn hidden md:inline-flex"
+        data-look-btn="blocks"
+        aria-pressed="false"
+        title="Switch to Blocks characters"
+      >
+        <span class="select-none text-neutral-400">░▒▓</span>
+        <span>Blocks</span>
+      </button>
 
-      <!-- GitHub CTA with ascii-magic tab styling -->
+      <button
+        type="button"
+        class="look-btn hidden lg:inline-flex"
+        data-look-btn="binary"
+        aria-pressed="false"
+        title="Switch to Binary characters"
+      >
+        <span class="select-none text-neutral-400">01</span>
+        <span>Binary</span>
+      </button>
+    </nav>
+
+    <!-- Right: Page Jumps & GitHub -->
+    <div class="flex items-center gap-3 shrink-0">
+      <div class="flex items-center gap-1 bg-neutral-100 p-0.5 border border-black/10 text-[11px]">
+        <a
+          href="#page-1"
+          data-page-link="page-1"
+          class="px-1.5 py-0.5 text-neutral-900 font-bold hover:text-black transition-colors"
+          title="Jump to Section 01 (Core)"
+        >
+          01
+        </a>
+        <span class="text-neutral-300">/</span>
+        <a
+          href="#page-2"
+          data-page-link="page-2"
+          class="px-1.5 py-0.5 text-neutral-400 hover:text-black transition-colors"
+          title="Jump to Section 02 (Primitives)"
+        >
+          02
+        </a>
+      </div>
+
       <a
         href="https://github.com/qntx"
         target="_blank"
         rel="noopener noreferrer"
-        class="nav__cta"
-        title="Explore GitHub"
+        class="inline-flex items-center gap-1 px-2 py-1 text-[11px] text-neutral-700 hover:text-black border border-black/15 hover:border-black bg-white transition-all shadow-2xs"
+        aria-label="GitHub Repository"
       >
-        <span class="nav__cta-tab"></span>
-        <span class="nav__cta-btn">
-          GITHUB ↗
-        </span>
+        <span>GITHUB</span>
+        <span class="text-neutral-400">↗</span>
       </a>
     </div>
 

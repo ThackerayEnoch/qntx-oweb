@@ -1,8 +1,18 @@
 ---
 import Layout from '@/layouts/Layout.astro';
-import HomeView from '@/views/home/HomeView.astro';
+import Header from '@/components/Header.astro';
+import PageOne from '@/components/PageOne.astro';
+import PageTwo from '@/components/PageTwo.astro';
+import '@/styles/global.css';
 ---
 
-<Layout title="QuantX — The Economic Layer for Autonomous AI Agents">
-  <HomeView />
+<Layout>
+  <div class="relative min-h-screen bg-white">
+    <Header />
+
+    <main class="max-w-[1100px] mx-auto px-4 sm:px-6">
+      <PageOne />
+      <PageTwo />
+    </main>
+  </div>
 </Layout>

@@ -1,68 +1,44 @@
 ---
-import '../styles/global.css';
-
+// Layout.astro - Clean Technical Paper Shell
 interface Props {
   title?: string;
   description?: string;
 }
 
 const {
-  title = 'QUANTX // The Economic Layer for Autonomous AI Agents',
-  description = 'Open protocols and machine-native primitives for AI agents to transact, collaborate, and evolve autonomously on-chain.',
+  title = "QNTX // Autonomous Agent Protocol",
+  description = "Minimalist protocol specification and runtime for autonomous AI agents.",
 } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" />
-    <meta name="theme-color" content="#fafafa" />
 
-    <!-- Preload Display Font -->
-    <link
-      rel="preload"
-      href="/fonts/GeistPixel-Square.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href="/fonts/Satoshi-400.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href="/fonts/Satoshi-500.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
+    <!-- OpenGraph -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
 
-    <!-- Google JetBrains Mono fallback -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Preload Fonts -->
+    <link rel="preload" href="/fonts/GeistPixel-Square.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/Satoshi-400.woff2" as="font" type="font/woff2" crossorigin />
   </head>
-  <body class="bg-[#fafafa] text-neutral-900 antialiased selection:bg-neutral-900 selection:text-white min-h-screen">
-    <!-- Side Rails (ascii-magic style in light graphite) -->
-    <div class="rail-left" aria-hidden="true"></div>
-    <div class="rail-right" aria-hidden="true"></div>
+  <body class="bg-white text-neutral-950 font-body min-h-screen relative antialiased">
+    <!-- Side Technical Guide Rails -->
+    <div class="side-rail-left" aria-hidden="true"></div>
+    <div class="side-rail-right" aria-hidden="true"></div>
 
     <slot />
 
-    <script>
-      import '../scripts/ascii-engine.js';
-    </script>
+    <!-- ASCII Engine Script -->
+    <script src="../scripts/ascii-engine.ts"></script>
   </body>
 </html>
