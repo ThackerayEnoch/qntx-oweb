@@ -7,13 +7,13 @@ interface Props {
 }
 
 const {
-  title = 'QuantX (qntx) — The Economic Layer for Autonomous AI Agents',
-  description = 'Open protocols and infrastructure for AI agents to transact, collaborate, govern, and evolve autonomously on-chain.',
+  title = 'QUANTX // The Economic Layer for Autonomous AI Agents',
+  description = 'Open protocols and machine-native primitives for AI agents to transact, collaborate, and evolve autonomously on-chain.',
 } = Astro.props;
 ---
 
 <!doctype html>
-<html class="scroll-smooth" lang="en">
+<html lang="en" class="scroll-smooth">
   <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
@@ -21,24 +21,48 @@ const {
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
+    <meta name="theme-color" content="#040406" />
 
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com" rel="preconnect" />
-    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <!-- Preload Display Font -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      href="/fonts/GeistPixel-Square.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
-    <!-- Material Symbols -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="preload"
+      href="/fonts/Satoshi-400.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/Satoshi-500.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <!-- Google JetBrains Mono fallback -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
   </head>
-  <body class="bg-[#ffffff] text-zinc-950 antialiased selection:bg-black selection:text-white">
+  <body class="bg-[#040406] text-white antialiased selection:bg-white selection:text-black min-h-screen">
+    <!-- Side Rails (ascii-magic style) -->
+    <div class="rail-left" aria-hidden="true"></div>
+    <div class="rail-right" aria-hidden="true"></div>
+
     <slot />
+
     <script>
-      import '../scripts/motion.js';
+      import '../scripts/ascii-engine.js';
     </script>
   </body>
 </html>

@@ -1,26 +1,233 @@
 ---
 import Header from '@/components/Header.astro';
-import Footer from '@/components/Footer.astro';
-import Divider from '@/components/Divider.astro';
-
-import Hero from './components/Hero.astro';
-import Thesis from './components/Thesis.astro';
-import Ecosystem from './components/Ecosystem.astro';
-import About from './components/About.astro';
-import Cta from './components/Cta.astro';
 ---
 
-<Header />
-<main>
-  <Hero />
-  <Divider theme="light" />
-  <Thesis />
-  <Divider theme="light" />
-  <Ecosystem />
-  <Divider theme="dark" />
-  <About />
-  <Divider theme="dark" />
-  <Cta />
-  <Divider theme="dark" />
-</main>
-<Footer />
+<div class="relative min-h-screen bg-[#040406] text-white">
+  <Header />
+
+  <main class="max-w-[1100px] mx-auto px-4 sm:px-6">
+    
+    <!-- ========================================================================= -->
+    <!-- PAGE 01: CORE & LIVE TELEMETRY                                            -->
+    <!-- ========================================================================= -->
+    <section id="page-1" class="min-h-[calc(100vh-3.5rem)] flex flex-col justify-between py-6 sm:py-8">
+      
+      <!-- Top Status Line -->
+      <div class="flex items-center justify-between border-b border-white/10 pb-2.5 font-mono text-[11px] text-white/50">
+        <div class="flex items-center gap-2">
+          <span class="text-emerald-400">●</span>
+          <span class="tracking-widest uppercase text-white/80">[ 01 // CORE ]</span>
+        </div>
+        <div class="flex items-center gap-4 text-white/40">
+          <span>MONAD_PERMIT2</span>
+          <span>RFC-x402</span>
+        </div>
+      </div>
+
+      <!-- Centerpiece: ASCII Letter Banner + Punchline -->
+      <div class="my-auto py-4 space-y-4">
+        <!-- ASCII Letter Banner (Reacts to Look Switcher) -->
+        <div class="overflow-x-auto select-none border border-white/10 bg-black/50 p-4 sm:p-6 flex justify-center">
+          <pre
+            id="ascii-lettering"
+            class="font-mono text-[9px] sm:text-[12px] md:text-[14px] leading-tight text-white whitespace-pre tracking-normal text-center"
+            aria-label="QUANTX ASCII Lettering"
+          ></pre>
+        </div>
+
+        <!-- Punchline (Minimal Words) -->
+        <div class="text-center space-y-2">
+          <p class="font-display text-lg sm:text-2xl text-white font-normal uppercase tracking-wider">
+            Agents earn. Agents pay. Agents scale.
+          </p>
+          <p class="font-mono text-xs text-white/40 uppercase tracking-widest">
+            Economic Layer for Autonomous AI Agents
+          </p>
+        </div>
+
+        <!-- Quick Command Snippet -->
+        <div class="flex justify-center pt-1">
+          <div class="inline-flex items-center gap-3 px-3 py-1.5 border border-white/15 bg-white/[0.02] font-mono text-xs">
+            <span class="text-white/40 select-none">$</span>
+            <span id="cmd-text" class="text-emerald-400 select-all">npm i @qntx/openai</span>
+            <button
+              id="copy-cmd-btn"
+              type="button"
+              class="ml-2 px-1.5 py-0.5 border border-white/20 text-[10px] text-white/70 hover:text-white hover:border-white transition-all cursor-pointer font-mono"
+            >
+              COPY
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LiveData Telemetry (Pure Data, Zero Fluff) -->
+      <div class="border border-white/15 bg-black/80 p-3.5 sm:p-4">
+        <!-- Live Ticker Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-2.5 mb-3 font-mono text-[11px]">
+          <div class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot"></span>
+            <span class="text-white/80 font-display uppercase tracking-wider">LIVEDATA // x402 STREAM</span>
+          </div>
+          <div class="flex items-center gap-4 text-white/60">
+            <div>TPS: <span id="stat-tps" class="text-emerald-400 font-semibold font-mono">2,842</span></div>
+            <div>LATENCY: <span id="stat-latency" class="text-white font-mono">11.4ms</span></div>
+            <div class="hidden sm:inline">SETTLED: <span id="stat-settled" class="text-white font-mono">$184,920</span></div>
+            <div class="hidden md:inline text-emerald-400">GAS: $0.00</div>
+          </div>
+        </div>
+
+        <!-- Stream & Waveform -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center font-mono">
+          <!-- Feed -->
+          <div class="md:col-span-8 overflow-hidden">
+            <div id="live-tx-feed" class="space-y-1 text-xs" aria-live="polite"></div>
+          </div>
+          <!-- ASCII Waveform -->
+          <div class="md:col-span-4 border-t md:border-t-0 md:border-l border-white/10 pt-2 md:pt-0 md:pl-4">
+            <pre
+              id="ascii-waveform"
+              class="font-mono text-xs leading-none text-emerald-400 select-none py-1"
+            ></pre>
+            <div class="text-[10px] text-white/40 pt-1 border-t border-white/10 flex justify-between">
+              <span>NODES:</span>
+              <span class="text-emerald-400">■ ■ ■ ■ ▪ ■ ■ ■ ■ ■ ■ ■</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Jump -->
+      <div class="pt-4 flex justify-between items-center font-mono text-[11px] text-white/40">
+        <span>PRESS [1] OR [2]</span>
+        <a href="#page-2" class="text-white/60 hover:text-white transition-colors">
+          [ 02 // PRIMITIVES ↓ ]
+        </a>
+      </div>
+
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- PAGE 02: PRIMITIVES & SPEC DIFF                                           -->
+    <!-- ========================================================================= -->
+    <section id="page-2" class="min-h-[calc(100vh-3.5rem)] flex flex-col justify-between py-6 sm:py-8 border-t border-white/10">
+      
+      <!-- Top Status Line -->
+      <div class="flex items-center justify-between border-b border-white/10 pb-2.5 font-mono text-[11px] text-white/50">
+        <div class="flex items-center gap-2">
+          <span class="text-white/80">[ 02 // PRIMITIVES ]</span>
+        </div>
+        <div class="text-white/40">
+          <span>MIT / APACHE 2.0</span>
+        </div>
+      </div>
+
+      <div class="my-auto py-4 space-y-6">
+        
+        <!-- 4 Primitives Cards (Ultra-Concise, Code-First) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono">
+          
+          <a
+            href="https://github.com/qntx/r402"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="ascii-card p-4 group block"
+          >
+            <div class="flex justify-between text-xs text-white/50 mb-1">
+              <span class="text-emerald-400">[RUST]</span>
+              <span class="group-hover:text-white transition-colors">↗</span>
+            </div>
+            <div class="font-display text-base text-white mb-1">qntx/r402</div>
+            <div class="text-xs text-white/60">x402 Protocol & Permit2 settlement engine.</div>
+          </a>
+
+          <a
+            href="https://github.com/qntx/openai"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="ascii-card p-4 group block"
+          >
+            <div class="flex justify-between text-xs text-white/50 mb-1">
+              <span class="text-emerald-400">[TS/PY]</span>
+              <span class="group-hover:text-white transition-colors">↗</span>
+            </div>
+            <div class="font-display text-base text-white mb-1">qntx/openai</div>
+            <div class="text-xs text-white/60">Drop-in transparent 402 micropayment client.</div>
+          </a>
+
+          <a
+            href="https://github.com/qntx/facilitator"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="ascii-card p-4 group block"
+          >
+            <div class="flex justify-between text-xs text-white/50 mb-1">
+              <span class="text-emerald-400">[RUST]</span>
+              <span class="group-hover:text-white transition-colors">↗</span>
+            </div>
+            <div class="font-display text-base text-white mb-1">qntx/facilitator</div>
+            <div class="text-xs text-white/60">Payment relayer & gas sponsorship node.</div>
+          </a>
+
+          <a
+            href="https://github.com/qntx/kobe"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="ascii-card p-4 group block"
+          >
+            <div class="flex justify-between text-xs text-white/50 mb-1">
+              <span class="text-emerald-400">[RUST]</span>
+              <span class="group-hover:text-white transition-colors">↗</span>
+            </div>
+            <div class="font-display text-base text-white mb-1">qntx/kobe & ks</div>
+            <div class="text-xs text-white/60">Agent HD wallet derivation & secret store.</div>
+          </a>
+
+        </div>
+
+        <!-- ASCII Spec Comparison Matrix (Ultra-Compact) -->
+        <div class="border border-white/10 bg-black/60 p-4 font-mono text-xs overflow-x-auto select-none">
+          <div class="text-[10px] text-white/40 uppercase tracking-widest mb-2">[ SPEC MATRIX ]</div>
+          <div class="grid grid-cols-2 gap-4 divide-x divide-white/10">
+            <div class="space-y-1 text-white/50 pr-2">
+              <div class="text-rose-400/90 font-semibold">[ LEGACY ]</div>
+              <div>• Human Credit Cards</div>
+              <div>• Centralized API Keys</div>
+              <div>• Zero-balance Halt</div>
+            </div>
+            <div class="space-y-1 text-white/90 pl-4">
+              <div class="text-emerald-400 font-semibold">[ x402 SPEC ]</div>
+              <div>• Agent Self-Custodial Wallets</div>
+              <div>• Monad Permit2 Gasless</div>
+              <div>• 100% Autonomous Streaming</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Minimalist Footer -->
+      <footer class="pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 font-mono text-[11px] text-white/40">
+        <div class="flex items-center gap-3">
+          <span class="text-white font-display">[ QNTX ]</span>
+          <span>MONAD</span>
+          <span>MIT / APACHE 2.0</span>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <a href="https://github.com/qntx" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">
+            GITHUB ↗
+          </a>
+          <a href="https://x.com/qntxorg" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">
+            X ↗
+          </a>
+          <a href="#page-1" class="text-emerald-400 hover:text-emerald-300 transition-colors">
+            [ TOP ↑ ]
+          </a>
+        </div>
+      </footer>
+
+    </section>
+
+  </main>
+</div>

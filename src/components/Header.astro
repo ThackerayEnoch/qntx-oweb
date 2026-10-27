@@ -1,53 +1,90 @@
 ---
-import Logo from './Logo.astro';
-
-const navLinks = [
-  { label: 'x402 Protocol', href: '#x402' },
-  { label: 'Ecosystem', href: '#ecosystem' },
-  { label: 'About', href: '#about' },
-  { label: 'Docs', href: 'https://github.com/qntx', external: true },
-];
 ---
 
-<header class="fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-7xl rounded-full z-50 bg-white/90 backdrop-blur-md border border-neutral-200/80 shadow-sm transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]">
-  <div class="flex justify-between items-center pl-6 pr-3 py-2 w-full">
-    <div class="flex items-center h-8">
-      <Logo href="/" label="QNTX home" class="h-10 w-auto -my-1 text-black overflow-visible" />
-    </div>
-
-    <!-- Navigation Links -->
-    <nav class="hidden md:flex items-center gap-7">
-      {navLinks.map((link) => (
-        <a
-          class="font-body-sm text-body-sm text-neutral-600 hover:text-black transition-colors duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
-          href={link.href}
-          {...(link.external ? { rel: 'noreferrer', target: '_blank' } : {})}
-        >
-          {link.label}
-        </a>
-      ))}
-    </nav>
-
-    <!-- Trailing Action Pill / Buttons -->
+<header class="sticky top-0 z-50 w-full bg-[#040406]/90 backdrop-blur-md border-b border-white/10">
+  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+    
+    <!-- Brand / ASCII Mark -->
     <div class="flex items-center gap-2.5">
-      <a
-        class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-neutral-200 bg-neutral-50 font-code-sm text-code-sm text-neutral-900 hover:border-black transition-colors duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
-        href="https://github.com/qntx"
-        rel="noreferrer"
-        target="_blank"
-      >
-        <span class="material-symbols-outlined text-xs leading-none" data-icon="star">star</span>
-        <span class="font-medium">1.8k</span>
+      <a href="#page-1" class="flex items-center gap-1.5 group">
+        <span class="font-display text-white text-base font-normal tracking-wide group-hover:text-emerald-400 transition-colors">
+          [ QNTX ]
+        </span>
       </a>
-      <a
-        class="inline-flex items-center gap-1.5 px-4.5 py-2 bg-black text-white rounded-full font-code-sm text-code-sm font-medium hover:bg-neutral-800 active:scale-[0.98] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
-        href="https://github.com/qntx"
-        rel="noreferrer"
-        target="_blank"
+
+      <!-- Live Monad Status Pill -->
+      <div class="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-mono text-[10px]">
+        <span class="w-1 h-1 rounded-full bg-emerald-400 pulse-dot"></span>
+        <span>MONAD</span>
+      </div>
+    </div>
+
+    <!-- Center Look Switcher (ascii-magic signature feature) -->
+    <div class="flex items-center gap-1 border border-white/10 p-0.5 bg-black/40">
+      <span class="text-[10px] text-white/40 font-mono uppercase px-1.5 hidden md:inline">LOOK:</span>
+      <button
+        type="button"
+        class="ascii-btn active text-xs h-6 px-2"
+        data-look-btn="squares"
+        aria-pressed="true"
+        title="Render with Squares character look"
       >
-        <span>Deploy Gateway</span>
-        <span class="material-symbols-outlined text-xs leading-none" data-icon="terminal">terminal</span>
+        ·▪■ Squares
+      </button>
+      <button
+        type="button"
+        class="ascii-btn text-xs h-6 px-2"
+        data-look-btn="ascii"
+        aria-pressed="false"
+        title="Render with ASCII character look"
+      >
+        #/! ASCII
+      </button>
+      <button
+        type="button"
+        class="ascii-btn text-xs h-6 px-2 hidden sm:inline-flex"
+        data-look-btn="binary"
+        aria-pressed="false"
+        title="Render with Binary character look"
+      >
+        01 Binary
+      </button>
+      <button
+        type="button"
+        class="ascii-btn text-xs h-6 px-2 hidden lg:inline-flex"
+        data-look-btn="dots"
+        aria-pressed="false"
+        title="Render with Dots character look"
+      >
+        ·•● Dots
+      </button>
+    </div>
+
+    <!-- Navigation & Quick Links -->
+    <div class="flex items-center gap-2">
+      <nav class="hidden md:flex items-center gap-1 font-mono text-xs">
+        <a href="#page-1" class="px-2 py-1 text-white/50 hover:text-white transition-colors">
+          [01 CORE]
+        </a>
+        <a href="#page-2" class="px-2 py-1 text-white/50 hover:text-white transition-colors">
+          [02 STACK]
+        </a>
+      </nav>
+
+      <!-- GitHub CTA with ascii-magic tab styling -->
+      <a
+        href="https://github.com/qntx"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="nav__cta"
+        title="Explore GitHub"
+      >
+        <span class="nav__cta-tab"></span>
+        <span class="nav__cta-btn">
+          GITHUB ↗
+        </span>
       </a>
     </div>
+
   </div>
 </header>
