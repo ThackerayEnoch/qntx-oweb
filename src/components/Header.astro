@@ -1,30 +1,30 @@
 ---
 ---
 
-<header class="sticky top-0 z-50 w-full bg-[#040406]/90 backdrop-blur-md border-b border-white/10">
-  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+<header class="sticky top-0 z-50 w-full bg-[#fafafa]/90 backdrop-blur-md border-b border-black/10">
+  <div class="max-w-[1100px] mx-auto px-4 sm:px-6 h-13 flex items-center justify-between gap-4">
     
     <!-- Brand / ASCII Mark -->
     <div class="flex items-center gap-2.5">
       <a href="#page-1" class="flex items-center gap-1.5 group">
-        <span class="font-display text-white text-base font-normal tracking-wide group-hover:text-emerald-400 transition-colors">
+        <span class="font-display text-neutral-900 text-base font-normal tracking-wide group-hover:text-emerald-700 transition-colors">
           [ QNTX ]
         </span>
       </a>
 
       <!-- Live Monad Status Pill -->
-      <div class="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-mono text-[10px]">
-        <span class="w-1 h-1 rounded-full bg-emerald-400 pulse-dot"></span>
+      <div class="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 border border-emerald-600/25 bg-emerald-50 text-emerald-700 font-mono text-[10px]">
+        <span class="w-1 h-1 rounded-full bg-emerald-600 pulse-dot"></span>
         <span>MONAD</span>
       </div>
     </div>
 
     <!-- Center Look Switcher (ascii-magic signature feature) -->
-    <div class="flex items-center gap-1 border border-white/10 p-0.5 bg-black/40">
-      <span class="text-[10px] text-white/40 font-mono uppercase px-1.5 hidden md:inline">LOOK:</span>
+    <div class="flex items-center gap-1 border border-black/10 p-0.5 bg-neutral-200/50">
+      <span class="text-[10px] text-neutral-500 font-mono uppercase px-1.5 hidden md:inline">LOOK:</span>
       <button
         type="button"
-        class="ascii-btn active text-xs h-6 px-2"
+        class="ascii-btn active text-[11px] h-6 px-2"
         data-look-btn="squares"
         aria-pressed="true"
         title="Render with Squares character look"
@@ -33,7 +33,7 @@
       </button>
       <button
         type="button"
-        class="ascii-btn text-xs h-6 px-2"
+        class="ascii-btn text-[11px] h-6 px-2"
         data-look-btn="ascii"
         aria-pressed="false"
         title="Render with ASCII character look"
@@ -42,7 +42,7 @@
       </button>
       <button
         type="button"
-        class="ascii-btn text-xs h-6 px-2 hidden sm:inline-flex"
+        class="ascii-btn text-[11px] h-6 px-2 hidden sm:inline-flex"
         data-look-btn="binary"
         aria-pressed="false"
         title="Render with Binary character look"
@@ -51,7 +51,7 @@
       </button>
       <button
         type="button"
-        class="ascii-btn text-xs h-6 px-2 hidden lg:inline-flex"
+        class="ascii-btn text-[11px] h-6 px-2 hidden lg:inline-flex"
         data-look-btn="dots"
         aria-pressed="false"
         title="Render with Dots character look"
@@ -63,10 +63,10 @@
     <!-- Navigation & Quick Links -->
     <div class="flex items-center gap-2">
       <nav class="hidden md:flex items-center gap-1 font-mono text-xs">
-        <a href="#page-1" class="px-2 py-1 text-white/50 hover:text-white transition-colors">
+        <a href="#page-1" class="px-2 py-1 text-neutral-500 hover:text-neutral-900 transition-colors">
           [01 CORE]
         </a>
-        <a href="#page-2" class="px-2 py-1 text-white/50 hover:text-white transition-colors">
+        <a href="#page-2" class="px-2 py-1 text-neutral-500 hover:text-neutral-900 transition-colors">
           [02 STACK]
         </a>
       </nav>

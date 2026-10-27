@@ -152,11 +152,11 @@ class AsciiEngine {
       try {
         await navigator.clipboard.writeText(text);
         const original = copyBtn.textContent;
-        copyBtn.textContent = '[ COPIED ✓ ]';
-        copyBtn.classList.add('bg-white', 'text-black');
+        copyBtn.textContent = 'COPIED ✓';
+        copyBtn.classList.add('bg-neutral-900', 'text-white');
         setTimeout(() => {
           copyBtn.textContent = original;
-          copyBtn.classList.remove('bg-white', 'text-black');
+          copyBtn.classList.remove('bg-neutral-900', 'text-white');
         }, 1800);
       } catch (err) {
         console.error('Copy failed', err);
@@ -239,14 +239,14 @@ class AsciiEngine {
     const lines = this.txLog.map((tx, idx) => {
       const isNew = idx === 0;
       const marker = isNew ? look.solid : look.mid;
-      return `<div class="truncate ${isNew ? 'text-white' : 'text-neutral-400'} font-mono text-[11px] sm:text-xs leading-relaxed flex items-center gap-2">
-        <span class="${isNew ? 'text-emerald-400' : 'text-neutral-600'} font-bold">${marker}</span>
-        <span class="text-neutral-500">[${tx.time}]</span>
-        <span class="text-neutral-300 font-semibold">${tx.agent}</span>
-        <span class="text-neutral-500">─(402: ${tx.fee} MON)─></span>
-        <span class="text-neutral-400">${tx.ep}</span>
-        <span class="text-emerald-400">200 OK</span>
-        <span class="text-neutral-600">${tx.ms}ms</span>
+      return `<div class="truncate ${isNew ? 'text-neutral-900 font-semibold' : 'text-neutral-600'} font-mono text-[11px] sm:text-xs leading-relaxed flex items-center gap-2">
+        <span class="${isNew ? 'text-emerald-700' : 'text-neutral-400'} font-bold">${marker}</span>
+        <span class="text-neutral-400">[${tx.time}]</span>
+        <span class="${isNew ? 'text-neutral-900' : 'text-neutral-700'}">${tx.agent}</span>
+        <span class="text-neutral-400">─(402: ${tx.fee} MON)─></span>
+        <span class="text-neutral-600">${tx.ep}</span>
+        <span class="text-emerald-700 font-medium">200 OK</span>
+        <span class="text-neutral-400">${tx.ms}ms</span>
       </div>`;
     });
 

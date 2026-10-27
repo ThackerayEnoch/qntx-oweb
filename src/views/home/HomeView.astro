@@ -2,58 +2,58 @@
 import Header from '@/components/Header.astro';
 ---
 
-<div class="relative min-h-screen bg-[#040406] text-white">
+<div class="relative min-h-screen bg-[#fafafa] text-neutral-900">
   <Header />
 
   <main class="max-w-[1100px] mx-auto px-4 sm:px-6">
     
     <!-- ========================================================================= -->
-    <!-- PAGE 01: CORE & LIVE TELEMETRY                                            -->
+    <!-- PAGE 01: CORE & LIVE TELEMETRY (WHITE SPEC)                               -->
     <!-- ========================================================================= -->
-    <section id="page-1" class="min-h-[calc(100vh-3.5rem)] flex flex-col justify-between py-6 sm:py-8">
+    <section id="page-1" class="min-h-[calc(100vh-3.25rem)] flex flex-col justify-between py-6 sm:py-8">
       
-      <!-- Top Status Line -->
-      <div class="flex items-center justify-between border-b border-white/10 pb-2.5 font-mono text-[11px] text-white/50">
+      <!-- Top Technical Line -->
+      <div class="flex items-center justify-between border-b border-black/10 pb-2.5 font-mono text-[11px] text-neutral-500">
         <div class="flex items-center gap-2">
-          <span class="text-emerald-400">●</span>
-          <span class="tracking-widest uppercase text-white/80">[ 01 // CORE ]</span>
+          <span class="text-emerald-600">●</span>
+          <span class="tracking-widest uppercase text-neutral-800">[ 01 // CORE SPEC ]</span>
         </div>
-        <div class="flex items-center gap-4 text-white/40">
+        <div class="flex items-center gap-4 text-neutral-400">
           <span>MONAD_PERMIT2</span>
           <span>RFC-x402</span>
         </div>
       </div>
 
-      <!-- Centerpiece: ASCII Letter Banner + Punchline -->
-      <div class="my-auto py-4 space-y-4">
-        <!-- ASCII Letter Banner (Reacts to Look Switcher) -->
-        <div class="overflow-x-auto select-none border border-white/10 bg-black/50 p-4 sm:p-6 flex justify-center">
+      <!-- Centerpiece: Ink-Stamp ASCII Letter Banner & Tagline -->
+      <div class="my-auto py-3 space-y-4">
+        <!-- ASCII Letter Banner (Ink on Paper) -->
+        <div class="overflow-x-auto select-none border border-black/10 bg-white p-4 sm:p-6 shadow-sm flex justify-center">
           <pre
             id="ascii-lettering"
-            class="font-mono text-[9px] sm:text-[12px] md:text-[14px] leading-tight text-white whitespace-pre tracking-normal text-center"
+            class="font-mono text-[9px] sm:text-[12px] md:text-[14px] leading-tight text-neutral-900 whitespace-pre tracking-normal text-center"
             aria-label="QUANTX ASCII Lettering"
           ></pre>
         </div>
 
         <!-- Punchline (Minimal Words) -->
-        <div class="text-center space-y-2">
-          <p class="font-display text-lg sm:text-2xl text-white font-normal uppercase tracking-wider">
+        <div class="text-center space-y-1.5">
+          <p class="font-display text-lg sm:text-2xl text-neutral-950 font-normal uppercase tracking-wider">
             Agents earn. Agents pay. Agents scale.
           </p>
-          <p class="font-mono text-xs text-white/40 uppercase tracking-widest">
+          <p class="font-mono text-xs text-neutral-500 uppercase tracking-widest">
             Economic Layer for Autonomous AI Agents
           </p>
         </div>
 
         <!-- Quick Command Snippet -->
-        <div class="flex justify-center pt-1">
-          <div class="inline-flex items-center gap-3 px-3 py-1.5 border border-white/15 bg-white/[0.02] font-mono text-xs">
-            <span class="text-white/40 select-none">$</span>
-            <span id="cmd-text" class="text-emerald-400 select-all">npm i @qntx/openai</span>
+        <div class="flex justify-center pt-0.5">
+          <div class="inline-flex items-center gap-3 px-3 py-1.5 border border-black/15 bg-white shadow-xs font-mono text-xs">
+            <span class="text-neutral-400 select-none">$</span>
+            <span id="cmd-text" class="text-neutral-900 font-medium select-all">npm i @qntx/openai</span>
             <button
               id="copy-cmd-btn"
               type="button"
-              class="ml-2 px-1.5 py-0.5 border border-white/20 text-[10px] text-white/70 hover:text-white hover:border-white transition-all cursor-pointer font-mono"
+              class="ml-2 px-1.5 py-0.5 border border-black/20 text-[10px] text-neutral-700 hover:text-black hover:border-black transition-all cursor-pointer font-mono bg-neutral-50"
             >
               COPY
             </button>
@@ -61,19 +61,19 @@ import Header from '@/components/Header.astro';
         </div>
       </div>
 
-      <!-- LiveData Telemetry (Pure Data, Zero Fluff) -->
-      <div class="border border-white/15 bg-black/80 p-3.5 sm:p-4">
+      <!-- LiveData Telemetry Tape (The Machine-to-Machine Ledger) -->
+      <div class="border border-black/10 bg-white p-3.5 sm:p-4 shadow-sm">
         <!-- Live Ticker Bar -->
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-2.5 mb-3 font-mono text-[11px]">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-black/10 pb-2.5 mb-3 font-mono text-[11px]">
           <div class="flex items-center gap-2">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot"></span>
-            <span class="text-white/80 font-display uppercase tracking-wider">LIVEDATA // x402 STREAM</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 pulse-dot"></span>
+            <span class="text-neutral-900 font-display uppercase tracking-wider">LIVEDATA // x402 STREAM</span>
           </div>
-          <div class="flex items-center gap-4 text-white/60">
-            <div>TPS: <span id="stat-tps" class="text-emerald-400 font-semibold font-mono">2,842</span></div>
-            <div>LATENCY: <span id="stat-latency" class="text-white font-mono">11.4ms</span></div>
-            <div class="hidden sm:inline">SETTLED: <span id="stat-settled" class="text-white font-mono">$184,920</span></div>
-            <div class="hidden md:inline text-emerald-400">GAS: $0.00</div>
+          <div class="flex items-center gap-4 text-neutral-600">
+            <div>TPS: <span id="stat-tps" class="text-emerald-700 font-semibold font-mono">2,842</span></div>
+            <div>LATENCY: <span id="stat-latency" class="text-neutral-900 font-mono">11.4ms</span></div>
+            <div class="hidden sm:inline">SETTLED: <span id="stat-settled" class="text-neutral-900 font-mono font-medium">$184,920</span></div>
+            <div class="hidden md:inline text-emerald-700">GAS: $0.00</div>
           </div>
         </div>
 
@@ -83,48 +83,48 @@ import Header from '@/components/Header.astro';
           <div class="md:col-span-8 overflow-hidden">
             <div id="live-tx-feed" class="space-y-1 text-xs" aria-live="polite"></div>
           </div>
-          <!-- ASCII Waveform -->
-          <div class="md:col-span-4 border-t md:border-t-0 md:border-l border-white/10 pt-2 md:pt-0 md:pl-4">
+          <!-- ASCII Waveform in Ink -->
+          <div class="md:col-span-4 border-t md:border-t-0 md:border-l border-black/10 pt-2 md:pt-0 md:pl-4">
             <pre
               id="ascii-waveform"
-              class="font-mono text-xs leading-none text-emerald-400 select-none py-1"
+              class="font-mono text-xs leading-none text-neutral-800 select-none py-1"
             ></pre>
-            <div class="text-[10px] text-white/40 pt-1 border-t border-white/10 flex justify-between">
+            <div class="text-[10px] text-neutral-500 pt-1 border-t border-black/10 flex justify-between">
               <span>NODES:</span>
-              <span class="text-emerald-400">■ ■ ■ ■ ▪ ■ ■ ■ ■ ■ ■ ■</span>
+              <span class="text-emerald-700">■ ■ ■ ■ ▪ ■ ■ ■ ■ ■ ■ ■</span>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Bottom Jump -->
-      <div class="pt-4 flex justify-between items-center font-mono text-[11px] text-white/40">
+      <div class="pt-3 flex justify-between items-center font-mono text-[11px] text-neutral-500">
         <span>PRESS [1] OR [2]</span>
-        <a href="#page-2" class="text-white/60 hover:text-white transition-colors">
-          [ 02 // PRIMITIVES ↓ ]
+        <a href="#page-2" class="text-neutral-700 hover:text-black transition-colors">
+          [ 02 // STACK ↓ ]
         </a>
       </div>
 
     </section>
 
     <!-- ========================================================================= -->
-    <!-- PAGE 02: PRIMITIVES & SPEC DIFF                                           -->
+    <!-- PAGE 02: PRIMITIVES & SPEC MATRIX (WHITE SPEC)                            -->
     <!-- ========================================================================= -->
-    <section id="page-2" class="min-h-[calc(100vh-3.5rem)] flex flex-col justify-between py-6 sm:py-8 border-t border-white/10">
+    <section id="page-2" class="min-h-[calc(100vh-3.25rem)] flex flex-col justify-between py-6 sm:py-8 border-t border-black/10">
       
-      <!-- Top Status Line -->
-      <div class="flex items-center justify-between border-b border-white/10 pb-2.5 font-mono text-[11px] text-white/50">
+      <!-- Top Technical Line -->
+      <div class="flex items-center justify-between border-b border-black/10 pb-2.5 font-mono text-[11px] text-neutral-500">
         <div class="flex items-center gap-2">
-          <span class="text-white/80">[ 02 // PRIMITIVES ]</span>
+          <span class="text-neutral-800">[ 02 // PRIMITIVES ]</span>
         </div>
-        <div class="text-white/40">
+        <div class="text-neutral-400">
           <span>MIT / APACHE 2.0</span>
         </div>
       </div>
 
-      <div class="my-auto py-4 space-y-6">
+      <div class="my-auto py-3 space-y-5">
         
-        <!-- 4 Primitives Cards (Ultra-Concise, Code-First) -->
+        <!-- 4 Primitives Cards (Clean White Architectural Spec) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono">
           
           <a
@@ -133,12 +133,12 @@ import Header from '@/components/Header.astro';
             rel="noopener noreferrer"
             class="ascii-card p-4 group block"
           >
-            <div class="flex justify-between text-xs text-white/50 mb-1">
-              <span class="text-emerald-400">[RUST]</span>
-              <span class="group-hover:text-white transition-colors">↗</span>
+            <div class="flex justify-between text-xs text-neutral-500 mb-1">
+              <span class="text-emerald-700 font-medium">[RUST]</span>
+              <span class="group-hover:text-black transition-colors">↗</span>
             </div>
-            <div class="font-display text-base text-white mb-1">qntx/r402</div>
-            <div class="text-xs text-white/60">x402 Protocol & Permit2 settlement engine.</div>
+            <div class="font-display text-base text-neutral-900 mb-1">qntx/r402</div>
+            <div class="text-xs text-neutral-600">x402 Protocol & Permit2 settlement engine.</div>
           </a>
 
           <a
@@ -147,12 +147,12 @@ import Header from '@/components/Header.astro';
             rel="noopener noreferrer"
             class="ascii-card p-4 group block"
           >
-            <div class="flex justify-between text-xs text-white/50 mb-1">
-              <span class="text-emerald-400">[TS/PY]</span>
-              <span class="group-hover:text-white transition-colors">↗</span>
+            <div class="flex justify-between text-xs text-neutral-500 mb-1">
+              <span class="text-emerald-700 font-medium">[TS/PY]</span>
+              <span class="group-hover:text-black transition-colors">↗</span>
             </div>
-            <div class="font-display text-base text-white mb-1">qntx/openai</div>
-            <div class="text-xs text-white/60">Drop-in transparent 402 micropayment client.</div>
+            <div class="font-display text-base text-neutral-900 mb-1">qntx/openai</div>
+            <div class="text-xs text-neutral-600">Drop-in transparent 402 micropayment client.</div>
           </a>
 
           <a
@@ -161,12 +161,12 @@ import Header from '@/components/Header.astro';
             rel="noopener noreferrer"
             class="ascii-card p-4 group block"
           >
-            <div class="flex justify-between text-xs text-white/50 mb-1">
-              <span class="text-emerald-400">[RUST]</span>
-              <span class="group-hover:text-white transition-colors">↗</span>
+            <div class="flex justify-between text-xs text-neutral-500 mb-1">
+              <span class="text-emerald-700 font-medium">[RUST]</span>
+              <span class="group-hover:text-black transition-colors">↗</span>
             </div>
-            <div class="font-display text-base text-white mb-1">qntx/facilitator</div>
-            <div class="text-xs text-white/60">Payment relayer & gas sponsorship node.</div>
+            <div class="font-display text-base text-neutral-900 mb-1">qntx/facilitator</div>
+            <div class="text-xs text-neutral-600">Payment relayer & gas sponsorship node.</div>
           </a>
 
           <a
@@ -175,28 +175,28 @@ import Header from '@/components/Header.astro';
             rel="noopener noreferrer"
             class="ascii-card p-4 group block"
           >
-            <div class="flex justify-between text-xs text-white/50 mb-1">
-              <span class="text-emerald-400">[RUST]</span>
-              <span class="group-hover:text-white transition-colors">↗</span>
+            <div class="flex justify-between text-xs text-neutral-500 mb-1">
+              <span class="text-emerald-700 font-medium">[RUST]</span>
+              <span class="group-hover:text-black transition-colors">↗</span>
             </div>
-            <div class="font-display text-base text-white mb-1">qntx/kobe & ks</div>
-            <div class="text-xs text-white/60">Agent HD wallet derivation & secret store.</div>
+            <div class="font-display text-base text-neutral-900 mb-1">qntx/kobe & ks</div>
+            <div class="text-xs text-neutral-600">Agent HD wallet derivation & secret store.</div>
           </a>
 
         </div>
 
-        <!-- ASCII Spec Comparison Matrix (Ultra-Compact) -->
-        <div class="border border-white/10 bg-black/60 p-4 font-mono text-xs overflow-x-auto select-none">
-          <div class="text-[10px] text-white/40 uppercase tracking-widest mb-2">[ SPEC MATRIX ]</div>
-          <div class="grid grid-cols-2 gap-4 divide-x divide-white/10">
-            <div class="space-y-1 text-white/50 pr-2">
-              <div class="text-rose-400/90 font-semibold">[ LEGACY ]</div>
+        <!-- ASCII Spec Comparison Matrix (Paper Ledger Spec) -->
+        <div class="border border-black/10 bg-white p-4 font-mono text-xs overflow-x-auto select-none shadow-xs">
+          <div class="text-[10px] text-neutral-400 uppercase tracking-widest mb-2">[ SPEC MATRIX ]</div>
+          <div class="grid grid-cols-2 gap-4 divide-x divide-black/10">
+            <div class="space-y-1 text-neutral-500 pr-2">
+              <div class="text-rose-600 font-semibold">[ LEGACY ]</div>
               <div>• Human Credit Cards</div>
               <div>• Centralized API Keys</div>
               <div>• Zero-balance Halt</div>
             </div>
-            <div class="space-y-1 text-white/90 pl-4">
-              <div class="text-emerald-400 font-semibold">[ x402 SPEC ]</div>
+            <div class="space-y-1 text-neutral-900 pl-4">
+              <div class="text-emerald-700 font-semibold">[ x402 SPEC ]</div>
               <div>• Agent Self-Custodial Wallets</div>
               <div>• Monad Permit2 Gasless</div>
               <div>• 100% Autonomous Streaming</div>
@@ -206,22 +206,22 @@ import Header from '@/components/Header.astro';
 
       </div>
 
-      <!-- Minimalist Footer -->
-      <footer class="pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 font-mono text-[11px] text-white/40">
+      <!-- Minimalist Paper Footer -->
+      <footer class="pt-3 border-t border-black/10 flex flex-wrap items-center justify-between gap-3 font-mono text-[11px] text-neutral-500">
         <div class="flex items-center gap-3">
-          <span class="text-white font-display">[ QNTX ]</span>
+          <span class="text-neutral-900 font-display">[ QNTX ]</span>
           <span>MONAD</span>
           <span>MIT / APACHE 2.0</span>
         </div>
 
         <div class="flex items-center gap-4">
-          <a href="https://github.com/qntx" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">
+          <a href="https://github.com/qntx" target="_blank" rel="noopener noreferrer" class="hover:text-black transition-colors">
             GITHUB ↗
           </a>
-          <a href="https://x.com/qntxorg" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">
+          <a href="https://x.com/qntxorg" target="_blank" rel="noopener noreferrer" class="hover:text-black transition-colors">
             X ↗
           </a>
-          <a href="#page-1" class="text-emerald-400 hover:text-emerald-300 transition-colors">
+          <a href="#page-1" class="text-neutral-800 hover:text-black transition-colors">
             [ TOP ↑ ]
           </a>
         </div>
