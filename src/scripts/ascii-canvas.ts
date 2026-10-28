@@ -1,127 +1,56 @@
 /**
- * QNTX Kinetic ASCII Canvas Engine Inspired by the Squares & ASCII architecture of
- * ascii-magic.com/ascii#library Features:
+ * QuantX ASCII Squares Interactive Canvas Engine
  *
- * - Real-time Halftone Squares (·▪■) & ASCII/Dots/Blocks rasterizer
- * - Kinetic Horizontal Unfolding of QNTX with particle trajectory interpolation
- * - Interactive gravitational mouse repulsion & cursor tracking
- * - Negative space floating aesthetic with zero outer borders
+ * Inspired by ascii-magic.com/ascii Squares component architecture. Features:
+ *
+ * - High-fidelity typographic density matrix directly sampled from public/qntx.png
+ * - Real-time ASCII Magic halftone squares rasterizer (cell darkness -> square size)
+ * - Kinetic horizontal unfolding crystallization sequence
+ * - Interactive gravitational mouse repulsion & tactile surface elasticity
+ * - Shockwave ripple pulses on click / tap
+ * - Ambient kinetic wave propagation
+ * - Full responsive touch & retina display support
  */
 
-export type LookMode = "squares" | "ascii" | "dots" | "blocks";
+import { QNTX_COLS, QNTX_ROWS, QNTX_SQUARES } from "./qntx-data";
 
-export type LookDef = {
-  key: LookMode;
-  label: string;
-  glyph: string;
-  ramp: ReadonlyArray<string>;
-};
-
-export const LOOK_DEFS: Record<LookMode, LookDef> = {
-  squares: {
-    key: "squares",
-    label: "Squares",
-    glyph: "·▪■",
-    ramp: [" ", "·", "▪", "■"],
-  },
-  ascii: {
-    key: "ascii",
-    label: "ASCII",
-    glyph: "*#$@",
-    ramp: [" ", ".", ":", "-", "=", "+", "*", "#", "%", "@"],
-  },
-  dots: {
-    key: "dots",
-    label: "Halftone",
-    glyph: "·•●",
-    ramp: [" ", "·", "•", "●"],
-  },
-  blocks: {
-    key: "blocks",
-    label: "Blocks",
-    glyph: "░▒▓█",
-    ramp: [" ", "░", "▒", "▓", "█"],
-  },
-};
-
-type Particle = {
-  targetCol: number;
-  targetRow: number;
-  originCol: number;
-  originRow: number;
-  currentCol: number;
-  currentRow: number;
+type SquareParticle = {
+  readonly col: number;
+  readonly row: number;
+  readonly density: number;
+  baseX: number;
+  baseY: number;
+  currentX: number;
+  currentY: number;
   vx: number;
   vy: number;
-  intensity: number;
-  delay: number;
+  scale: number;
+  vScale: number;
+  readonly delay: number;
 };
 
-// 7x9 bitmap glyphs for Q, N, T, X
-const GLYPH_MAP: Record<string, ReadonlyArray<string>> = {
-  Q: [
-    " 11111 ",
-    "11   11",
-    "11   11",
-    "11   11",
-    "11   11",
-    "11 1 11",
-    " 11111 ",
-    "    11 ",
-    "     11",
-  ],
-  N: [
-    "11   11",
-    "111  11",
-    "1111 11",
-    "11 1111",
-    "11  111",
-    "11   11",
-    "11   11",
-    "11   11",
-    "11   11",
-  ],
-  T: [
-    "1111111",
-    "1111111",
-    "  111  ",
-    "  111  ",
-    "  111  ",
-    "  111  ",
-    "  111  ",
-    "  111  ",
-    "  111  ",
-  ],
-  X: [
-    "11   11",
-    " 11 11 ",
-    "  111  ",
-    "   1   ",
-    "  111  ",
-    " 11 11 ",
-    "11   11",
-    "11   11",
-    "11   11",
-  ],
+type Shockwave = {
+  originX: number;
+  originY: number;
+  startTime: number;
+  maxRadius: number;
+  speed: number;
 };
 
 export class AsciiCanvasEngine {
   private canvas: HTMLCanvasElement | undefined = undefined;
   private ctx: CanvasRenderingContext2D | undefined = undefined;
-  private readonly currentLook: LookMode = "squares";
-  private particles: Particle[] = [];
-  private cols = 64;
-  private rows = 24;
-  private cellW = 14;
-  private cellH = 18;
+  private squares: SquareParticle[] = [];
+  private shockwaves: Shockwave[] = [];
   private dpr = 1;
+  private cellUnit = 10;
   private unfoldProgress = 1.0;
   private isAutoPlaying = true;
   private animStartTime = 0;
-  private readonly animDuration = 1800;
+  private readonly animDuration = 1600;
   private rafId: number | undefined = undefined;
-  private mouseX = -1000;
-  private mouseY = -1000;
+  private mouseX = -2000;
+  private mouseY = -2000;
   private isMouseOver = false;
 
   constructor() {
@@ -147,8 +76,6 @@ export class AsciiCanvasEngine {
 
     this.dpr = Math.min(window.devicePixelRatio || 1, 2);
     this.handleResize();
-    this.generateParticles();
-
     this.setupListeners();
     this.startUnfoldAnimation();
     this.loop(performance.now());
@@ -157,7 +84,6 @@ export class AsciiCanvasEngine {
   private setupListeners(): void {
     window.addEventListener("resize", () => {
       this.handleResize();
-      this.generateParticles();
     });
 
     if (this.canvas) {
@@ -166,19 +92,67 @@ export class AsciiCanvasEngine {
           return;
         }
         const rect = this.canvas.getBoundingClientRect();
-        this.mouseX = (e.clientX - rect.left) / this.cellW;
-        this.mouseY = (e.clientY - rect.top) / this.cellH;
+        this.mouseX = e.clientX - rect.left;
+        this.mouseY = e.clientY - rect.top;
         this.isMouseOver = true;
       });
 
       this.canvas.addEventListener("mouseleave", () => {
         this.isMouseOver = false;
-        this.mouseX = -1000;
-        this.mouseY = -1000;
+        this.mouseX = -2000;
+        this.mouseY = -2000;
       });
 
-      this.canvas.addEventListener("click", () => {
-        this.startUnfoldAnimation();
+      this.canvas.addEventListener("click", (e: MouseEvent) => {
+        if (!this.canvas) {
+          return;
+        }
+        const rect = this.canvas.getBoundingClientRect();
+        this.addShockwave(e.clientX - rect.left, e.clientY - rect.top);
+      });
+
+      // Mobile Touch Support
+      this.canvas.addEventListener(
+        "touchstart",
+        (e: TouchEvent) => {
+          if (!this.canvas) {
+            return;
+          }
+          const [touch] = e.touches;
+          if (touch === undefined) {
+            return;
+          }
+          const rect = this.canvas.getBoundingClientRect();
+          this.mouseX = touch.clientX - rect.left;
+          this.mouseY = touch.clientY - rect.top;
+          this.isMouseOver = true;
+          this.addShockwave(this.mouseX, this.mouseY);
+        },
+        { passive: true },
+      );
+
+      this.canvas.addEventListener(
+        "touchmove",
+        (e: TouchEvent) => {
+          if (!this.canvas) {
+            return;
+          }
+          const [touch] = e.touches;
+          if (touch === undefined) {
+            return;
+          }
+          const rect = this.canvas.getBoundingClientRect();
+          this.mouseX = touch.clientX - rect.left;
+          this.mouseY = touch.clientY - rect.top;
+          this.isMouseOver = true;
+        },
+        { passive: true },
+      );
+
+      this.canvas.addEventListener("touchend", () => {
+        this.isMouseOver = false;
+        this.mouseX = -2000;
+        this.mouseY = -2000;
       });
     }
 
@@ -193,94 +167,78 @@ export class AsciiCanvasEngine {
     });
   }
 
+  private addShockwave(originX: number, originY: number): void {
+    this.shockwaves.push({
+      originX,
+      originY,
+      startTime: performance.now(),
+      maxRadius: 750,
+      speed: 0.65,
+    });
+    if (this.shockwaves.length > 5) {
+      this.shockwaves.shift();
+    }
+  }
+
   private handleResize(): void {
     if (!this.canvas) {
       return;
     }
     const rect = this.canvas.getBoundingClientRect();
-    const width = Math.max(rect.width, 320);
-    const height = Math.max(rect.height, 260);
+    const cssW = Math.max(rect.width, 300);
+    const cssH = Math.max(rect.height, 200);
 
-    this.canvas.width = width * this.dpr;
-    this.canvas.height = height * this.dpr;
+    this.canvas.width = cssW * this.dpr;
+    this.canvas.height = cssH * this.dpr;
 
-    if (width < 640) {
-      this.cols = 48;
-      this.rows = 20;
-    } else if (width < 1024) {
-      this.cols = 64;
-      this.rows = 22;
+    // Calculate grid unit to fit 84 cols x 18 rows
+    const hPadding = cssW < 640 ? 16 : 32;
+    const vPadding = 20;
+    const availableW = cssW - hPadding * 2;
+    const availableH = cssH - vPadding * 2;
+
+    this.cellUnit = Math.min(availableW / QNTX_COLS, availableH / QNTX_ROWS);
+    const gridW = QNTX_COLS * this.cellUnit;
+    const gridH = QNTX_ROWS * this.cellUnit;
+    const startX = (cssW - gridW) / 2;
+    const startY = (cssH - gridH) / 2;
+
+    if (this.squares.length === 0) {
+      this.squares = QNTX_SQUARES.map(([col, row, density]) => {
+        const baseX = startX + (col + 0.5) * this.cellUnit;
+        const baseY = startY + (row + 0.5) * this.cellUnit;
+        const delay = (col / QNTX_COLS) * 0.55;
+        return {
+          col,
+          row,
+          density,
+          baseX,
+          baseY,
+          currentX: baseX,
+          currentY: baseY,
+          vx: 0,
+          vy: 0,
+          scale: 0,
+          vScale: 0,
+          delay,
+        };
+      });
     } else {
-      this.cols = 76;
-      this.rows = 24;
+      this.squares.forEach((sq) => {
+        sq.baseX = startX + (sq.col + 0.5) * this.cellUnit;
+        sq.baseY = startY + (sq.row + 0.5) * this.cellUnit;
+      });
     }
-
-    this.cellW = width / this.cols;
-    this.cellH = height / this.rows;
-  }
-
-  private generateParticles(): void {
-    this.particles = [];
-    const letters = ["Q", "N", "T", "X"];
-    const glyphW = 7;
-    const glyphH = 9;
-    const letterGap = Math.max(2, Math.floor(this.cols / 24));
-    const totalLetterWidth = letters.length * glyphW + (letters.length - 1) * letterGap;
-
-    const startX = Math.floor((this.cols - totalLetterWidth) / 2);
-    const startY = Math.floor((this.rows - glyphH) / 2);
-    const centerCol = this.cols / 2;
-    const centerRow = this.rows / 2;
-
-    letters.forEach((char, letterIdx) => {
-      const glyph = GLYPH_MAP[char];
-      if (glyph === undefined) {
-        return;
-      }
-
-      const letterOffsetCol = startX + letterIdx * (glyphW + letterGap);
-
-      for (let r = 0; r < glyph.length; r++) {
-        const rowStr = glyph[r];
-        if (rowStr === undefined) {
-          continue;
-        }
-
-        for (let c = 0; c < rowStr.length; c++) {
-          if (rowStr[c] === "1") {
-            const targetCol = letterOffsetCol + c;
-            const targetRow = startY + r;
-
-            const angle = Math.random() * Math.PI * 2;
-            const radius = 1.5 + Math.random() * 3.5;
-            const originCol = centerCol + Math.cos(angle) * radius;
-            const originRow = centerRow + Math.sin(angle) * radius;
-
-            const distFromCenter = Math.abs(targetCol - centerCol) / centerCol;
-            const delay = distFromCenter * 0.45;
-
-            this.particles.push({
-              targetCol,
-              targetRow,
-              originCol,
-              originRow,
-              currentCol: originCol,
-              currentRow: originRow,
-              vx: 0,
-              vy: 0,
-              intensity: 0.95 + Math.random() * 0.05,
-              delay,
-            });
-          }
-        }
-      }
-    });
   }
 
   startUnfoldAnimation(): void {
     this.isAutoPlaying = true;
     this.unfoldProgress = 0.0;
     this.animStartTime = performance.now();
+    this.squares.forEach((sq) => {
+      sq.scale = 0;
+      sq.vScale = 0;
+    });
   }
 
   private loop(timestamp: number): void {
@@ -299,45 +257,86 @@ export class AsciiCanvasEngine {
       const elapsed = now - this.animStartTime;
       const t = Math.min(1, elapsed / this.animDuration);
       this.unfoldProgress = t === 1 ? 1 : 1 - (1 - t) ** 3;
-
       if (t >= 1) {
         this.isAutoPlaying = false;
       }
     }
 
-    for (const p of this.particles) {
-      const particleProgress = Math.max(
-        0,
-        Math.min(1, (this.unfoldProgress - p.delay) / (1 - p.delay)),
-      );
-      const easeP = 1 - (1 - particleProgress) ** 3;
+    // Filter finished shockwaves
+    this.shockwaves = this.shockwaves.filter(
+      (sw) => (now - sw.startTime) * sw.speed < sw.maxRadius,
+    );
 
-      const baseX = p.originCol + (p.targetCol - p.originCol) * easeP;
-      const baseY = p.originRow + (p.targetRow - p.originRow) * easeP;
+    const mouseRadius = 88;
+    const maxRepel = 24;
 
-      const wave = Math.sin(now * 0.002 + p.targetCol * 0.25) * 0.15 * easeP;
+    for (const sq of this.squares) {
+      // 1. Unfold progress for this square
+      let unfoldScale = 1.0;
+      if (!prefersReducedMotion) {
+        const sqP = Math.max(0, Math.min(1, (this.unfoldProgress - sq.delay) / 0.45));
+        unfoldScale = sqP === 1 ? 1 : 1 - (1 - sqP) ** 3;
+      }
 
-      let mouseDispX = 0;
-      let mouseDispY = 0;
+      // 2. Ambient kinetic micro-wave
+      let ambientY = 0;
+      let ambientScale = 1.0;
+      if (!prefersReducedMotion) {
+        ambientY = Math.sin(now * 0.0022 + sq.col * 0.18 + sq.row * 0.12) * 0.85;
+        ambientScale = 1.0 + Math.sin(now * 0.0018 + sq.col * 0.15) * 0.035;
+      }
+
+      // 3. Mouse repulsion & proximity swell
+      let repelX = 0;
+      let repelY = 0;
+      let mouseScale = 1.0;
+
       if (this.isMouseOver) {
-        const dx = p.currentCol - this.mouseX;
-        const dy = p.currentRow - this.mouseY;
+        const dx = sq.currentX - this.mouseX;
+        const dy = sq.currentY - this.mouseY;
         const dist = Math.hypot(dx, dy);
-        const radius = 6.0;
-        if (dist < radius && dist > 0.01) {
-          const force = (1 - dist / radius) * 2.8;
-          mouseDispX = (dx / dist) * force;
-          mouseDispY = (dy / dist) * force;
+
+        if (dist < mouseRadius && dist > 0.01) {
+          const force = (1 - dist / mouseRadius) ** 2 * maxRepel;
+          repelX = (dx / dist) * force;
+          repelY = (dy / dist) * force;
+          mouseScale = 1.0 + (1 - dist / mouseRadius) * 0.28;
         }
       }
 
-      const destX = baseX + mouseDispX;
-      const destY = baseY + wave + mouseDispY;
+      // 4. Shockwave ripples
+      let waveX = 0;
+      let waveY = 0;
+      let waveScale = 1.0;
 
-      p.vx = (destX - p.currentCol) * 0.22;
-      p.vy = (destY - p.currentRow) * 0.22;
-      p.currentCol += p.vx;
-      p.currentRow += p.vy;
+      for (const sw of this.shockwaves) {
+        const elapsed = (now - sw.startTime) * sw.speed;
+        const dist = Math.hypot(sq.baseX - sw.originX, sq.baseY - sw.originY);
+        const waveDiff = Math.abs(dist - elapsed);
+        const waveThickness = 48;
+
+        if (waveDiff < waveThickness) {
+          const falloff = Math.max(0, 1 - dist / sw.maxRadius);
+          const strength = (1 - waveDiff / waveThickness) ** 2 * falloff;
+          const normDist = Math.max(dist, 1);
+          waveX += ((sq.baseX - sw.originX) / normDist) * strength * 16;
+          waveY += ((sq.baseY - sw.originY) / normDist) * strength * 16;
+          waveScale += strength * 0.35;
+        }
+      }
+
+      // Spring physics towards target
+      const targetX = sq.baseX + repelX + waveX;
+      const targetY = sq.baseY + ambientY + repelY + waveY;
+      const targetScale = unfoldScale * ambientScale * mouseScale * waveScale;
+
+      sq.vx = (sq.vx + (targetX - sq.currentX) * 0.18) * 0.72;
+      sq.vy = (sq.vy + (targetY - sq.currentY) * 0.18) * 0.72;
+      sq.currentX += sq.vx;
+      sq.currentY += sq.vy;
+
+      sq.vScale = (sq.vScale + (targetScale - sq.scale) * 0.22) * 0.76;
+      sq.scale += sq.vScale;
     }
   }
 
@@ -345,7 +344,6 @@ export class AsciiCanvasEngine {
     if (!this.ctx || !this.canvas) {
       return;
     }
-
     const { width, height } = this.canvas;
     const { ctx } = this;
 
@@ -355,43 +353,27 @@ export class AsciiCanvasEngine {
 
     ctx.clearRect(0, 0, canvasCssW, canvasCssH);
 
-    const lookDef = LOOK_DEFS[this.currentLook] ?? LOOK_DEFS.squares;
-
+    // ASCII Magic squares halftone algorithm:
+    // Cell darkness determines the size of the square:
+    // baseSize = cellUnit * 0.88 * (minDot + (1 - minDot) * density)
+    const minDot = 0.24;
+    const maxSquareRatio = 0.88;
     ctx.fillStyle = "#09090b";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.font = `600 ${Math.max(10, Math.round(this.cellH * 0.82))}px "GeistPixel-Square", ui-monospace, Menlo, Consolas, monospace`;
 
-    for (const p of this.particles) {
-      const px = p.currentCol * this.cellW;
-      const py = p.currentRow * this.cellH;
-
-      if (px < -20 || px > canvasCssW + 20 || py < -20 || py > canvasCssH + 20) {
+    for (const sq of this.squares) {
+      if (sq.scale < 0.01) {
         continue;
       }
 
-      if (this.currentLook === "squares") {
-        const maxSquareSize = Math.min(this.cellW, this.cellH) * 0.88;
-        const squareSize = Math.max(2, Math.round(maxSquareSize * p.intensity));
-        ctx.fillRect(
-          Math.round(px - squareSize / 2),
-          Math.round(py - squareSize / 2),
-          squareSize,
-          squareSize,
-        );
-      } else if (this.currentLook === "dots") {
-        const radius = Math.max(1.5, Math.min(this.cellW, this.cellH) * 0.44 * p.intensity);
-        ctx.beginPath();
-        ctx.arc(px, py, radius, 0, Math.PI * 2);
-        ctx.fill();
-      } else {
-        const glyphIdx = Math.min(
-          lookDef.ramp.length - 1,
-          Math.floor(p.intensity * (lookDef.ramp.length - 1)),
-        );
-        const char = lookDef.ramp[glyphIdx] ?? "■";
-        ctx.fillText(char, px, py);
-      }
+      const baseSize = this.cellUnit * maxSquareRatio * (minDot + (1 - minDot) * sq.density);
+      const size = Math.max(1, baseSize * sq.scale);
+
+      ctx.fillRect(
+        Math.round(sq.currentX - size / 2),
+        Math.round(sq.currentY - size / 2),
+        Math.round(size),
+        Math.round(size),
+      );
     }
   }
 

@@ -1,32 +1,28 @@
 ---
-// Footer.astro - Refined Protocol Footer
+// Footer.astro - Refined Protocol Footer (Essential Links)
 const links = [
-  { label: 'Blog', href: 'https://qntx.org/blog' },
   { label: 'Docs', href: 'https://docs.qntx.org' },
   { label: 'GitHub', href: 'https://github.com/qntx' },
   { label: 'Community', href: 'https://x.com/qntxorg' },
-  { label: 'Support', href: 'mailto:x@qntx.org' },
-  { label: 'Careers', href: 'https://qntx.org/careers' },
-  { label: 'Team', href: 'https://qntx.org/team' },
-  { label: 'Privacy', href: 'https://qntx.org/privacy' },
+  { label: 'Blog', href: 'https://qntx.org/blog' },
   { label: 'Terms', href: 'https://qntx.org/terms' },
 ];
 ---
 
 <footer class="w-full bg-transparent px-6 sm:px-10 pb-6 sm:pb-8 pt-6 select-none">
-  <div class="max-w-[1240px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4 font-sans text-xs tracking-wide">
+  <div class="max-w-[1240px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 font-sans text-xs tracking-wide">
     <!-- Left: Trademark & Year -->
     <div class="text-neutral-500 font-medium tracking-wide shrink-0">
       © 2026 QuantX
     </div>
 
-    <!-- Right: Protocol Links -->
-    <nav class="flex flex-wrap items-center justify-center md:justify-end gap-x-5 sm:gap-x-6 gap-y-2 text-neutral-400" aria-label="Footer Links">
+    <!-- Right: Core Protocol Links -->
+    <nav class="flex flex-wrap items-center justify-center sm:justify-end gap-x-6 sm:gap-x-7 gap-y-2 text-neutral-400" aria-label="Footer Links">
       {links.map((link) => (
         <a
           href={link.href}
-          target={link.href.startsWith('mailto:') ? undefined : '_blank'}
-          rel={link.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+          target="_blank"
+          rel="noopener noreferrer"
           class="hover:text-neutral-900 transition-colors"
         >
           {link.label}
