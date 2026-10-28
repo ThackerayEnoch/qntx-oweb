@@ -1,28 +1,34 @@
 ---
-// Header.astro - Pure Minimalist Web3 Header
+// Header.astro - Refined Minimalist Web3 Protocol Navigation
 ---
 
 <header class="w-full bg-transparent px-6 sm:px-10 pt-6 sm:pt-8 select-none">
   <div class="max-w-[1240px] mx-auto flex items-center justify-between">
     
-    <!-- Left: Logo Identifier with Enlaraged favicon.svg -->
+    <!-- Left: Identity & Status -->
     <a
       href="/"
-      class="flex items-center gap-3 text-neutral-950 hover:opacity-80 transition-opacity"
+      class="group flex items-center gap-3 text-neutral-950 hover:opacity-80 transition-opacity"
       aria-label="QuantX Home"
     >
-      <img src="/favicon.svg" alt="QuantX Logo" class="w-8 h-8 sm:w-9 sm:h-9 shrink-0" />
-      <span class="font-medium tracking-wider text-base sm:text-lg">QuantX</span>
-      <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 pulse-emerald inline-block"></span>
+      <img
+        src="/favicon.svg"
+        alt="QuantX Icon"
+        class="w-7 h-7 sm:w-8 sm:h-8 shrink-0 transition-transform duration-200 group-hover:scale-105"
+      />
+      <div class="flex items-center gap-2">
+        <span class="font-sans font-semibold tracking-wider text-sm sm:text-base text-neutral-950">QuantX</span>
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 pulse-emerald inline-block" title="Runtime Active"></span>
+      </div>
     </a>
 
-    <!-- Right: Navigation Links (Larger typography, clear & restrained) -->
-    <nav class="flex items-center gap-5 sm:gap-8 tracking-wider text-sm sm:text-base" aria-label="Main Navigation">
+    <!-- Right: Navigation Items -->
+    <nav class="flex items-center gap-5 sm:gap-7 font-sans text-xs sm:text-[13px] tracking-wider" aria-label="Main Navigation">
       <a
         href="https://docs.qntx.org"
         target="_blank"
         rel="noopener noreferrer"
-        class="text-neutral-500 hover:text-neutral-950 transition-colors uppercase"
+        class="text-neutral-500 hover:text-neutral-950 transition-colors uppercase font-medium"
       >
         DOCS
       </a>
@@ -31,22 +37,22 @@
         href="https://github.com/qntx"
         target="_blank"
         rel="noopener noreferrer"
-        class="text-neutral-500 hover:text-neutral-950 transition-colors inline-flex items-center gap-1 uppercase"
+        class="text-neutral-500 hover:text-neutral-950 transition-colors uppercase font-medium inline-flex items-center gap-1"
         aria-label="GitHub Repository"
       >
         <span>GITHUB</span>
-        <span class="text-neutral-400 text-xs sm:text-sm">↗</span>
+        <span class="text-neutral-400 text-[11px]">↗</span>
       </a>
 
       <a
         href="https://docs.qntx.org"
         target="_blank"
         rel="noopener noreferrer"
-        class="text-neutral-950 hover:opacity-70 transition-opacity inline-flex items-center gap-1 font-medium uppercase"
+        class="px-2.5 py-1 text-neutral-950 hover:text-white border border-black/15 hover:border-black hover:bg-neutral-950 transition-all uppercase font-medium inline-flex items-center gap-1 shadow-2xs"
         aria-label="Get Started"
       >
         <span>GET STARTED</span>
-        <span class="text-neutral-400 text-xs sm:text-sm">→</span>
+        <span class="text-neutral-400 group-hover:text-neutral-300">→</span>
       </a>
     </nav>
 

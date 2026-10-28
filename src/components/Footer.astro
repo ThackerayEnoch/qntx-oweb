@@ -1,33 +1,33 @@
 ---
-// Footer.astro - Minimalist Web3 Protocol Footer
+// Footer.astro - Refined Protocol Footer
 const links = [
-  { label: 'BLOG', href: 'https://qntx.org/blog' },
-  { label: 'DOCS', href: 'https://docs.qntx.org' },
-  { label: 'GITHUB', href: 'https://github.com/qntx' },
-  { label: 'COMMUNITY', href: 'https://x.com/qntxorg' },
-  { label: 'SUPPORT', href: 'mailto:x@qntx.org' },
-  { label: 'CAREERS', href: 'https://qntx.org/careers' },
-  { label: 'TEAM', href: 'https://qntx.org/team' },
-  { label: 'PRIVACY', href: 'https://qntx.org/privacy' },
-  { label: 'TERMS', href: 'https://qntx.org/terms' },
+  { label: 'Blog', href: 'https://qntx.org/blog' },
+  { label: 'Docs', href: 'https://docs.qntx.org' },
+  { label: 'GitHub', href: 'https://github.com/qntx' },
+  { label: 'Community', href: 'https://x.com/qntxorg' },
+  { label: 'Support', href: 'mailto:x@qntx.org' },
+  { label: 'Careers', href: 'https://qntx.org/careers' },
+  { label: 'Team', href: 'https://qntx.org/team' },
+  { label: 'Privacy', href: 'https://qntx.org/privacy' },
+  { label: 'Terms', href: 'https://qntx.org/terms' },
 ];
 ---
 
-<footer class="w-full bg-transparent px-6 sm:px-10 pb-6 sm:pb-8 pt-4 select-none">
-  <div class="max-w-[1240px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs sm:text-sm tracking-wider">
-    <!-- Left: Copyright with Trademark/Copyright Sign Before Year -->
-    <div class="text-neutral-900 font-medium tracking-wide shrink-0">
+<footer class="w-full bg-transparent px-6 sm:px-10 pb-6 sm:pb-8 pt-6 select-none">
+  <div class="max-w-[1240px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4 font-sans text-xs tracking-wide">
+    <!-- Left: Trademark & Year -->
+    <div class="text-neutral-500 font-medium tracking-wide shrink-0">
       © 2026 QuantX
     </div>
 
-    <!-- Right: Protocol Links (Pure typography, clean hover) -->
-    <nav class="flex flex-wrap items-center justify-center md:justify-end gap-x-4 sm:gap-x-6 gap-y-2 text-neutral-500" aria-label="Footer Links">
+    <!-- Right: Protocol Links -->
+    <nav class="flex flex-wrap items-center justify-center md:justify-end gap-x-5 sm:gap-x-6 gap-y-2 text-neutral-400" aria-label="Footer Links">
       {links.map((link) => (
         <a
           href={link.href}
           target={link.href.startsWith('mailto:') ? undefined : '_blank'}
           rel={link.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
-          class="hover:text-neutral-950 transition-colors uppercase text-xs sm:text-[13px] tracking-wider"
+          class="hover:text-neutral-900 transition-colors"
         >
           {link.label}
         </a>

@@ -1,11 +1,11 @@
 ---
-// PageOne.astro - The Kinetic ASCII Sculpture & Pure Web3 Slogan
+// PageOne.astro - Center Stage: Kinetic ASCII Squares Sculpture & Core Slogan
 ---
 
-<div class="w-full flex flex-col items-center justify-center my-auto py-4 sm:py-8 select-none">
+<div class="w-full flex flex-col items-center justify-center my-auto py-4 sm:py-6 select-none">
   
   <!-- The Real-Time Kinetic ASCII Canvas (Borderless, Floating) -->
-  <div class="relative w-full max-w-[920px] h-[300px] sm:h-[380px] md:h-[440px] cursor-crosshair overflow-hidden">
+  <div class="relative w-full max-w-[900px] h-[300px] sm:h-[360px] md:h-[400px] cursor-crosshair overflow-hidden">
     <canvas
       id="qntx-ascii-canvas"
       class="w-full h-full block"
@@ -13,9 +13,9 @@
     ></canvas>
   </div>
 
-  <!-- Bottom Slogan (Restrained, Generous Negative Space, Pure Typography) -->
-  <div class="text-center pt-3 sm:pt-6 space-y-3 sm:space-y-4">
-    <h1 class="text-xs sm:text-sm md:text-base tracking-[0.25em] text-neutral-950 uppercase font-normal select-none">
+  <!-- Central Hierarchy: Slogan & Refined Action -->
+  <div class="text-center pt-4 sm:pt-6 space-y-4">
+    <h1 class="font-mono text-xs sm:text-[13px] md:text-sm tracking-[0.24em] text-neutral-800 uppercase font-medium select-none">
       Economic Layer for Autonomous AI Agents
     </h1>
 
@@ -24,10 +24,13 @@
         href="https://docs.qntx.org"
         target="_blank"
         rel="noopener noreferrer"
-        class="text-xs sm:text-sm text-neutral-400 hover:text-neutral-950 tracking-[0.2em] uppercase transition-colors inline-flex items-center gap-1.5"
+        class="group inline-flex items-center gap-2 px-3.5 py-1.5 font-mono text-xs tracking-wider text-neutral-800 hover:text-black border border-black/15 hover:border-black bg-white/80 hover:bg-neutral-950 hover:text-white transition-all duration-150 shadow-2xs select-none"
         aria-label="Get Started with QuantX"
       >
-        <span>[ GET STARTED ]</span>
+        <span class="text-neutral-400 group-hover:text-neutral-500 transition-colors select-none">[</span>
+        <span class="font-medium">GET STARTED</span>
+        <span class="text-neutral-400 group-hover:text-neutral-300 transition-transform group-hover:translate-x-0.5 select-none">→</span>
+        <span class="text-neutral-400 group-hover:text-neutral-500 transition-colors select-none">]</span>
       </a>
     </div>
   </div>
