@@ -7,7 +7,7 @@
 <h3 align="center">QuantX — The Economic Layer for Autonomous AI Agents</h3>
 
 <p align="center">
-  Official website and landing portal for <b>QuantX Labs</b> and the <b>x402 Protocol</b>.
+  Official website and protocol terminal for <b>QuantX Labs</b> and the <b>x402 Protocol</b>.
 </p>
 
 <p align="center">
@@ -31,16 +31,19 @@
 
 ## 🌐 Overview
 
-**qntx-oweb** is the official web portal for [QuantX Labs](https://github.com/qntx). It serves as the primary gateway introducing the **x402 Protocol** — an open economic protocol enabling autonomous AI agents to transact, collaborate, govern, and evolve independently on-chain with native micro-settlement primitives on Monad (Permit2).
+**qntx-oweb** is the official landing terminal for [QuantX Labs](https://github.com/qntx). It serves as the primary visual and informational gateway introducing the **x402 Protocol** — an open economic protocol enabling autonomous AI agents to transact, collaborate, govern, and settle micro-transactions on-chain.
 
 ### ✨ Key Features
 
-- **⚡ Modern High-Performance Stack**: Built with [Astro](https://astro.build) and [Tailwind CSS v4](https://tailwindcss.com) for zero-JS static HTML by default and ultra-fast page loads.
-- **🎨 Futuristic Cyber-Minimalist Aesthetic**: High-contrast dark/light mode balance, monospace typography (`JetBrains Mono` & `Geist`), and terminal-style interface accents.
-- **🧊 Interactive 3D Voxel Field**: Canvas-rendered 3D interactive particle/voxel visualization responding smoothly to viewports and animations.
-- **🧩 Decoupled View Architecture**: Clean separation between presentation components, TypeScript definitions, and content models (`home.data.ts` + `home.types.ts`).
-- **🚀 Monad Native & x402 Protocol**: Comprehensive documentation links, ecosystem primitives, and interactive terminal snippet copy capabilities.
-- **📦 Fast Developer Tooling**: Powered by [Bun](https://bun.sh), with [Oxlint](https://oxc.rs) and [Oxfmt](https://oxc.rs) for lightning-fast linting and formatting.
+- **⚡ Modern High-Performance Stack**: Built with [Astro v7](https://astro.build) and [Tailwind CSS v4](https://tailwindcss.com) for zero-JS static HTML by default and near-instant initial page loads.
+- **🔳 Kinetic ASCII Squares Engine**: Real-time canvas-based halftone squares rasterizer (`ascii-canvas.ts`) inspired by ASCII Magic. Accurately sampled from the `qntx.png` brand logotype into an 84×18 matrix featuring:
+  - **Horizontal Unfold Crystallization**: Smooth progressive column-by-column emergence on page load.
+  - **Gravitational Cursor Tracking**: Interactive spatial deflection and proximity swelling around mouse cursor and touch pointers.
+  - **Click/Tap Shockwaves**: Radial impulse waves propagating from contact points across the square field.
+  - **Ambient Kinetic Waves**: Micro-amplitude idle breathing to keep the surface dynamically alive.
+- **🎨 Restrained Minimalist Web3 Aesthetic**: Negative space composition, subtle 1px dot grid background texture, pure monochrome contrast, and elimination of clutter.
+- **🔤 Clean Typography System**: Distinctive hierarchy pairing custom display typography with clean sans-serif (`Satoshi`) and monospace terminal accents.
+- **📦 Ultra-Fast Tooling**: Powered by [Bun](https://bun.sh), with [Oxlint](https://oxc.rs) and [Oxfmt](https://oxc.rs) for sub-second static analysis and formatting.
 
 ---
 
@@ -50,30 +53,33 @@
 qntx-oweb/
 ├── .github/
 │   └── workflows/
-│       └── astro.yml            # Automated GitHub Pages CI/CD workflow
+│       └── astro.yml          # Automated GitHub Pages CI/CD workflow
 ├── public/
 │   ├── favicon.ico
-│   └── favicon.svg              # QuantX vector logo
+│   ├── favicon.svg            # QuantX vector logo
+│   ├── qntx.png               # Reference bitmap for ASCII Squares sampling
+│   └── fonts/                 # Web font assets (CKTKingKong, GeistPixel-Square, Satoshi)
 ├── src/
-│   ├── assets/                  # Static graphic assets (astro.svg, quantx.svg, etc.)
-│   ├── components/              # Shared UI components (Header, Footer, Logo, Divider)
-│   ├── layouts/                 # Base HTML layout and font/metadata orchestration
-│   ├── pages/                   # Astro page routes
-│   │   └── index.astro          # Landing page entry point
-│   ├── scripts/                 # Client scripts (3D voxel animation, motion, media query utils)
-│   ├── styles/                  # Tailwind CSS v4 design tokens and global styles
-│   └── views/
-│       └── home/                # Modular home view implementation
-│           ├── components/      # Section components: Hero, Thesis, Ecosystem, About, Cta
-│           ├── home.data.ts     # Content data model and external links
-│           ├── home.types.ts    # TypeScript interfaces for sections and props
-│           ├── HomeView.astro   # Main page layout orchestrator
-│           └── index.ts         # Module barrel exports
-├── astro.config.mjs             # Astro and Vite plugins configuration
-├── oxfmt.config.ts              # Code formatting configuration
-├── oxlint.config.ts             # Linter rules and configuration
-├── package.json                 # Project dependencies and script runner
-├── tsconfig.json                # TypeScript compiler configuration (Path alias: @/*)
+│   ├── assets/                # Vector brand assets
+│   ├── components/            # UI components
+│   │   ├── Header.astro       # Minimalist top navigation bar
+│   │   ├── PageOne.astro      # Centerpiece kinetic ASCII stage & slogan
+│   │   └── Footer.astro       # Understated copyright & core protocol links
+│   ├── layouts/
+│   │   └── Layout.astro       # Base HTML document shell, metadata & script injection
+│   ├── pages/
+│   │   └── index.astro        # Single-page terminal entry route
+│   ├── scripts/
+│   │   ├── ascii-canvas.ts    # ASCII Squares canvas physics & rendering engine
+│   │   ├── qntx-data.ts       # 84x18 density matrix extracted from qntx.png
+│   │   └── nav.ts             # Navigation & client interaction helpers
+│   └── styles/
+│       └── global.css         # Tailwind CSS v4 design tokens & font-face declarations
+├── astro.config.mjs           # Astro and Vite plugins configuration
+├── oxfmt.config.ts            # Code formatting configuration
+├── oxlint.config.ts           # Linter rules and configuration
+├── package.json               # Project dependencies and script runner
+├── tsconfig.json              # TypeScript compiler configuration (Path alias: @/*)
 └── README.md
 ```
 
@@ -81,14 +87,14 @@ qntx-oweb/
 
 ## 🛠️ Tech Stack
 
-| Technology                                                | Purpose                                                      |
-| :-------------------------------------------------------- | :----------------------------------------------------------- |
-| **[Astro](https://astro.build/)**                         | Web framework optimized for content and performance          |
-| **[Tailwind CSS v4](https://tailwindcss.com/)**           | Utility-first CSS framework (via `@tailwindcss/vite`)        |
-| **[TypeScript](https://www.typescriptlang.org/)**         | Type safety across configurations and content models         |
-| **[Bun](https://bun.sh/)**                                | Blazing-fast JavaScript/TypeScript runtime & package manager |
-| **[Oxlint](https://oxc.rs/) & [Oxfmt](https://oxc.rs/)**  | Ultra-fast linter and code formatter                         |
-| **[GitHub Actions](https://github.com/features/actions)** | Automated static build and GitHub Pages deployment           |
+| Technology                                                | Purpose                                                         |
+| :-------------------------------------------------------- | :-------------------------------------------------------------- |
+| **[Astro](https://astro.build/)**                         | Content-first static site generation and component runtime      |
+| **[Tailwind CSS v4](https://tailwindcss.com/)**           | Next-generation utility-first styling (via `@tailwindcss/vite`) |
+| **[TypeScript](https://www.typescriptlang.org/)**         | Strict static type safety across components and canvas logic    |
+| **[Bun](https://bun.sh/)**                                | High-speed JavaScript runtime and package manager               |
+| **[Oxlint](https://oxc.rs/) & [Oxfmt](https://oxc.rs/)**  | Rust-based ultra-fast linter and code formatter                 |
+| **[GitHub Actions](https://github.com/features/actions)** | Automated static build and GitHub Pages deployment              |
 
 ---
 
@@ -178,14 +184,18 @@ bun run preview
 
 ### 🌟 项目简介
 
-**qntx-oweb** 是 [QuantX Labs](https://github.com/qntx) 的官方网站门户。主要用于展示 **x402 协议**（为自主 AI Agent 构建的链上经济基础设施，支持 Monad 上的 Permit2 原生微支付）以及 QuantX 开源生态系统中的基础库与工具链。
+**qntx-oweb** 是 [QuantX Labs](https://github.com/qntx) 的官方网站终端。主要用于展示 **x402 协议**（为自主 AI Agent 构建的链上经济基础设施，支持 Monad 上的 Permit2 原生微支付）以及 QuantX 开源生态系统中的核心协议与基础工具链。
 
 ### 💡 核心特性
 
 - **极速现代技术栈**：基于 Astro 7 + Tailwind CSS v4，默认生成静态 HTML，极致首屏加载性能。
-- **赛博极简美学**：黑白对比设计风格，搭配 `JetBrains Mono` 与 `Geist` 等宽/正文字体，呈现硬核极客质感。
-- **交互式 3D 体素画布**：内置高效的 Canvas 3D 粒子体素场动画 (`logo-animation.js`)，赋予页面沉浸式视觉交互。
-- **数据视图解耦**：采用结构化模块设计，将文案配置 (`home.data.ts`)、类型系统 (`home.types.ts`) 与展示组件彻底解耦，易于维护扩展。
+- **动态 ASCII Squares 引擎**：参考 ASCII Magic 半调方块渲染逻辑，基于官方位图 `qntx.png` 精确映射为 84×18 动态网格：
+  - **横向阶梯展开**：初次加载时沿水平方向逐列平滑结晶展开。
+  - **重力指针交互**：鼠标或触控拖拽时触发弹性排斥偏移与方块表面膨胀（Swell）。
+  - **触控/点击冲击波**：点击任意区域向外扩散环形波，逐层激发方块波动弹跳。
+  - **环境呼吸微动效**：静止状态下带有微弱波动，消除静态死板感，呈现数字活体艺术。
+- **克制极简 Web3 艺术品风格**：极致大留白负空间排版、超轻量 1px 点阵网格纸质质感、纯粹黑白高对比度。
+- **单页精致终端架构**：去除冗余控制台与多屏翻页，精细化组织顶部 Logo、中心动态视觉焦点、Slogan 与极简页脚外链。
 - **极速代码校验工具**：整合 Bun 生态与 Rust 编写的 Oxlint、Oxfmt 工具，毫秒级完成语法与格式检查。
 
 ### 📦 常用开发命令
@@ -226,8 +236,10 @@ bun run format
 
 ## 🤝 社区与支持
 
+- **官网文档**: [https://docs.qntx.org](https://docs.qntx.org)
 - **GitHub 组织**: [@qntx](https://github.com/qntx)
 - **Twitter / X**: [@qntxorg](https://x.com/qntxorg)
+- **博客**: [https://qntx.org/blog](https://qntx.org/blog)
 
 ---
 
