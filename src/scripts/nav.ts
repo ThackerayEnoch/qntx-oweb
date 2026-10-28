@@ -1,58 +1,44 @@
-/** Navigation and Clipboard Helper */
+/** Terminal Command and Clipboard Helper */
 
 export function initNav(): void {
   if (typeof window === "undefined") {
     return;
   }
 
-  // Copy button
-  const copyBtn = document.getElementById("copy-cmd-btn");
+  const container = document.getElementById("cmd-container");
   const cmdText = document.getElementById("cmd-text");
-  if (copyBtn && cmdText) {
-    copyBtn.addEventListener("click", () => {
-      const text = cmdText.textContent?.trim() || "bun add @qntx/core";
+  const feedback = document.getElementById("cmd-feedback");
+
+  if (container && cmdText) {
+    const handleCopy = () => {
+      const text = cmdText.textContent?.trim() || "bun add @quantx/core";
       navigator.clipboard
         .writeText(text)
         .then(() => {
-          const original = copyBtn.textContent;
-          copyBtn.textContent = "COPIED";
-          copyBtn.classList.add("bg-neutral-950", "text-white");
-          setTimeout(() => {
-            copyBtn.textContent = original;
-            copyBtn.classList.remove("bg-neutral-950", "text-white");
-          }, 1600);
+          if (feedback) {
+            const original = feedback.textContent;
+            feedback.textContent = "[copied]";
+            feedback.classList.remove("opacity-0", "text-neutral-400");
+            feedback.classList.add("text-emerald-600", "opacity-100");
+            setTimeout(() => {
+              feedback.textContent = original;
+              feedback.classList.remove("text-emerald-600", "opacity-100");
+              feedback.classList.add("opacity-0", "text-neutral-400");
+            }, 1600);
+          }
         })
         .catch(() => {
-          // Ignore clipboard permission errors
+          // Clipboard fallback or permissions ignored
         });
-    });
-  }
+    };
 
-  // Page active observer
-  const observer = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting && entry.intersectionRatio > 0.4) {
-          const { id } = entry.target;
-          document.querySelectorAll("[data-page-link]").forEach((link) => {
-            const target = link.getAttribute("data-page-link");
-            link.classList.toggle("text-neutral-950", target === id);
-            link.classList.toggle("font-bold", target === id);
-            link.classList.toggle("text-neutral-400", target !== id);
-          });
-        }
+    container.addEventListener("click", handleCopy);
+    container.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handleCopy();
       }
-    },
-    { threshold: [0.4, 0.7] },
-  );
-
-  const p1 = document.getElementById("page-1");
-  const p2 = document.getElementById("page-2");
-  if (p1) {
-    observer.observe(p1);
-  }
-  if (p2) {
-    observer.observe(p2);
+    });
   }
 }
 

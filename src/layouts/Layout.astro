@@ -1,12 +1,12 @@
 ---
-// Layout.astro - Clean Technical Paper Shell
+// Layout.astro - Minimalist Web3 Protocol Terminal Shell
 interface Props {
   title?: string;
   description?: string;
 }
 
 const {
-  title = "QNTX // Autonomous Agent Protocol",
+  title = "QuantX // Autonomous Agent Protocol",
   description = "Minimalist protocol specification and runtime for autonomous AI agents.",
 } = Astro.props;
 ---
@@ -29,18 +29,12 @@ const {
 
     <!-- Preload Fonts -->
     <link rel="preload" href="/fonts/GeistPixel-Square.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/Satoshi-400.woff2" as="font" type="font/woff2" crossorigin />
   </head>
-  <body class="bg-white text-neutral-950 font-body min-h-screen relative antialiased">
-    <!-- Side Technical Guide Rails -->
-    <div class="side-rail-left" aria-hidden="true"></div>
-    <div class="side-rail-right" aria-hidden="true"></div>
-
+  <body class="bg-white text-neutral-950 font-mono min-h-screen relative antialiased selection:bg-neutral-950 selection:text-white">
     <slot />
 
     <!-- Client Scripts -->
     <script src="../scripts/ascii-canvas.ts"></script>
-    <script src="../scripts/swarm-canvas.ts"></script>
     <script src="../scripts/nav.ts"></script>
   </body>
 </html>

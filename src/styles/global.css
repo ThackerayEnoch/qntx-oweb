@@ -16,29 +16,14 @@
   font-display: swap;
 }
 
-@font-face {
-  font-family: "Satoshi";
-  src: url("/fonts/Satoshi-500.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
 :root {
   --bg: #ffffff;
-  --bg-subtle: #f8fafc;
-  --bg-card: #ffffff;
   --text: #09090b;
   --text-muted: #52525b;
   --text-faint: #a1a1aa;
-  --border: rgba(0, 0, 0, 0.1);
-  --border-strong: #09090b;
-  --border-subtle: rgba(0, 0, 0, 0.05);
   --emerald: #059669;
-  --emerald-bg: rgba(5, 150, 105, 0.08);
-  --font-display: "GeistPixel-Square", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --font-body: "Satoshi", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  --font-display: "GeistPixel-Square", ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
 }
 
 *,
@@ -55,17 +40,16 @@
 html {
   background-color: var(--bg);
   color-scheme: light;
-  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   padding: 0;
   background-color: var(--bg);
-  background-image: radial-gradient(rgba(0, 0, 0, 0.07) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(0, 0, 0, 0.045) 1px, transparent 1px);
   background-size: 24px 24px;
   color: var(--text);
-  font-family: var(--font-body);
+  font-family: var(--font-mono);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
@@ -73,82 +57,19 @@ body {
   overflow-x: hidden;
 }
 
-/* Side guide rails */
-.side-rail-left,
-.side-rail-right {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: var(--border-subtle);
-  pointer-events: none;
-  z-index: 40;
-}
-.side-rail-left {
-  left: max(16px, calc((100vw - 1180px) / 2));
-}
-.side-rail-right {
-  right: max(16px, calc((100vw - 1180px) / 2));
-}
-
 /* Typography Utility Classes */
 .font-display {
   font-family: var(--font-display);
-}
-.font-body {
-  font-family: var(--font-body);
 }
 .font-mono {
   font-family: var(--font-mono);
 }
 
-/* ASCII Button / Look Switcher Pill */
-.look-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  height: 26px;
-  padding: 0 8px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-muted);
-  background: #ffffff;
-  border: 1px solid var(--border);
-  transition: all 0.12s ease;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.look-btn:hover {
-  color: var(--text);
-  border-color: var(--border-strong);
-  background: #fafafa;
-}
-.look-btn.active {
-  background: var(--text);
-  color: #ffffff;
-  border-color: var(--text);
-  font-weight: 500;
-}
-
-/* Blueprint Card */
-.blueprint-card {
-  background: #ffffff;
-  border: 1px solid var(--border);
-  position: relative;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
-}
-.blueprint-card:hover {
-  border-color: var(--border-strong);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  transform: translateY(-2px);
-}
-
-/* Pulse animation */
+/* Pulse indicator animation */
 @keyframes pulseDot {
   0%,
   100% {
-    opacity: 0.3;
+    opacity: 0.35;
     transform: scale(0.9);
   }
   50% {
@@ -157,30 +78,5 @@ body {
   }
 }
 .pulse-emerald {
-  animation: pulseDot 1.8s ease-in-out infinite;
-}
-
-/* Subtle Shimmer across ASCII characters */
-@keyframes asciiScan {
-  0% {
-    opacity: 0.85;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.85;
-  }
-}
-.ascii-shimmer {
-  animation: asciiScan 3s ease-in-out infinite;
-}
-
-/* Hide scrollbar for clean UI while preserving scroll */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  animation: pulseDot 2s ease-in-out infinite;
 }

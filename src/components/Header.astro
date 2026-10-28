@@ -1,105 +1,29 @@
 ---
-// Header.astro - Minimalist Technical ASCII Navigation Bar
+// Header.astro - Pure Minimalist Header
 ---
 
-<header class="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-xs border-b border-black/8 px-4 sm:px-6">
-  <div class="max-w-[1140px] mx-auto h-12 flex items-center justify-between gap-4 text-xs font-mono">
-    
-    <!-- Left: Organization Identity -->
-    <div class="flex items-center gap-3">
-      <a
-        href="#page-1"
-        class="flex items-center gap-2 text-neutral-950 font-display text-sm tracking-wider hover:opacity-75 transition-opacity"
-        aria-label="QNTX Home"
-      >
-        <span class="w-1.5 h-1.5 rounded-xs bg-emerald-600 pulse-emerald inline-block"></span>
-        <span class="font-semibold">QNTX</span>
-      </a>
-      <span class="hidden sm:inline text-[11px] text-neutral-400 border-l border-black/10 pl-3">
-        [ AUTONOMOUS RUNTIME ]
-      </span>
-    </div>
+<header class="w-full bg-transparent px-6 sm:px-10 pt-6 sm:pt-8 select-none">
+  <div class="max-w-[1200px] mx-auto flex items-center justify-between text-xs font-mono">
+    <!-- Left: Logo Identifier -->
+    <a
+      href="/"
+      class="flex items-center gap-2.5 text-neutral-950 hover:opacity-75 transition-opacity"
+      aria-label="QuantX Home"
+    >
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 pulse-emerald inline-block"></span>
+      <span class="font-semibold tracking-wider text-sm">QuantX</span>
+    </a>
 
-    <!-- Center: Look Switcher (Squares / ASCII / Dots / Blocks) -->
-    <nav class="flex items-center gap-1.5 overflow-x-auto py-1 no-scrollbar" aria-label="ASCII Character Mode">
-      <button
-        type="button"
-        class="look-btn active"
-        data-look-btn="squares"
-        aria-pressed="true"
-        title="Squares halftone character mode"
-      >
-        <span class="select-none text-emerald-700">·▪■</span>
-        <span class="hidden sm:inline">Squares</span>
-      </button>
-
-      <button
-        type="button"
-        class="look-btn"
-        data-look-btn="ascii"
-        aria-pressed="false"
-        title="ASCII text mode"
-      >
-        <span class="select-none text-neutral-400">*#$</span>
-        <span class="hidden sm:inline">ASCII</span>
-      </button>
-
-      <button
-        type="button"
-        class="look-btn"
-        data-look-btn="dots"
-        aria-pressed="false"
-        title="Halftone dots mode"
-      >
-        <span class="select-none text-neutral-400">·•●</span>
-        <span class="hidden sm:inline">Dots</span>
-      </button>
-
-      <button
-        type="button"
-        class="look-btn hidden md:inline-flex"
-        data-look-btn="blocks"
-        aria-pressed="false"
-        title="Block shades mode"
-      >
-        <span class="select-none text-neutral-400">░▒▓</span>
-        <span>Blocks</span>
-      </button>
-    </nav>
-
-    <!-- Right: Page Switcher & GitHub -->
-    <div class="flex items-center gap-3 shrink-0">
-      <div class="flex items-center gap-1 bg-neutral-100 p-0.5 border border-black/10 text-[11px]">
-        <a
-          href="#page-1"
-          data-page-link="page-1"
-          class="px-1.5 py-0.5 text-neutral-900 font-bold hover:text-black transition-colors"
-          title="Section 01: Monument"
-        >
-          01
-        </a>
-        <span class="text-neutral-300">/</span>
-        <a
-          href="#page-2"
-          data-page-link="page-2"
-          class="px-1.5 py-0.5 text-neutral-400 hover:text-black transition-colors"
-          title="Section 02: Primitives"
-        >
-          02
-        </a>
-      </div>
-
-      <a
-        href="https://github.com/qntx"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] text-neutral-800 hover:text-black border border-black/15 hover:border-black bg-white transition-all shadow-2xs"
-        aria-label="GitHub Repository"
-      >
-        <span>GITHUB</span>
-        <span class="text-neutral-400">↗</span>
-      </a>
-    </div>
-
+    <!-- Right: GitHub Link -->
+    <a
+      href="https://github.com/qntx"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="text-neutral-500 hover:text-neutral-950 transition-colors inline-flex items-center gap-1 tracking-wider"
+      aria-label="GitHub Repository"
+    >
+      <span>GITHUB</span>
+      <span class="text-neutral-400">↗</span>
+    </a>
   </div>
 </header>

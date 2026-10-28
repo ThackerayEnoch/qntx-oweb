@@ -4,9 +4,8 @@
  *
  * - Real-time Halftone Squares (·▪■) & ASCII/Dots/Blocks rasterizer
  * - Kinetic Horizontal Unfolding of QNTX with particle trajectory interpolation
- * - Interactive Scrubbing & Replay controls
  * - Interactive gravitational mouse repulsion & cursor tracking
- * - Scroll-driven camera parallax & particle dissipation
+ * - Negative space floating aesthetic with zero outer borders
  */
 
 export type LookMode = "squares" | "ascii" | "dots" | "blocks";
@@ -109,7 +108,7 @@ const GLYPH_MAP: Record<string, ReadonlyArray<string>> = {
 export class AsciiCanvasEngine {
   private canvas: HTMLCanvasElement | undefined = undefined;
   private ctx: CanvasRenderingContext2D | undefined = undefined;
-  private currentLook: LookMode = "squares";
+  private readonly currentLook: LookMode = "squares";
   private particles: Particle[] = [];
   private cols = 64;
   private rows = 24;
@@ -124,7 +123,6 @@ export class AsciiCanvasEngine {
   private mouseX = -1000;
   private mouseY = -1000;
   private isMouseOver = false;
-  private scrollY = 0;
 
   constructor() {
     this.init();
@@ -152,7 +150,6 @@ export class AsciiCanvasEngine {
     this.generateParticles();
 
     this.setupListeners();
-    this.setupControls();
     this.startUnfoldAnimation();
     this.loop(performance.now());
   }
@@ -161,10 +158,6 @@ export class AsciiCanvasEngine {
     window.addEventListener("resize", () => {
       this.handleResize();
       this.generateParticles();
-    });
-
-    window.addEventListener("scroll", () => {
-      this.scrollY = window.scrollY;
     });
 
     if (this.canvas) {
@@ -183,52 +176,21 @@ export class AsciiCanvasEngine {
         this.mouseX = -1000;
         this.mouseY = -1000;
       });
+
+      this.canvas.addEventListener("click", () => {
+        this.startUnfoldAnimation();
+      });
     }
 
     window.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
         return;
       }
-      if (e.key === "1") {
-        document.getElementById("page-1")?.scrollIntoView({ behavior: "smooth" });
-      } else if (e.key === "2") {
-        document.getElementById("page-2")?.scrollIntoView({ behavior: "smooth" });
-      } else if (e.key.toLowerCase() === "l") {
-        this.cycleLook();
-      } else if (e.key === " ") {
+      if (e.key === " " || e.key.toLowerCase() === "r") {
         e.preventDefault();
         this.startUnfoldAnimation();
       }
     });
-  }
-
-  private setupControls(): void {
-    document.querySelectorAll("[data-look-btn]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const key = btn.getAttribute("data-look-btn");
-        if (key === "squares" || key === "ascii" || key === "dots" || key === "blocks") {
-          this.setLook(key);
-        }
-      });
-    });
-
-    const slider = document.getElementById("unfold-slider");
-    if (slider instanceof HTMLInputElement) {
-      slider.addEventListener("input", (e: Event) => {
-        if (e.target instanceof HTMLInputElement) {
-          this.isAutoPlaying = false;
-          this.unfoldProgress = Number.parseFloat(e.target.value) / 100;
-          this.updateUiProgress();
-        }
-      });
-    }
-
-    const replayBtn = document.getElementById("unfold-replay-btn");
-    if (replayBtn) {
-      replayBtn.addEventListener("click", () => {
-        this.startUnfoldAnimation();
-      });
-    }
   }
 
   private handleResize(): void {
@@ -315,44 +277,10 @@ export class AsciiCanvasEngine {
     });
   }
 
-  setLook(look: LookMode): void {
-    this.currentLook = look;
-    document.querySelectorAll("[data-look-btn]").forEach((btn) => {
-      const active = btn.getAttribute("data-look-btn") === look;
-      btn.classList.toggle("active", active);
-      btn.setAttribute("aria-pressed", String(active));
-    });
-
-    window.dispatchEvent(new CustomEvent("qntx:lookchange", { detail: { look } }));
-  }
-
-  cycleLook(): void {
-    const order: LookMode[] = ["squares", "ascii", "dots", "blocks"];
-    const nextIdx = (order.indexOf(this.currentLook) + 1) % order.length;
-    const next = order[nextIdx];
-    if (next) {
-      this.setLook(next);
-    }
-  }
-
   startUnfoldAnimation(): void {
     this.isAutoPlaying = true;
     this.unfoldProgress = 0.0;
     this.animStartTime = performance.now();
-    this.updateUiProgress();
-  }
-
-  private updateUiProgress(): void {
-    const pct = Math.round(this.unfoldProgress * 100);
-    const pctEl = document.getElementById("unfold-pct");
-    if (pctEl) {
-      pctEl.textContent = `${pct}%`;
-    }
-
-    const slider = document.getElementById("unfold-slider");
-    if (slider instanceof HTMLInputElement) {
-      slider.value = String(pct);
-    }
   }
 
   private loop(timestamp: number): void {
@@ -371,14 +299,11 @@ export class AsciiCanvasEngine {
       const elapsed = now - this.animStartTime;
       const t = Math.min(1, elapsed / this.animDuration);
       this.unfoldProgress = t === 1 ? 1 : 1 - (1 - t) ** 3;
-      this.updateUiProgress();
 
       if (t >= 1) {
         this.isAutoPlaying = false;
       }
     }
-
-    const scrollFactor = Math.min(1, this.scrollY / 450);
 
     for (const p of this.particles) {
       const particleProgress = Math.max(
@@ -406,11 +331,8 @@ export class AsciiCanvasEngine {
         }
       }
 
-      const scrollDispX = (p.targetCol - this.cols / 2) * scrollFactor * 0.6;
-      const scrollDispY = scrollFactor * 3.5;
-
-      const destX = baseX + mouseDispX + scrollDispX;
-      const destY = baseY + wave + mouseDispY + scrollDispY;
+      const destX = baseX + mouseDispX;
+      const destY = baseY + wave + mouseDispY;
 
       p.vx = (destX - p.currentCol) * 0.22;
       p.vy = (destY - p.currentRow) * 0.22;
@@ -433,23 +355,12 @@ export class AsciiCanvasEngine {
 
     ctx.clearRect(0, 0, canvasCssW, canvasCssH);
 
-    ctx.fillStyle = "rgba(0, 0, 0, 0.04)";
-    for (let c = 1; c < this.cols; c += 2) {
-      for (let r = 1; r < this.rows; r += 2) {
-        ctx.fillRect(c * this.cellW - 0.5, r * this.cellH - 0.5, 1, 1);
-      }
-    }
-
     const lookDef = LOOK_DEFS[this.currentLook] ?? LOOK_DEFS.squares;
 
     ctx.fillStyle = "#09090b";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.font = `600 ${Math.max(10, Math.round(this.cellH * 0.82))}px "GeistPixel-Square", ui-monospace, Menlo, Consolas, monospace`;
-
-    const scrollFactor = Math.min(1, this.scrollY / 450);
-    const alpha = Math.max(0.08, 1 - scrollFactor * 0.85);
-    ctx.globalAlpha = alpha;
 
     for (const p of this.particles) {
       const px = p.currentCol * this.cellW;
@@ -482,36 +393,6 @@ export class AsciiCanvasEngine {
         ctx.fillText(char, px, py);
       }
     }
-
-    ctx.globalAlpha = 1.0;
-
-    ctx.strokeStyle = "rgba(0, 0, 0, 0.12)";
-    ctx.lineWidth = 1;
-    const cornerSize = 10;
-
-    ctx.beginPath();
-    ctx.moveTo(10, 10 + cornerSize);
-    ctx.lineTo(10, 10);
-    ctx.lineTo(10 + cornerSize, 10);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(canvasCssW - 10 - cornerSize, 10);
-    ctx.lineTo(canvasCssW - 10, 10);
-    ctx.lineTo(canvasCssW - 10, 10 + cornerSize);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(10, canvasCssH - 10 - cornerSize);
-    ctx.lineTo(10, canvasCssH - 10);
-    ctx.lineTo(10 + cornerSize, canvasCssH - 10);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(canvasCssW - 10 - cornerSize, canvasCssH - 10);
-    ctx.lineTo(canvasCssW - 10, canvasCssH - 10);
-    ctx.lineTo(canvasCssW - 10, canvasCssH - 10 - cornerSize);
-    ctx.stroke();
   }
 
   destroy(): void {

@@ -1,120 +1,43 @@
 ---
-// PageOne.astro - Page 01: The Kinetic ASCII Monument & Horizontal Unfold
+// PageOne.astro - The Kinetic ASCII Sculpture & Web3 Terminal Focus
 ---
 
-<section id="page-1" class="min-h-[calc(100vh-3rem)] flex flex-col justify-between py-6 sm:py-8 border-b border-black/8">
+<div class="w-full flex flex-col items-center justify-center my-auto py-2 sm:py-6 select-none">
   
-  <!-- Technical Line: Coordinates & Protocol Status -->
-  <div class="flex items-center justify-between border-b border-black/10 pb-2 text-[11px] font-mono text-neutral-500">
-    <div class="flex items-center gap-2">
-      <span class="text-emerald-600">■</span>
-      <span class="tracking-wider uppercase text-neutral-900 font-medium">[ 01 // HORIZONTAL UNFOLD ]</span>
-    </div>
-    <div class="flex items-center gap-3 text-neutral-400">
-      <span class="hidden sm:inline">COORDINATE: 00..76</span>
-      <span>READY</span>
-    </div>
+  <!-- The Real-Time Kinetic ASCII Canvas (Borderless, Floating) -->
+  <div class="relative w-full max-w-[880px] h-[280px] sm:h-[360px] md:h-[400px] cursor-crosshair overflow-hidden">
+    <canvas
+      id="qntx-ascii-canvas"
+      class="w-full h-full block"
+      aria-label="Interactive QNTX ASCII horizontal unfolding animation"
+    ></canvas>
   </div>
 
-  <!-- Centerpiece: Kinetic ASCII Sculpture & Unfolding Controls -->
-  <div class="my-auto py-3 sm:py-5 space-y-4 sm:space-y-6">
-    
-    <!-- Stage Box -->
-    <div class="border border-black/12 bg-white shadow-2xs relative">
-      
-      <!-- Stage Top Bar: Controls -->
-      <div class="flex items-center justify-between border-b border-black/8 px-3.5 py-2 text-[11px] font-mono text-neutral-500">
-        <div class="flex items-center gap-2">
-          <span class="text-neutral-400 select-none">STAGE:</span>
-          <span class="text-neutral-950 font-display">ASCII // HORIZON</span>
-          <span id="unfold-pct" class="text-emerald-700 ml-1 font-semibold">100%</span>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <label class="hidden sm:flex items-center gap-2 text-neutral-400">
-            <span class="select-none">EXPAND:</span>
-            <input
-              id="unfold-slider"
-              type="range"
-              min="0"
-              max="100"
-              value="100"
-              class="w-24 sm:w-32 accent-neutral-950 cursor-pointer h-1.5 bg-neutral-200"
-              aria-label="Horizontal expansion phase slider"
-            />
-          </label>
-
-          <button
-            id="unfold-replay-btn"
-            type="button"
-            class="px-2 py-0.5 border border-black/15 bg-neutral-50 hover:bg-neutral-900 hover:text-white transition-all cursor-pointer font-mono text-[10px] uppercase text-neutral-700"
-            title="Replay horizontal unfolding animation (or press Space)"
-          >
-            REPLAY ↺
-          </button>
-        </div>
-      </div>
-
-      <!-- The Real-Time Kinetic ASCII Canvas -->
-      <div class="relative w-full h-[280px] sm:h-[340px] md:h-[400px] bg-white cursor-crosshair overflow-hidden">
-        <canvas
-          id="qntx-ascii-canvas"
-          class="w-full h-full block"
-          aria-label="Interactive QNTX ASCII horizontal unfolding animation"
-        ></canvas>
-      </div>
-
-      <!-- Stage Bottom Coordinate Ruler -->
-      <div class="flex items-center justify-between border-t border-black/6 px-3.5 py-1.5 text-[10px] font-mono text-neutral-400">
-        <span>GRID: SQUARE_HALFTONE</span>
-        <span class="hidden sm:inline">GRAVITATIONAL_MOUSE_TRACKING</span>
-        <span>SYS // 2026</span>
-      </div>
-
-    </div>
-
-    <!-- Minimal Impact Statement -->
-    <div class="text-center space-y-1 pt-1">
-      <h1 class="font-display text-base sm:text-xl md:text-2xl text-neutral-950 uppercase tracking-widest font-normal">
-        Economic Layer for Autonomous AI Agents
-      </h1>
-      <p class="font-mono text-xs text-neutral-500 uppercase tracking-widest">
-        Compute. Coordinate. Settle.
-      </p>
-    </div>
-
-    <!-- Drop-in Quick Install Chip -->
-    <div class="flex justify-center pt-0.5">
-      <div class="inline-flex items-center gap-3 px-3 py-1.5 border border-black/15 bg-white shadow-2xs font-mono text-xs">
-        <span class="text-neutral-400 select-none">$</span>
-        <span id="cmd-text" class="text-neutral-900 font-medium select-all">bun add @qntx/core</span>
-        <button
-          id="copy-cmd-btn"
-          type="button"
-          class="ml-2 px-1.5 py-0.5 border border-black/20 text-[10px] text-neutral-700 hover:text-black hover:border-black transition-all cursor-pointer font-mono bg-neutral-50"
-          aria-label="Copy install command"
-        >
-          COPY
-        </button>
-      </div>
-    </div>
-
+  <!-- Bottom Slogan (Uppercase Monospace, Zero Extra Spacing Above) -->
+  <div class="text-center pt-2 sm:pt-4">
+    <h1 class="font-mono text-xs sm:text-sm tracking-[0.22em] text-neutral-950 uppercase font-medium">
+      Economic Layer for Autonomous AI Agents
+    </h1>
   </div>
 
-  <!-- Bottom Page Navigation Cue -->
-  <div class="pt-2 flex items-center justify-between font-mono text-[11px] text-neutral-400">
-    <div class="flex items-center gap-2">
-      <span class="text-neutral-950 font-medium">01</span>
-      <span class="text-neutral-300">──▪──</span>
-      <span>02</span>
-    </div>
-    <a
-      href="#page-2"
-      class="hover:text-black transition-colors flex items-center gap-1 text-neutral-700"
+  <!-- Terminal Style Code Snippet (Seamless, Borderless, No Button Box) -->
+  <div class="flex justify-center pt-2.5 sm:pt-3">
+    <div
+      id="cmd-container"
+      class="group cursor-pointer inline-flex items-center gap-2 text-xs font-mono text-neutral-500 hover:text-neutral-950 transition-colors"
+      title="Click to copy command"
+      role="button"
+      tabindex="0"
     >
-      <span>PRIMITIVES</span>
-      <span>↓</span>
-    </a>
+      <span class="text-neutral-400 select-none">$</span>
+      <span id="cmd-text" class="text-neutral-900 tracking-wider">bun add @quantx/core</span>
+      <span
+        id="cmd-feedback"
+        class="text-[10px] text-neutral-400 uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all select-none ml-0.5"
+      >
+        [copy]
+      </span>
+    </div>
   </div>
 
-</section>
+</div>
