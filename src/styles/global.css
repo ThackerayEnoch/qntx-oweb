@@ -8,22 +8,15 @@
   font-display: swap;
 }
 
-@font-face {
-  font-family: "Satoshi";
-  src: url("/fonts/Satoshi-400.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
 :root {
   --bg: #ffffff;
   --text: #09090b;
   --text-muted: #52525b;
   --text-faint: #a1a1aa;
   --emerald: #059669;
+  --font-pixel: "GeistPixel-Square", ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
   --font-display: "GeistPixel-Square", ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
-  --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --font-mono: "GeistPixel-Square", ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
 }
 
 *,
@@ -49,7 +42,7 @@ body {
   background-image: radial-gradient(rgba(0, 0, 0, 0.045) 1px, transparent 1px);
   background-size: 24px 24px;
   color: var(--text);
-  font-family: var(--font-mono);
+  font-family: var(--font-pixel);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;

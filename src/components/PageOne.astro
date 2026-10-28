@@ -1,11 +1,11 @@
 ---
-// PageOne.astro - The Kinetic ASCII Sculpture & Web3 Terminal Focus
+// PageOne.astro - The Kinetic ASCII Sculpture & Pure Web3 Slogan
 ---
 
-<div class="w-full flex flex-col items-center justify-center my-auto py-2 sm:py-6 select-none">
+<div class="w-full flex flex-col items-center justify-center my-auto py-4 sm:py-8 select-none">
   
   <!-- The Real-Time Kinetic ASCII Canvas (Borderless, Floating) -->
-  <div class="relative w-full max-w-[880px] h-[280px] sm:h-[360px] md:h-[400px] cursor-crosshair overflow-hidden">
+  <div class="relative w-full max-w-[920px] h-[300px] sm:h-[380px] md:h-[440px] cursor-crosshair overflow-hidden">
     <canvas
       id="qntx-ascii-canvas"
       class="w-full h-full block"
@@ -13,44 +13,23 @@
     ></canvas>
   </div>
 
-  <!-- Bottom Slogan (Uppercase Monospace, Zero Extra Spacing Above) -->
-  <div class="text-center pt-2 sm:pt-4">
-    <h1 class="font-mono text-xs sm:text-sm tracking-[0.22em] text-neutral-950 uppercase font-medium">
+  <!-- Bottom Slogan (Restrained, Generous Negative Space, Pure Typography) -->
+  <div class="text-center pt-3 sm:pt-6 space-y-3 sm:space-y-4">
+    <h1 class="text-xs sm:text-sm md:text-base tracking-[0.25em] text-neutral-950 uppercase font-normal select-none">
       Economic Layer for Autonomous AI Agents
     </h1>
-  </div>
 
-  <!-- Actions: Terminal Style Code Snippet & Get Started -->
-  <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 pt-3 sm:pt-4 text-xs font-mono">
-    <div
-      id="cmd-container"
-      class="group cursor-pointer inline-flex items-center gap-2 text-neutral-500 hover:text-neutral-950 transition-colors"
-      title="Click to copy command"
-      role="button"
-      tabindex="0"
-    >
-      <span class="text-neutral-400 select-none">$</span>
-      <span id="cmd-text" class="text-neutral-900 tracking-wider">bun add @quantx/core</span>
-      <span
-        id="cmd-feedback"
-        class="text-[10px] text-neutral-400 uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all select-none ml-0.5"
+    <div class="pt-1">
+      <a
+        href="https://docs.qntx.org"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-xs sm:text-sm text-neutral-400 hover:text-neutral-950 tracking-[0.2em] uppercase transition-colors inline-flex items-center gap-1.5"
+        aria-label="Get Started with QuantX"
       >
-        [copy]
-      </span>
+        <span>[ GET STARTED ]</span>
+      </a>
     </div>
-
-    <span class="hidden sm:inline text-neutral-300 select-none">/</span>
-
-    <a
-      href="https://github.com/qntx"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="text-neutral-900 hover:text-black transition-colors tracking-wider inline-flex items-center gap-1 font-medium"
-      aria-label="Get Started with QuantX"
-    >
-      <span>GET STARTED</span>
-      <span class="text-neutral-400">→</span>
-    </a>
   </div>
 
 </div>
