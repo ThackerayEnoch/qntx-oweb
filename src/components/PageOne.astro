@@ -20,11 +20,11 @@
     </h1>
   </div>
 
-  <!-- Terminal Style Code Snippet (Seamless, Borderless, No Button Box) -->
-  <div class="flex justify-center pt-2.5 sm:pt-3">
+  <!-- Actions: Terminal Style Code Snippet & Get Started -->
+  <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 pt-3 sm:pt-4 text-xs font-mono">
     <div
       id="cmd-container"
-      class="group cursor-pointer inline-flex items-center gap-2 text-xs font-mono text-neutral-500 hover:text-neutral-950 transition-colors"
+      class="group cursor-pointer inline-flex items-center gap-2 text-neutral-500 hover:text-neutral-950 transition-colors"
       title="Click to copy command"
       role="button"
       tabindex="0"
@@ -38,6 +38,19 @@
         [copy]
       </span>
     </div>
+
+    <span class="hidden sm:inline text-neutral-300 select-none">/</span>
+
+    <a
+      href="https://github.com/qntx"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="text-neutral-900 hover:text-black transition-colors tracking-wider inline-flex items-center gap-1 font-medium"
+      aria-label="Get Started with QuantX"
+    >
+      <span>GET STARTED</span>
+      <span class="text-neutral-400">→</span>
+    </a>
   </div>
 
 </div>
