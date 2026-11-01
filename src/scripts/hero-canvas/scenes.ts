@@ -1,10 +1,10 @@
 /**
  * QuantX Hero Canvas Scene Generator
  *
- * Implements the 3-scene narrative: EARN -> PAY -> SCALE -> QNTX Hold.
+ * Implements the 3-scene narrative: EARN -> PAY -> SCALE -> QuantX Hold.
  *
  * Strict black & white, ASCII squares matrix, linear whole-cell movement. Symmetrically centered
- * across the wide canvas in all scenes.
+ * with wide spacing across the canvas in all scenes.
  */
 
 import { CANVAS_CONFIG } from "./config";
@@ -24,15 +24,15 @@ import {
 } from "./sprites";
 import type { SceneFrame, TargetCell } from "./types";
 
-/** Generates 16 symmetrically centered crowd coordinates around (midCol, midRow) */
+/** Generates 16 widely and symmetrically spaced crowd coordinates around (midCol, midRow) */
 function getSymmetricalCrowdCoords(
   midCol: number,
   midRow: number,
   isMobile: boolean,
 ): ReadonlyArray<{ col: number; row: number }> {
-  // Column offsets for alternating rows, symmetrical about midCol
-  const evenOffsets = isMobile ? [-24, -8, 8, 24] : [-33, -11, 11, 33];
-  const oddOffsets = isMobile ? [-18, -4, 4, 18] : [-22, -6, 6, 22];
+  // Column offsets for alternating rows, stretched wide to fill canvas
+  const evenOffsets = isMobile ? [-25, -8, 8, 25] : [-38, -13, 13, 38];
+  const oddOffsets = isMobile ? [-18, -5, 5, 18] : [-26, -7, 7, 26];
 
   // Row offsets, symmetrical about midRow
   const rowOffsets = isMobile ? [-9, -3, 3, 9] : [-12, -4, 4, 12];
@@ -64,7 +64,7 @@ const COIN_FLIGHT_PAIRS = [
   { from: 15, to: 11, phase: 350 },
 ] as const;
 
-/** QNTX Wordmark Frame (Intro / Outro Hold) */
+/** QuantX Wordmark Frame (Intro / Outro Hold) */
 export function getQntxFrame(
   cols: number,
   rows: number,
@@ -72,8 +72,8 @@ export function getQntxFrame(
   isIntro = false,
 ): SceneFrame {
   const isMobile = cols < CANVAS_CONFIG.mobile.breakpoint;
-  const text = "QNTX";
-  const scale = isMobile ? 2 : 3;
+  const text = "QuantX";
+  const scale = isMobile ? 1 : 2;
   const width = getTextWidth(text, scale, 1);
   const height = 7 * scale;
   const startCol = Math.floor((cols - width) / 2);
@@ -96,16 +96,16 @@ export function getQntxFrame(
 
   const cells: TargetCell[] = [];
 
-  // Letters Q, N, T
-  const qntCells = textToCells("QNT", startCol, startRow, scale, "filled", 1);
-  for (const c of qntCells) {
+  // Letters Q, u, a, n, t
+  const quantCells = textToCells("Quant", startCol, startRow, scale, "filled", 1);
+  for (const c of quantCells) {
     if (c.col <= maxColAllowed) {
       cells.push(c);
     }
   }
 
   // Letter X with possible invert flash
-  const xCol = startCol + getTextWidth("QNT", scale, 1) + scale;
+  const xCol = startCol + getTextWidth("Quant", scale, 1) + scale;
   const xCells = textToCells("X", xCol, startRow, scale, xInverted ? "inverted" : "filled", 1);
   for (const c of xCells) {
     if (c.col <= maxColAllowed) {
@@ -116,7 +116,7 @@ export function getQntxFrame(
   return { cells };
 }
 
-/** SCENE 1: EARN (4s) - Two agents bookending the canvas symmetrically */
+/** SCENE 1: EARN (4s) - Two agents widely spaced across the wide canvas */
 export function getScene1EarnFrame(cols: number, rows: number, elapsed: number): SceneFrame {
   const cells: TargetCell[] = [];
   const isMobile = cols < CANVAS_CONFIG.mobile.breakpoint;
@@ -125,14 +125,14 @@ export function getScene1EarnFrame(cols: number, rows: number, elapsed: number):
   const midRow = Math.floor(rows / 2);
   const agentRow = midRow - 4;
 
-  // Space agents widely and symmetrically to balance the wide canvas
-  const spacing = isMobile ? 20 : 30;
+  // Space agents even further apart across the wide canvas
+  const spacing = isMobile ? 22 : 36;
   const leftCol = midCol - spacing - 3;
   const rightCol = midCol + spacing - 3;
   const pileCol = leftCol + 8;
   const pileRow = agentRow + 2;
 
-  // 1. Right Agent (Client) - Stays visible throughout to maintain balance
+  // 1. Right Agent (Client) - Stays visible throughout to keep perfect balance
   cells.push(...spriteToCells(SPRITE_AGENT, rightCol, agentRow, "filled", 1.0));
 
   // 2. Speech bubble travels from right agent to the EXACT CENTER between them
@@ -180,7 +180,7 @@ export function getScene1EarnFrame(cols: number, rows: number, elapsed: number):
   return { cells };
 }
 
-/** SCENE 2: PAY (4.5s) - Symmetrically balanced with result centered */
+/** SCENE 2: PAY (4.5s) - Widely spaced with result centered in the middle */
 export function getScene2PayFrame(cols: number, rows: number, elapsed: number): SceneFrame {
   const cells: TargetCell[] = [];
   const isMobile = cols < CANVAS_CONFIG.mobile.breakpoint;
@@ -189,7 +189,7 @@ export function getScene2PayFrame(cols: number, rows: number, elapsed: number): 
   const midRow = Math.floor(rows / 2);
   const agentRow = midRow - 4;
 
-  const spacing = isMobile ? 20 : 30;
+  const spacing = isMobile ? 22 : 36;
   const leftCol = midCol - spacing - 3;
   const rightCol = midCol + spacing - 3;
   const pileCol = leftCol + 8;
@@ -205,7 +205,7 @@ export function getScene2PayFrame(cols: number, rows: number, elapsed: number): 
   // Coin pile: starts with 3, shrinks to 2 after payment
   let pileCount = 3;
 
-  // Sub-step 1: Coin flies from Left Agent to Right Agent (800ms - 1900ms)
+  // Sub-step 1: Coin flies from Left Agent across the wide span to Right Agent (800ms - 1900ms)
   if (elapsed >= 800 && elapsed < 1900) {
     pileCount = 2;
     const t = (elapsed - 800) / 1100;
@@ -244,7 +244,7 @@ export function getScene2PayFrame(cols: number, rows: number, elapsed: number): 
   return { cells };
 }
 
-/** SCENE 3: SCALE (4s) - Symmetrically expands from canvas center */
+/** SCENE 3: SCALE (4s) - Widely expands from canvas center across full width */
 export function getScene3ScaleFrame(cols: number, rows: number, elapsed: number): SceneFrame {
   const cells: TargetCell[] = [];
   const isMobile = cols < CANVAS_CONFIG.mobile.breakpoint;
@@ -261,8 +261,8 @@ export function getScene3ScaleFrame(cols: number, rows: number, elapsed: number)
       // 1 mini agent at the exact center
       cells.push(...spriteToCells(SPRITE_MINI_AGENT, midCol - 2, midRow - 2, "filled", 1.0));
     } else if (elapsed < 800) {
-      // 2 mini agents symmetrical around center
-      const offset = isMobile ? 14 : 20;
+      // 2 mini agents widely spaced symmetrical around center
+      const offset = isMobile ? 18 : 26;
       cells.push(
         ...spriteToCells(SPRITE_MINI_AGENT, midCol - offset - 2, midRow - 2, "filled", 1.0),
       );
@@ -270,8 +270,8 @@ export function getScene3ScaleFrame(cols: number, rows: number, elapsed: number)
         ...spriteToCells(SPRITE_MINI_AGENT, midCol + offset - 2, midRow - 2, "filled", 1.0),
       );
     } else if (elapsed < 1200) {
-      // 4 mini agents in a centered 2x2 grid
-      const offX = isMobile ? 16 : 22;
+      // 4 mini agents in a widely spaced centered 2x2 grid
+      const offX = isMobile ? 20 : 28;
       const offY = isMobile ? 5 : 7;
       cells.push(
         ...spriteToCells(SPRITE_MINI_AGENT, midCol - offX - 2, midRow - offY - 2, "filled", 1.0),
@@ -286,8 +286,8 @@ export function getScene3ScaleFrame(cols: number, rows: number, elapsed: number)
         ...spriteToCells(SPRITE_MINI_AGENT, midCol + offX - 2, midRow + offY - 2, "filled", 1.0),
       );
     } else if (elapsed < 1600) {
-      // 8 mini agents symmetrically positioned
-      const indices = [1, 2, 4, 7, 8, 11, 13, 14];
+      // 8 mini agents widely positioned
+      const indices = [0, 3, 5, 6, 9, 10, 12, 15];
       for (const idx of indices) {
         const pos = crowdCoords[idx];
         if (pos !== undefined) {
@@ -295,7 +295,7 @@ export function getScene3ScaleFrame(cols: number, rows: number, elapsed: number)
         }
       }
     } else {
-      // All 16 mini agents active
+      // All 16 mini agents active across wide grid
       for (const pos of crowdCoords) {
         cells.push(...spriteToCells(SPRITE_MINI_AGENT, pos.col, pos.row, "filled", 1.0));
       }
@@ -322,7 +322,7 @@ export function getScene3ScaleFrame(cols: number, rows: number, elapsed: number)
     return { cells };
   }
 
-  // Sub-step 3: All agents and coins flow straight into the QNTX wordmark (3100ms - 4000ms)
+  // Sub-step 3: All agents and coins flow straight into the QuantX wordmark (3100ms - 4000ms)
   const qntxFrame = getQntxFrame(cols, rows, elapsed - 3100, false);
   const qntxTargets = qntxFrame.cells;
 
@@ -344,11 +344,11 @@ export function getScene3ScaleFrame(cols: number, rows: number, elapsed: number)
     return { cells };
   }
 
-  // 3800ms - 4000ms: QNTX wordmark fully assembled, letter X double flash
+  // 3800ms - 4000ms: QuantX wordmark fully assembled, letter X double flash
   return qntxFrame;
 }
 
-/** End state of PAY (used for prefers-reduced-motion) - Centered balance */
+/** End state of PAY (used for prefers-reduced-motion) - Wide centered balance */
 export function getReducedMotionPayFrame(cols: number, rows: number): SceneFrame {
   const cells: TargetCell[] = [];
   const isMobile = cols < CANVAS_CONFIG.mobile.breakpoint;
@@ -357,7 +357,7 @@ export function getReducedMotionPayFrame(cols: number, rows: number): SceneFrame
   const midRow = Math.floor(rows / 2);
   const agentRow = midRow - 4;
 
-  const spacing = isMobile ? 20 : 30;
+  const spacing = isMobile ? 22 : 36;
   const leftCol = midCol - spacing - 3;
   const rightCol = midCol + spacing - 3;
   const pileCol = leftCol + 8;
