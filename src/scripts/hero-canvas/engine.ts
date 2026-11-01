@@ -42,6 +42,7 @@ export class HeroCanvasEngine {
 
   // Observers & Listeners
   private intersectionObserver?: IntersectionObserver;
+  private resizeObserver?: ResizeObserver;
   private resizeDebounceTimer?: number;
 
   constructor(canvas: HTMLCanvasElement, onSceneChange?: (scene: SceneIndex) => void) {
@@ -220,6 +221,13 @@ export class HeroCanvasEngine {
         { threshold: 0.1 },
       );
       this.intersectionObserver.observe(this.canvas);
+    }
+
+    if (typeof ResizeObserver !== "undefined") {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.initGrid();
+      });
+      this.resizeObserver.observe(this.canvas);
     }
   }
 
@@ -460,6 +468,9 @@ export class HeroCanvasEngine {
 
     if (this.intersectionObserver !== undefined) {
       this.intersectionObserver.disconnect();
+    }
+    if (this.resizeObserver !== undefined) {
+      this.resizeObserver.disconnect();
     }
   }
 }
