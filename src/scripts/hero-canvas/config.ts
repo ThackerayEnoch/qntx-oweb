@@ -24,7 +24,7 @@ export const CANVAS_CONFIG = {
   tickRate: 30, // 30 ticks/second for mechanical whole-cell movement
 
   // Micro caption toggle: display "X402" under the payment coin in Scene 2
-  SHOW_X402_LABEL: false,
+  SHOW_X402_LABEL: true,
 
   // Scene timings in milliseconds (~16.5s total loop)
   timings: {

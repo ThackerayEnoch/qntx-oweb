@@ -39,6 +39,7 @@ export class HeroCanvasEngine {
   private reducedMotionTimer = 0;
   private reducedMotionFrame: "QNTX" | "PAY" = "QNTX";
   private reducedMotionOpacity = 1.0;
+  private wasTransitioning = false;
 
   // Observers & Listeners
   private intersectionObserver?: IntersectionObserver;
@@ -85,11 +86,9 @@ export class HeroCanvasEngine {
     const btn = document.getElementById(CANVAS_CONFIG.getStartedBtnId);
     if (btn !== null) {
       if (flashing) {
-        btn.classList.add("bg-black", "text-white");
-        btn.classList.remove("bg-white/80", "text-neutral-800");
+        btn.classList.add("!bg-black", "!text-white");
       } else {
-        btn.classList.remove("bg-black", "text-white");
-        btn.classList.add("bg-white/80", "text-neutral-800");
+        btn.classList.remove("!bg-black", "!text-white");
       }
     }
   }
@@ -286,11 +285,6 @@ export class HeroCanvasEngine {
     }
   }
 
-  private applyState(state: TimelineState, isNewScene = false): void {
-    const frame = this.getFrameForState(state);
-    this.setTargets(frame.cells, isNewScene);
-  }
-
   private readonly tick = (timestamp: number): void => {
     const deltaMs = Math.min(100, timestamp - this.lastTime);
     this.lastTime = timestamp;
@@ -355,24 +349,57 @@ export class HeroCanvasEngine {
   }
 
   private update(deltaMs: number): void {
-    const prevScene = this.timeline.getScene();
     const state = this.timeline.update(deltaMs);
-    const isNewScene = prevScene !== state.currentScene;
 
-    this.applyState(state, isNewScene);
+    if (state.isTransitioning) {
+      if (!this.wasTransitioning) {
+        this.wasTransitioning = true;
 
-    // Mechanical uniform movement: whole-cell step progression
-    const transDuration = CANVAS_CONFIG.timings.transition;
+        // Snapshot origin coordinates and assign random stagger delays
+        for (const p of this.particles) {
+          p.fromCol = p.col;
+          p.fromRow = p.row;
+          p.fromScale = p.scale;
+          p.delay = Math.random() * CANVAS_CONFIG.timings.maxStaggerDelay;
+        }
 
-    for (const p of this.particles) {
-      if (!p.active && p.scale <= 0.01) {
-        continue;
+        // Fetch targets for the new scene
+        const targetFrame = this.getFrameForState(state);
+        const targetCount = targetFrame.cells.length;
+        const poolSize = this.particles.length;
+
+        for (let i = 0; i < poolSize; i++) {
+          const p = this.particles[i];
+          if (p === undefined) {
+            continue;
+          }
+
+          if (i < targetCount) {
+            const t = targetFrame.cells[i];
+            if (t !== undefined) {
+              p.targetCol = t.col;
+              p.targetRow = t.row;
+              p.targetState = t.state ?? "filled";
+              p.targetScale = t.scale ?? 1.0;
+              p.active = true;
+            }
+          } else {
+            p.targetScale = 0;
+            p.active = false;
+          }
+        }
       }
 
-      if (state.isTransitioning) {
-        const transElapsed = state.transitionProgress * transDuration;
+      // Staggered dissolve-and-regather transition progression
+      const transDuration = CANVAS_CONFIG.timings.transition;
+      const transElapsed = state.transitionProgress * transDuration;
+
+      for (const p of this.particles) {
+        if (!p.active && p.scale <= 0.01 && p.fromScale <= 0.01) {
+          continue;
+        }
+
         if (transElapsed < p.delay) {
-          // Stagger hold at origin
           p.col = p.fromCol;
           p.row = p.fromRow;
           p.scale = p.fromScale;
@@ -380,7 +407,6 @@ export class HeroCanvasEngine {
           const effectiveDuration = Math.max(50, transDuration - p.delay);
           const t = Math.min(1, (transElapsed - p.delay) / effectiveDuration);
 
-          // Strictly linear movement, rounded to whole cell integer
           p.col = Math.round(p.fromCol + (p.targetCol - p.fromCol) * t);
           p.row = Math.round(p.fromRow + (p.targetRow - p.fromRow) * t);
           p.scale = p.fromScale + (p.targetScale - p.fromScale) * t;
@@ -389,12 +415,34 @@ export class HeroCanvasEngine {
             p.state = p.targetState;
           }
         }
-      } else {
-        // Holding / dynamic in-scene step: strictly snapped to targets
-        p.col = p.targetCol;
-        p.row = p.targetRow;
-        p.scale = p.targetScale;
-        p.state = p.targetState;
+      }
+    } else {
+      this.wasTransitioning = false;
+
+      // Normal in-scene playback
+      const frame = this.getFrameForState(state);
+      const targetCount = frame.cells.length;
+      const poolSize = this.particles.length;
+
+      for (let i = 0; i < poolSize; i++) {
+        const p = this.particles[i];
+        if (p === undefined) {
+          continue;
+        }
+
+        if (i < targetCount) {
+          const t = frame.cells[i];
+          if (t !== undefined) {
+            p.col = t.col;
+            p.row = t.row;
+            p.scale = t.scale ?? 1.0;
+            p.state = t.state ?? "filled";
+            p.active = true;
+          }
+        } else {
+          p.scale = 0;
+          p.active = false;
+        }
       }
     }
   }
