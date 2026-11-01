@@ -31,8 +31,8 @@ function getSymmetricalCrowdCoords(
   isMobile: boolean,
 ): ReadonlyArray<{ col: number; row: number }> {
   // Column offsets for alternating rows, stretched wide to fill canvas
-  const evenOffsets = isMobile ? [-25, -8, 8, 25] : [-38, -13, 13, 38];
-  const oddOffsets = isMobile ? [-18, -5, 5, 18] : [-26, -7, 7, 26];
+  const evenOffsets = isMobile ? [-27, -9, 9, 27] : [-42, -14, 14, 42];
+  const oddOffsets = isMobile ? [-18, -6, 6, 18] : [-28, -9, 9, 28];
 
   // Row offsets, symmetrical about midRow
   const rowOffsets = isMobile ? [-9, -3, 3, 9] : [-12, -4, 4, 12];
@@ -125,10 +125,9 @@ export function getScene1EarnFrame(cols: number, rows: number, elapsed: number):
   const midRow = Math.floor(rows / 2);
   const agentRow = midRow - 4;
 
-  // Space agents even further apart across the wide canvas
-  const spacing = isMobile ? 22 : 36;
-  const leftCol = midCol - spacing - 3;
-  const rightCol = midCol + spacing - 3;
+  // Space agents near the outer canvas margins
+  const leftCol = isMobile ? 2 : 4;
+  const rightCol = isMobile ? cols - 9 : cols - 11;
   const pileCol = leftCol + 8;
   const pileRow = agentRow + 2;
 
@@ -145,7 +144,6 @@ export function getScene1EarnFrame(cols: number, rows: number, elapsed: number):
 
   cells.push(...spriteToCells(SPRITE_SPEECH_BUBBLE, bubbleCol, bubbleRow, "filled", 1.0));
   cells.push(...spriteToCells(SPRITE_TRANSLATE_ICON, bubbleCol + 2, bubbleRow + 2, "filled", 1.0));
-  cells.push(...microTextToCells("TRANSLATE", bubbleCol - 7, bubbleRow + 9, 1, "filled", 1));
 
   // 3. Left Agent (Earner): Blinks at 2000ms - 2200ms
   const isBlinking = elapsed >= 2000 && elapsed <= 2200;
@@ -189,9 +187,8 @@ export function getScene2PayFrame(cols: number, rows: number, elapsed: number): 
   const midRow = Math.floor(rows / 2);
   const agentRow = midRow - 4;
 
-  const spacing = isMobile ? 22 : 36;
-  const leftCol = midCol - spacing - 3;
-  const rightCol = midCol + spacing - 3;
+  const leftCol = isMobile ? 2 : 4;
+  const rightCol = isMobile ? cols - 9 : cols - 11;
   const pileCol = leftCol + 8;
   const pileRow = agentRow + 2;
 
@@ -223,7 +220,8 @@ export function getScene2PayFrame(cols: number, rows: number, elapsed: number): 
   cells.push(...createCoinPile(pileCol, pileRow, pileCount));
 
   // Sub-step 2: Right agent sends back picture sprite to the CENTER (2100ms - 3200ms)
-  const targetPicCol = midCol - 4;
+  // Centered 14-col unit (7w drawing + 2 gap + 5w checkmark) at midCol
+  const targetPicCol = midCol - 7;
   const targetPicRow = agentRow - 7;
 
   if (elapsed >= 2100 && elapsed < 3200) {
@@ -262,7 +260,7 @@ export function getScene3ScaleFrame(cols: number, rows: number, elapsed: number)
       cells.push(...spriteToCells(SPRITE_MINI_AGENT, midCol - 2, midRow - 2, "filled", 1.0));
     } else if (elapsed < 800) {
       // 2 mini agents widely spaced symmetrical around center
-      const offset = isMobile ? 18 : 26;
+      const offset = isMobile ? 22 : 38;
       cells.push(
         ...spriteToCells(SPRITE_MINI_AGENT, midCol - offset - 2, midRow - 2, "filled", 1.0),
       );
@@ -271,8 +269,8 @@ export function getScene3ScaleFrame(cols: number, rows: number, elapsed: number)
       );
     } else if (elapsed < 1200) {
       // 4 mini agents in a widely spaced centered 2x2 grid
-      const offX = isMobile ? 20 : 28;
-      const offY = isMobile ? 5 : 7;
+      const offX = isMobile ? 24 : 38;
+      const offY = isMobile ? 6 : 8;
       cells.push(
         ...spriteToCells(SPRITE_MINI_AGENT, midCol - offX - 2, midRow - offY - 2, "filled", 1.0),
       );
@@ -357,9 +355,8 @@ export function getReducedMotionPayFrame(cols: number, rows: number): SceneFrame
   const midRow = Math.floor(rows / 2);
   const agentRow = midRow - 4;
 
-  const spacing = isMobile ? 22 : 36;
-  const leftCol = midCol - spacing - 3;
-  const rightCol = midCol + spacing - 3;
+  const leftCol = isMobile ? 2 : 4;
+  const rightCol = isMobile ? cols - 9 : cols - 11;
   const pileCol = leftCol + 8;
   const pileRow = agentRow + 2;
 
@@ -371,7 +368,7 @@ export function getReducedMotionPayFrame(cols: number, rows: number): SceneFrame
   cells.push(...spriteToCells(SPRITE_AGENT, rightCol, agentRow, "filled", 1.0));
 
   // Picture and check mark centered between the two agents
-  const targetPicCol = midCol - 4;
+  const targetPicCol = midCol - 7;
   const targetPicRow = agentRow - 7;
   cells.push(...spriteToCells(SPRITE_DRAW_ICON, targetPicCol, targetPicRow, "filled", 1.0));
   cells.push(

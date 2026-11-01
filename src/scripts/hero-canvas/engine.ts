@@ -42,6 +42,7 @@ export class HeroCanvasEngine {
 
   // Observers & Listeners
   private intersectionObserver?: IntersectionObserver;
+  private resizeObserver?: ResizeObserver;
   private resizeDebounceTimer?: number;
 
   constructor(canvas: HTMLCanvasElement, onSceneChange?: (scene: SceneIndex) => void) {
@@ -105,22 +106,18 @@ export class HeroCanvasEngine {
     // Responsive grid column/row limits
     const isMobile = cssW < CANVAS_CONFIG.mobile.breakpoint;
     this.cols = isMobile ? CANVAS_CONFIG.mobile.cols : CANVAS_CONFIG.desktop.cols;
-    this.rows = isMobile ? CANVAS_CONFIG.mobile.rows : CANVAS_CONFIG.desktop.rows;
 
     const { gap } = CANVAS_CONFIG;
     const availableW = cssW - 16;
     const availableH = cssH - 16;
 
-    // Compute maximum integer cell size that fits
-    this.cellSize = Math.max(
-      3,
-      Math.floor(
-        Math.min(
-          (availableW - (this.cols - 1) * gap) / this.cols,
-          (availableH - (this.rows - 1) * gap) / this.rows,
-        ),
-      ),
-    );
+    // Cell size driven by available width to fill canvas horizontally
+    const wCell = Math.floor((availableW - (this.cols - 1) * gap) / this.cols);
+    const hCell = Math.floor((availableH - (20 - 1) * gap) / 20);
+    this.cellSize = Math.max(3, Math.min(wCell, hCell));
+
+    // Dynamic row count to cleanly fill vertical space
+    this.rows = Math.max(20, Math.floor((availableH + gap) / (this.cellSize + gap)));
 
     const gridW = this.cols * this.cellSize + (this.cols - 1) * gap;
     const gridH = this.rows * this.cellSize + (this.rows - 1) * gap;
@@ -220,6 +217,13 @@ export class HeroCanvasEngine {
         { threshold: 0.1 },
       );
       this.intersectionObserver.observe(this.canvas);
+    }
+
+    if (typeof ResizeObserver !== "undefined") {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.initGrid();
+      });
+      this.resizeObserver.observe(this.canvas);
     }
   }
 
@@ -460,6 +464,9 @@ export class HeroCanvasEngine {
 
     if (this.intersectionObserver !== undefined) {
       this.intersectionObserver.disconnect();
+    }
+    if (this.resizeObserver !== undefined) {
+      this.resizeObserver.disconnect();
     }
   }
 }
