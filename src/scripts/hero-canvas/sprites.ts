@@ -7,25 +7,48 @@
 
 import type { CellState, SpriteData, TargetCell } from "./types";
 
-/** Agent (7x7) with eyes at column 1 and 5 */
+/** Agent (7x7) with antenna head pixel and little hands on row 4 */
 export const SPRITE_AGENT: SpriteData = {
   width: 7,
   height: 7,
-  rows: ["...#...", "#######", "#.###.#", "#######", "#######", "#######", "##...##"],
+  rows: [
+    "...#...", // antenna
+    ".#####.", // head top
+    "#.###.#", // eyes at col 1 & 5
+    ".#####.", // jaw / neck
+    "###.###", // little hands at col 0 & 6! body at 1..5
+    ".#####.", // torso
+    "##...##", // feet
+  ],
 };
 
 /** Agent (7x7) in blinking state (eyes filled) */
 export const SPRITE_AGENT_BLINK: SpriteData = {
   width: 7,
   height: 7,
-  rows: ["...#...", "#######", "#######", "#######", "#######", "#######", "##...##"],
+  rows: [
+    "...#...",
+    ".#####.",
+    "#######", // blink: eyes filled
+    ".#####.",
+    "###.###", // little hands
+    ".#####.",
+    "##...##",
+  ],
 };
 
-/** Mini Agent (5x5) for the crowd scene */
+/** Mini Agent (5x6) with head antenna pixel, eyes, little hands, and feet */
 export const SPRITE_MINI_AGENT: SpriteData = {
   width: 5,
-  height: 5,
-  rows: ["#####", "#.#.#", "#####", "#####", "#...#"],
+  height: 6,
+  rows: [
+    "..#..", // head antenna pixel
+    ".###.", // head top
+    ".#.#.", // eyes at col 1 & 3
+    "#####", // little hands at col 0 & 4! body at 1..3
+    ".###.", // torso
+    ".#.#.", // feet at col 1 & 3
+  ],
 };
 
 /** Coin (5x5) */
@@ -33,13 +56,6 @@ export const SPRITE_COIN: SpriteData = {
   width: 5,
   height: 5,
   rows: [".###.", "#...#", "#.#.#", "#...#", ".###."],
-};
-
-/** Moon (5x6) */
-export const SPRITE_MOON: SpriteData = {
-  width: 5,
-  height: 6,
-  rows: [".###.", "##...", "#....", "#....", "##...", ".###."],
 };
 
 /** Speech Bubble (11x8) with 2-cell tail pointing down-left */

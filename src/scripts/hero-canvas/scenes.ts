@@ -24,17 +24,19 @@ import {
 } from "./sprites";
 import type { SceneFrame, TargetCell } from "./types";
 
-/** 6 neighbor pairs for busy market coins in Scene 3 (SCALE) */
+/** Neighbor pairs for busy market coins in Scene 3 (SCALE) */
 const COIN_FLIGHT_PAIRS = [
-  { from: 0, to: 4, phase: 0 },
-  { from: 3, to: 7, phase: 150 },
-  { from: 5, to: 6, phase: 300 },
-  { from: 12, to: 8, phase: 450 },
-  { from: 15, to: 11, phase: 200 },
-  { from: 9, to: 10, phase: 350 },
+  { from: 0, to: 8, phase: 0 },
+  { from: 7, to: 14, phase: 150 },
+  { from: 3, to: 4, phase: 300 },
+  { from: 11, to: 12, phase: 450 },
+  { from: 18, to: 19, phase: 200 },
+  { from: 22, to: 29, phase: 350 },
+  { from: 25, to: 26, phase: 100 },
+  { from: 1, to: 9, phase: 250 },
 ] as const;
 
-/** Computes 16 staggered coordinates mathematically centered across the canvas */
+/** Computes 30 staggered coordinates mathematically centered across the canvas */
 function getCrowdCoords(cols: number, rows: number): TargetCell[] {
   const midCol = Math.floor(cols / 2);
   const midRow = Math.floor(rows / 2);
@@ -44,39 +46,48 @@ function getCrowdCoords(cols: number, rows: number): TargetCell[] {
     ? [midRow - 12, midRow - 4, midRow + 4, midRow + 12]
     : [midRow - 14, midRow - 5, midRow + 4, midRow + 13];
 
-  const outerOffset = isMobile ? 24 : 38;
-  const innerOffset = isMobile ? 8 : 14;
-  const stagOuter = isMobile ? 16 : 26;
-  const stagInner = isMobile ? 1 : 6;
+  if (isMobile) {
+    // 16 agents on mobile to maintain clean integer spacing
+    const outer = 24;
+    const inner = 8;
+    const stagOuter = 16;
+    const stagInner = 1;
 
-  // Row 0 (4 agents, wide)
-  const r0 = [
-    { col: midCol - outerOffset, row: rowY[0] ?? midRow - 14 },
-    { col: midCol - innerOffset, row: rowY[0] ?? midRow - 14 },
-    { col: midCol + innerOffset - 5, row: rowY[0] ?? midRow - 14 },
-    { col: midCol + outerOffset - 5, row: rowY[0] ?? midRow - 14 },
-  ];
-  // Row 1 (4 agents, staggered)
-  const r1 = [
-    { col: midCol - stagOuter, row: rowY[1] ?? midRow - 5 },
-    { col: midCol - stagInner - 2, row: rowY[1] ?? midRow - 5 },
-    { col: midCol + stagInner - 3, row: rowY[1] ?? midRow - 5 },
-    { col: midCol + stagOuter - 5, row: rowY[1] ?? midRow - 5 },
-  ];
-  // Row 2 (4 agents, wide)
-  const r2 = [
-    { col: midCol - outerOffset, row: rowY[2] ?? midRow + 4 },
-    { col: midCol - innerOffset, row: rowY[2] ?? midRow + 4 },
-    { col: midCol + innerOffset - 5, row: rowY[2] ?? midRow + 4 },
-    { col: midCol + outerOffset - 5, row: rowY[2] ?? midRow + 4 },
-  ];
-  // Row 3 (4 agents, staggered)
-  const r3 = [
-    { col: midCol - stagOuter, row: rowY[3] ?? midRow + 13 },
-    { col: midCol - stagInner - 2, row: rowY[3] ?? midRow + 13 },
-    { col: midCol + stagInner - 3, row: rowY[3] ?? midRow + 13 },
-    { col: midCol + stagOuter - 5, row: rowY[3] ?? midRow + 13 },
-  ];
+    const r0 = [
+      { col: midCol - outer, row: rowY[0] ?? midRow - 12 },
+      { col: midCol - inner, row: rowY[0] ?? midRow - 12 },
+      { col: midCol + inner - 5, row: rowY[0] ?? midRow - 12 },
+      { col: midCol + outer - 5, row: rowY[0] ?? midRow - 12 },
+    ];
+    const r1 = [
+      { col: midCol - stagOuter, row: rowY[1] ?? midRow - 4 },
+      { col: midCol - stagInner - 2, row: rowY[1] ?? midRow - 4 },
+      { col: midCol + stagInner - 3, row: rowY[1] ?? midRow - 4 },
+      { col: midCol + stagOuter - 5, row: rowY[1] ?? midRow - 4 },
+    ];
+    const r2 = [
+      { col: midCol - outer, row: rowY[2] ?? midRow + 4 },
+      { col: midCol - inner, row: rowY[2] ?? midRow + 4 },
+      { col: midCol + inner - 5, row: rowY[2] ?? midRow + 4 },
+      { col: midCol + outer - 5, row: rowY[2] ?? midRow + 4 },
+    ];
+    const r3 = [
+      { col: midCol - stagOuter, row: rowY[3] ?? midRow + 12 },
+      { col: midCol - stagInner - 2, row: rowY[3] ?? midRow + 12 },
+      { col: midCol + stagInner - 3, row: rowY[3] ?? midRow + 12 },
+      { col: midCol + stagOuter - 5, row: rowY[3] ?? midRow + 12 },
+    ];
+    return [...r0, ...r1, ...r2, ...r3];
+  }
+
+  // 30 mini agents on desktop (8 + 7 + 8 + 7 lattice)
+  const offsets8 = [-39, -28, -17, -6, 1, 12, 23, 34];
+  const r0 = offsets8.map((off) => ({ col: midCol + off, row: rowY[0] ?? midRow - 14 }));
+  const r2 = offsets8.map((off) => ({ col: midCol + off, row: rowY[2] ?? midRow + 4 }));
+
+  const offsets7 = [-33, -22, -11, -2, 7, 18, 29];
+  const r1 = offsets7.map((off) => ({ col: midCol + off, row: rowY[1] ?? midRow - 5 }));
+  const r3 = offsets7.map((off) => ({ col: midCol + off, row: rowY[3] ?? midRow + 13 }));
 
   return [...r0, ...r1, ...r2, ...r3];
 }
@@ -141,7 +152,7 @@ export function getScene1EarnFrame(cols: number, rows: number, elapsed: number):
   const midCol = Math.floor(cols / 2);
   const agentRow = Math.floor(rows / 2) - 4;
 
-  // Pull the two AIs widely apart across the broad canvas with identical margins on both sides
+  // Wide, symmetric positioning across the broad canvas
   const leftCol = isMobile ? 4 : 6;
   const rightCol = isMobile ? cols - 11 : cols - 13;
   const pileCol = leftCol + 8;
@@ -280,36 +291,45 @@ export function getScene3ScaleFrame(cols: number, rows: number, elapsed: number)
   const midCol = Math.floor(cols / 2);
   const midRow = Math.floor(rows / 2);
 
-  // Staggered crowd coordinates mathematically centered across grid
+  // Staggered crowd coordinates mathematically centered across grid (up to 30 agents)
   const crowdCoords = getCrowdCoords(cols, rows);
 
-  // Sub-step 1: Agent splits 1 -> 2 -> 4 -> 8 -> 16 starting from the exact center
+  // Sub-step 1: Agent splits 1 -> 2 -> 4 -> 8 -> 16 -> 30 starting from the exact center
   // Sub-step 2: Busy market coins between neighbors (1600ms - 3100ms)
   if (elapsed < 3100) {
-    if (elapsed < 400) {
+    if (elapsed < 300) {
       // 1 Agent in the exact center of the canvas
-      cells.push(...spriteToCells(SPRITE_MINI_AGENT, midCol - 2, midRow - 2, "filled", 1.0));
-    } else if (elapsed < 800) {
+      cells.push(...spriteToCells(SPRITE_MINI_AGENT, midCol - 2, midRow - 3, "filled", 1.0));
+    } else if (elapsed < 600) {
       // 2 Agents placed symmetrically around center
-      cells.push(...spriteToCells(SPRITE_MINI_AGENT, midCol - 12, midRow - 2, "filled", 1.0));
-      cells.push(...spriteToCells(SPRITE_MINI_AGENT, midCol + 7, midRow - 2, "filled", 1.0));
-    } else if (elapsed < 1200) {
+      cells.push(...spriteToCells(SPRITE_MINI_AGENT, midCol - 12, midRow - 3, "filled", 1.0));
+      cells.push(...spriteToCells(SPRITE_MINI_AGENT, midCol + 7, midRow - 3, "filled", 1.0));
+    } else if (elapsed < 900) {
       // 4 Agents in centered box
       cells.push(...spriteToCells(SPRITE_MINI_AGENT, midCol - 14, midRow - 7, "filled", 1.0));
       cells.push(...spriteToCells(SPRITE_MINI_AGENT, midCol + 9, midRow - 7, "filled", 1.0));
       cells.push(...spriteToCells(SPRITE_MINI_AGENT, midCol - 14, midRow + 4, "filled", 1.0));
       cells.push(...spriteToCells(SPRITE_MINI_AGENT, midCol + 9, midRow + 4, "filled", 1.0));
-    } else if (elapsed < 1600) {
+    } else if (elapsed < 1200) {
       // 8 Agents symmetrically distributed
-      const subsetIndices = [1, 2, 4, 5, 6, 7, 9, 10];
-      for (const idx of subsetIndices) {
-        const pos = crowdCoords[idx];
+      const subset8 = [3, 4, 10, 11, 18, 19, 25, 26];
+      for (const idx of subset8) {
+        const pos = crowdCoords[idx % crowdCoords.length];
+        if (pos !== undefined) {
+          cells.push(...spriteToCells(SPRITE_MINI_AGENT, pos.col, pos.row, "filled", 1.0));
+        }
+      }
+    } else if (elapsed < 1500) {
+      // 16 Agents symmetrically distributed
+      const subset16 = [1, 2, 5, 6, 9, 10, 12, 13, 16, 17, 20, 21, 24, 25, 27, 28];
+      for (const idx of subset16) {
+        const pos = crowdCoords[idx % crowdCoords.length];
         if (pos !== undefined) {
           cells.push(...spriteToCells(SPRITE_MINI_AGENT, pos.col, pos.row, "filled", 1.0));
         }
       }
     } else {
-      // All 16 Agents active in the centered staggered lattice
+      // All mini Agents active in the centered staggered lattice (30 agents on desktop)
       for (const pos of crowdCoords) {
         cells.push(...spriteToCells(SPRITE_MINI_AGENT, pos.col, pos.row, "filled", 1.0));
       }
@@ -323,8 +343,8 @@ export function getScene3ScaleFrame(cols: number, rows: number, elapsed: number)
         const flightTime = (marketElapsed + flight.phase) % routeDuration;
         const t = flightTime / routeDuration;
 
-        const fromPos = crowdCoords[flight.from];
-        const toPos = crowdCoords[flight.to];
+        const fromPos = crowdCoords[flight.from % crowdCoords.length];
+        const toPos = crowdCoords[flight.to % crowdCoords.length];
         if (fromPos !== undefined && toPos !== undefined) {
           const coinCol = Math.round(fromPos.col + (toPos.col - fromPos.col) * t);
           const coinRow = Math.round(fromPos.row + (toPos.row - fromPos.row) * t);
