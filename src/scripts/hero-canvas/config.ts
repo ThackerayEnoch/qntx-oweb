@@ -12,11 +12,11 @@ export const CANVAS_CONFIG = {
   // Grid dimensions
   desktop: {
     cols: 96,
-    rows: 44,
+    rows: 36,
   },
   mobile: {
     cols: 64,
-    rows: 40,
+    rows: 32,
     breakpoint: 640,
   },
   gap: 1, // 1px gap between cells
