@@ -17,7 +17,6 @@ import {
   SPRITE_COIN,
   SPRITE_DRAW_ICON,
   SPRITE_MINI_AGENT,
-  SPRITE_MOON,
   SPRITE_SPEECH_BUBBLE,
   SPRITE_TRANSLATE_ICON,
   spriteToCells,
@@ -111,55 +110,53 @@ export function getScene1EarnFrame(cols: number, rows: number, elapsed: number):
   const cells: TargetCell[] = [];
   const isMobile = cols < CANVAS_CONFIG.mobile.breakpoint;
 
-  const centerCol = Math.floor(cols / 2) - 3;
+  const midCol = Math.floor(cols / 2);
   const agentRow = Math.floor(rows / 2) - 4;
-  const leftCol = isMobile ? 6 : 16;
-  const pileCol = centerCol + 8;
+  const spacing = isMobile ? 18 : 25;
+  const leftCol = midCol - spacing - 3;
+  const rightCol = midCol + spacing - 3;
+  const pileCol = leftCol + 8;
   const pileRow = agentRow + 2;
 
-  // 1. Moon sprite at top-right
-  const moonCol = isMobile ? cols - 10 : cols - 15;
-  cells.push(...spriteToCells(SPRITE_MOON, moonCol, 4, "filled", 1.0));
-
-  // 2. Speech bubble with TRANSLATE icon traveling from left agent to center agent
+  // 1. Speech bubble with TRANSLATE icon traveling from right agent to left agent
   const bubbleRow = agentRow - 7;
   const bubbleCol =
     elapsed < 1200
-      ? Math.round(leftCol + 8 + (centerCol - 15 - (leftCol + 8)) * (elapsed / 1200))
-      : centerCol - 15;
+      ? Math.round(rightCol - 12 - (rightCol - 12 - (leftCol + 14)) * (elapsed / 1200))
+      : leftCol + 14;
 
-  // Fade out left agent and bubble at the end of Scene 1 (3500ms - 4000ms)
-  let leftScale = 1.0;
+  // Fade out right agent and bubble at the end of Scene 1 (3500ms - 4000ms)
+  let rightScale = 1.0;
   if (elapsed >= 3500) {
     const fadeT = Math.min(1, (elapsed - 3500) / 400);
-    leftScale = Math.max(0, 1 - fadeT);
+    rightScale = Math.max(0, 1 - fadeT);
   }
 
-  if (leftScale > 0.05) {
-    // Left Agent
-    cells.push(...spriteToCells(SPRITE_AGENT, leftCol, agentRow, "filled", leftScale));
+  if (rightScale > 0.05) {
+    // Right Agent (Client)
+    cells.push(...spriteToCells(SPRITE_AGENT, rightCol, agentRow, "filled", rightScale));
 
     // Speech bubble
-    cells.push(...spriteToCells(SPRITE_SPEECH_BUBBLE, bubbleCol, bubbleRow, "filled", leftScale));
+    cells.push(...spriteToCells(SPRITE_SPEECH_BUBBLE, bubbleCol, bubbleRow, "filled", rightScale));
     // TRANSLATE icon inside bubble
     cells.push(
-      ...spriteToCells(SPRITE_TRANSLATE_ICON, bubbleCol + 2, bubbleRow + 2, "filled", leftScale),
+      ...spriteToCells(SPRITE_TRANSLATE_ICON, bubbleCol + 2, bubbleRow + 2, "filled", rightScale),
     );
     // Micro caption "TRANSLATE" under bubble
     cells.push(
       ...microTextToCells("TRANSLATE", bubbleCol - 7, bubbleRow + 9, 1, "filled", 1).map((c) => ({
         ...c,
-        scale: leftScale,
+        scale: rightScale,
       })),
     );
   }
 
-  // 3. Center Agent: Blinks at 2000ms - 2200ms
+  // 2. Left Agent (Earner): Blinks at 2000ms - 2200ms
   const isBlinking = elapsed >= 2000 && elapsed <= 2200;
-  const centerAgentSprite = isBlinking ? SPRITE_AGENT_BLINK : SPRITE_AGENT;
-  cells.push(...spriteToCells(centerAgentSprite, centerCol, agentRow, "filled", 1.0));
+  const leftAgentSprite = isBlinking ? SPRITE_AGENT_BLINK : SPRITE_AGENT;
+  cells.push(...spriteToCells(leftAgentSprite, leftCol, agentRow, "filled", 1.0));
 
-  // Thinking dots: 1200ms - 2400ms (light up 1 by 1)
+  // Thinking dots: 1200ms - 2400ms (light up 1 by 1 above left agent)
   if (elapsed >= 1200 && elapsed < 2400) {
     let dotCount = 1;
     if (elapsed >= 1600 && elapsed < 2000) {
@@ -167,27 +164,23 @@ export function getScene1EarnFrame(cols: number, rows: number, elapsed: number):
     } else if (elapsed >= 2000) {
       dotCount = 3;
     }
-    cells.push(...createThinkingDots(centerCol, agentRow, dotCount));
+    cells.push(...createThinkingDots(leftCol, agentRow, dotCount));
   }
 
-  // 4. Coin flight from Left Agent to Center Agent Coin Pile (2400ms - 3500ms)
+  // 3. Coin flight from Right Agent to Left Agent Coin Pile (2400ms - 3500ms)
   let coinPileCount = 2;
   if (elapsed >= 2400 && elapsed < 3500) {
     const travelT = (elapsed - 2400) / 1100;
-    const coinCol = Math.round(leftCol + 8 + (pileCol + 4 - (leftCol + 8)) * travelT);
-    const coinRow = Math.round(agentRow + 2 + (pileRow - 4 - (agentRow + 2)) * travelT);
+    const coinCol = Math.round(rightCol - 6 - (rightCol - 6 - (pileCol + 4)) * travelT);
+    const coinRow = Math.round(agentRow + 1 + (pileRow - 4 - (agentRow + 1)) * travelT);
     cells.push(...spriteToCells(SPRITE_COIN, coinCol, coinRow, "filled", 1.0));
   } else if (elapsed >= 3500) {
     // Coin landed on pile -> pile grows from 2 to 3 coins!
     coinPileCount = 3;
   }
 
-  // Coin pile at center agent's feet
+  // Coin pile at left agent's feet
   cells.push(...createCoinPile(pileCol, pileRow, coinPileCount));
-
-  // Scene label "EARN"
-  const labelW = getTextWidth("EARN", 1, 1);
-  cells.push(...textToCells("EARN", Math.floor((cols - labelW) / 2), rows - 5, 1, "filled", 1));
 
   return { cells };
 }
@@ -197,36 +190,29 @@ export function getScene2PayFrame(cols: number, rows: number, elapsed: number): 
   const cells: TargetCell[] = [];
   const isMobile = cols < CANVAS_CONFIG.mobile.breakpoint;
 
-  const centerCol = Math.floor(cols / 2) - 3;
+  const midCol = Math.floor(cols / 2);
   const agentRow = Math.floor(rows / 2) - 4;
-  const rightCol = isMobile ? cols - 13 : cols - 23;
-  const pileCol = centerCol + 8;
+  const spacing = isMobile ? 18 : 25;
+  const leftCol = midCol - spacing - 3;
+  const rightCol = midCol + spacing - 3;
+  const pileCol = leftCol + 8;
   const pileRow = agentRow + 2;
 
-  // Center Agent
-  cells.push(...spriteToCells(SPRITE_AGENT, centerCol, agentRow, "filled", 1.0));
+  // Left Agent (Spender)
+  cells.push(...spriteToCells(SPRITE_AGENT, leftCol, agentRow, "filled", 1.0));
 
-  // Painter Agent on the right: blinks after receiving coin (2300ms - 2500ms)
-  const painterBlink = elapsed >= 2300 && elapsed <= 2500;
+  // Painter Agent on the right: blinks after receiving coin (2000ms - 2200ms)
+  const painterBlink = elapsed >= 2000 && elapsed <= 2200;
   const painterSprite = painterBlink ? SPRITE_AGENT_BLINK : SPRITE_AGENT;
   cells.push(...spriteToCells(painterSprite, rightCol, agentRow, "filled", 1.0));
 
-  // Sub-step 1: Bubble with DRAW icon pops up above center agent (0ms - 1000ms)
-  if (elapsed < 1000) {
-    const bubbleCol = centerCol - 2;
-    const bubbleRow = agentRow - 10;
-    cells.push(...spriteToCells(SPRITE_SPEECH_BUBBLE, bubbleCol, bubbleRow, "filled", 1.0));
-    cells.push(...spriteToCells(SPRITE_DRAW_ICON, bubbleCol + 2, bubbleRow + 2, "filled", 1.0));
-    cells.push(...microTextToCells("DRAW", bubbleCol + 1, bubbleRow + 9, 1, "filled", 1));
-  }
-
-  // Coin pile starts with 3, shrinks to 2 after center agent spends one coin
+  // Coin pile starts with 3, shrinks to 2 after left agent spends one coin
   let pileCount = 3;
 
-  // Sub-step 2: Coin flies from Center pile to Right Agent (1000ms - 2200ms)
-  if (elapsed >= 1000 && elapsed < 2200) {
+  // Sub-step 1: Coin flies from Left pile to Right Agent (800ms - 2000ms)
+  if (elapsed >= 800 && elapsed < 2000) {
     pileCount = 2;
-    const t = (elapsed - 1000) / 1200;
+    const t = (elapsed - 800) / 1200;
     const coinCol = Math.round(pileCol + 4 + (rightCol - 6 - (pileCol + 4)) * t);
     const coinRow = Math.round(pileRow - 4 + (agentRow + 1 - (pileRow - 4)) * t);
     cells.push(...spriteToCells(SPRITE_COIN, coinCol, coinRow, "filled", 1.0));
@@ -235,29 +221,25 @@ export function getScene2PayFrame(cols: number, rows: number, elapsed: number): 
     if (CANVAS_CONFIG.SHOW_X402_LABEL) {
       cells.push(...microTextToCells("X402", coinCol - 1, coinRow + 6, 1, "filled", 1));
     }
-  } else if (elapsed >= 2200) {
+  } else if (elapsed >= 2000) {
     pileCount = 2;
   }
 
   cells.push(...createCoinPile(pileCol, pileRow, pileCount));
 
-  // Sub-step 3: Right agent sends back picture sprite (2400ms - 3400ms)
-  if (elapsed >= 2400 && elapsed < 3400) {
-    const t = (elapsed - 2400) / 1000;
-    const picCol = Math.round(rightCol - (rightCol - centerCol) * t);
+  // Sub-step 2: Right agent sends back picture sprite (2200ms - 3200ms)
+  if (elapsed >= 2200 && elapsed < 3200) {
+    const t = (elapsed - 2200) / 1000;
+    const picCol = Math.round(rightCol - 7 - (rightCol - 7 - leftCol) * t);
     const picRow = Math.round(agentRow + 1 + (agentRow - 9 - (agentRow + 1)) * t);
     cells.push(...spriteToCells(SPRITE_DRAW_ICON, picCol, picRow, "filled", 1.0));
   }
-  // Sub-step 4: Picture lands above center agent, check mark appears, inverted flash (3400ms - 4500ms)
-  else if (elapsed >= 3400) {
-    const picState = elapsed >= 3700 && elapsed <= 3900 ? "inverted" : "filled";
-    cells.push(...spriteToCells(SPRITE_DRAW_ICON, centerCol, agentRow - 9, picState, 1.0));
-    cells.push(...spriteToCells(SPRITE_CHECK_MARK, centerCol + 9, agentRow - 8, "filled", 1.0));
+  // Sub-step 3: Picture lands above left agent, check mark appears, inverted flash (3200ms - 4500ms)
+  else if (elapsed >= 3200) {
+    const picState = elapsed >= 3500 && elapsed <= 3700 ? "inverted" : "filled";
+    cells.push(...spriteToCells(SPRITE_DRAW_ICON, leftCol, agentRow - 9, picState, 1.0));
+    cells.push(...spriteToCells(SPRITE_CHECK_MARK, leftCol + 9, agentRow - 8, "filled", 1.0));
   }
-
-  // Scene label "PAY"
-  const labelW = getTextWidth("PAY", 1, 1);
-  cells.push(...textToCells("PAY", Math.floor((cols - labelW) / 2), rows - 5, 1, "filled", 1));
 
   return { cells };
 }
@@ -314,10 +296,6 @@ export function getScene3ScaleFrame(cols: number, rows: number, elapsed: number)
       }
     }
 
-    // Scene label "SCALE"
-    const labelW = getTextWidth("SCALE", 1, 1);
-    cells.push(...textToCells("SCALE", Math.floor((cols - labelW) / 2), rows - 5, 1, "filled", 1));
-
     return { cells };
   }
 
@@ -351,22 +329,26 @@ export function getScene3ScaleFrame(cols: number, rows: number, elapsed: number)
 /** End state of PAY (used for prefers-reduced-motion) */
 export function getReducedMotionPayFrame(cols: number, rows: number): SceneFrame {
   const cells: TargetCell[] = [];
-  const centerCol = Math.floor(cols / 2) - 3;
+  const isMobile = cols < CANVAS_CONFIG.mobile.breakpoint;
+
+  const midCol = Math.floor(cols / 2);
   const agentRow = Math.floor(rows / 2) - 4;
-  const pileCol = centerCol + 8;
+  const spacing = isMobile ? 18 : 25;
+  const leftCol = midCol - spacing - 3;
+  const rightCol = midCol + spacing - 3;
+  const pileCol = leftCol + 8;
   const pileRow = agentRow + 2;
 
-  // Center agent with 2 coins
-  cells.push(...spriteToCells(SPRITE_AGENT, centerCol, agentRow, "filled", 1.0));
+  // Left agent with 2 coins
+  cells.push(...spriteToCells(SPRITE_AGENT, leftCol, agentRow, "filled", 1.0));
   cells.push(...createCoinPile(pileCol, pileRow, 2));
 
-  // Picture above head and check mark ✓
-  cells.push(...spriteToCells(SPRITE_DRAW_ICON, centerCol, agentRow - 9, "filled", 1.0));
-  cells.push(...spriteToCells(SPRITE_CHECK_MARK, centerCol + 9, agentRow - 8, "filled", 1.0));
+  // Right agent (painter)
+  cells.push(...spriteToCells(SPRITE_AGENT, rightCol, agentRow, "filled", 1.0));
 
-  // Label "PAY"
-  const labelW = getTextWidth("PAY", 1, 1);
-  cells.push(...textToCells("PAY", Math.floor((cols - labelW) / 2), rows - 5, 1, "filled", 1));
+  // Picture above left agent and check mark ✓
+  cells.push(...spriteToCells(SPRITE_DRAW_ICON, leftCol, agentRow - 9, "filled", 1.0));
+  cells.push(...spriteToCells(SPRITE_CHECK_MARK, leftCol + 9, agentRow - 8, "filled", 1.0));
 
   return { cells };
 }
