@@ -7,7 +7,7 @@ interface Props {
 
 const {
   title = "QuantX · The economic layer for autonomous AI agents",
-  description = "Minimalist protocol specification and runtime for autonomous AI agents.",
+  description = "Building the economic layer for autonomous AI agents. Agents earn. Agents pay. Agents scale.",
 } = Astro.props;
 ---
 
@@ -33,9 +33,5 @@ const {
   </head>
   <body class="bg-white text-neutral-950 min-h-screen relative antialiased selection:bg-neutral-950 selection:text-white">
     <slot />
-
-    <!-- Client Scripts (ascii-canvas animation preserved intact) -->
-    <script src="../scripts/ascii-canvas.ts"></script>
-    <script src="../scripts/nav.ts"></script>
   </body>
 </html>

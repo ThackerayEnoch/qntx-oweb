@@ -9,8 +9,35 @@
     <canvas
       id="qntx-ascii-canvas"
       class="w-full h-full block"
-      aria-label="Interactive QNTX ASCII horizontal unfolding animation"
+      aria-label="Interactive QNTX ASCII Squares Animation"
     ></canvas>
+  </div>
+
+  <!-- Progress Indicator: 3 small squares (16px, 1px black border, filled when active) centered directly under the canvas and above the tagline -->
+  <div
+    id="canvas-progress"
+    class="flex items-center justify-center gap-2 pt-4 select-none"
+    role="group"
+    aria-label="Animation Scene Progress"
+  >
+    <button
+      type="button"
+      data-scene="0"
+      class="progress-square w-4 h-4 border border-black bg-black transition-colors cursor-pointer"
+      aria-label="EARN"
+    ></button>
+    <button
+      type="button"
+      data-scene="1"
+      class="progress-square w-4 h-4 border border-black bg-transparent transition-colors cursor-pointer"
+      aria-label="PAY"
+    ></button>
+    <button
+      type="button"
+      data-scene="2"
+      class="progress-square w-4 h-4 border border-black bg-transparent transition-colors cursor-pointer"
+      aria-label="SCALE"
+    ></button>
   </div>
 
   <!-- Central Hierarchy: Slogan & Refined Action -->
@@ -21,6 +48,7 @@
 
     <div class="pt-1">
       <a
+        id="get-started-btn"
         href="https://docs.qntx.org"
         target="_blank"
         rel="noopener noreferrer"
@@ -36,3 +64,8 @@
   </div>
 
 </div>
+
+<script>
+  import { initHeroCanvas } from "@/scripts/hero-canvas";
+  initHeroCanvas();
+</script>
