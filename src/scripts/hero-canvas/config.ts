@@ -1,13 +1,12 @@
 /**
  * QuantX Hero Canvas Configuration
  *
- * Centralized declarative constants for logical stage, physical grid, stage positions, timings,
- * PRNG seed, and black/white palette.
+ * Centralized declarative constants for logical stage, physical grid, positions, timings, speeds
+ * (integer cells per tick), PRNG seed, and black/white palette.
  */
 
 export const CANVAS_CONFIG = {
   canvasId: "qntx-ascii-canvas",
-  progressContainerId: "canvas-progress",
   ctaBtnSelector: "[data-hero-cta]",
 
   // Logical STAGE: 128 cols x 40 rows
@@ -25,6 +24,7 @@ export const CANVAS_CONFIG = {
     minCols: 32,
     minRows: 20,
     mobileBreakpoint: 640,
+    minK: 0.6, // k = max(0.6, realCols / 128)
   },
 
   // Fixed particle pool size (covers wordmark 920 cells + headroom)
@@ -34,47 +34,58 @@ export const CANVAS_CONFIG = {
   tickRate: 30,
 
   // PRNG seed for deterministic stagger and trading patterns
-  prngSeed: 7771,
+  prngSeed: 4021,
 
   // Stage Coordinates
   positions: {
-    groundRow: 33, // Ground line (bottom row of agents and pile)
-    agentRow: 25, // Agent top-left row (antenna at row 25, feet at row 33)
-    oursCol: 36, // "Ours" agent top-left col (center col 40)
-    otherCol: 84, // "Other" agent top-left col (center col 88)
-    pileStartCol: 49, // Pile columns 49-55 (center col 52)
-    pileEndCol: 55,
-    pileBars: [33, 31, 29, 27] as const, // Rows for stacked coin bars from bottom to top
-    coinRow: 22, // Center row of traveling 5x5 coin (rows 20-24)
-    bubbleRowStart: 6, // Speech bubble outer box rows 6-18
+    groundRow: 33, // Ground line (bottom row of agents: row 33)
+    agentRow: 26, // Full-size agent top row (rows 26-33, height 8)
+    agentACol: 35, // Agent A top-left col (center col 40, width 11)
+    agentBCol: 83, // Agent B top-left col (center col 88, width 11)
+    coinRow: 22, // Coin travel line center row (rows 20-24)
+    bubbleRowStart: 6, // Speech bubble outer box rows 6-18 (height 13)
     bubbleRowEnd: 18,
     bubbleTailRow1: 19,
     bubbleTailRow2: 20,
-    resultIconRowStart: 11, // Result icon rows 11-19
+    resultIconRowStart: 11, // Result icon rows 11-19 (height 9)
     resultIconRowEnd: 19,
-    scene3AgentRow: 16, // Scene 3 initial agent top-left (60, 16)
-    scene3AgentCol: 60,
+    checkMarkColStart: 49, // Check mark cols 49-55 (width 7)
+    checkMarkColEnd: 55,
+    checkMarkRowStart: 13, // Check mark rows 13-17 (height 5)
+    checkMarkRowEnd: 17,
+    scene2AgentRow: 16, // Scene 2 centered initial agent top-left (59, 16)
+    scene2AgentCol: 59,
   },
 
-  // Timings in milliseconds (Total loop: ~15.5s)
+  // Speeds in integer cells per tick (at 30 ticks/second)
+  speeds: {
+    bubbleMove: 2, // 48 cells in 24 ticks (0.8s) = 2 cells/tick
+    coinMove: 4, // 48 cells in 12 ticks (0.4s) = 4 cells/tick
+    iconMove: 2, // 48 cells in 24 ticks (0.8s) = 2 cells/tick
+  },
+
+  // Timings in milliseconds (Total loop: ~14.0s)
   timings: {
     qntxIntroBuild: 800, // First page load column-by-column build (0.8s)
     qntxHold: 2000, // QNTX hold duration (2.0s)
     qntxXFlashStart: 300, // Letter X flash starts at t=0.3s
     flashDuration: 120, // FLASH duration (120ms hollow, then filled)
     ctaFlashDuration: 250, // GET STARTED button color inversion (250ms)
-    transition: 800, // Dissolve transition duration (0.8s)
+
+    scene1Duration: 8000, // Scene 1 duration (8.0s)
+    scene1Dissolve: 800, // Dissolve from QNTX into agents A and B (0.8s)
+
+    scene2Duration: 4000, // Scene 2 duration (4.0s)
+    scene2Dissolve: 600, // Dissolve into one centered agent (0.6s)
+    scene2DissolveOut: 800, // Dissolve crowd into QNTX wordmark (0.8s)
+
+    scene2CoinInterval: 120, // Spawn mini coin every 120ms
+    scene2CoinDuration: 280, // Coin travel duration between neighbors
+    scene2MaxCoins: 10, // Max 10 coins in flight
+
     maxStaggerDelay: 400, // Max random stagger delay (up to 400ms)
-    objectBuildDuration: 300, // Build flyout from antenna (~0.3s)
-    objectDisappearDuration: 300, // Peeling / scale to 0 (~0.3s)
-
-    scene1Earn: 4000, // Scene 1 duration (4.0s)
-    scene2Pay: 4500, // Scene 2 duration (4.5s)
-    scene3Scale: 4200, // Scene 3 duration (4.2s)
-
-    scene3CoinInterval: 120, // Spawn mini coin every 120ms
-    scene3CoinDuration: 280, // Coin travel duration between neighbors
-    scene3MaxCoins: 10, // Max 10 coins in flight
+    objectBuildDuration: 300, // Flyout build from sender head (~0.3s)
+    objectVanishDuration: 200, // Scale to 0 with random stagger (~0.2s)
 
     reducedMotionInterval: 3000, // Switch static frames every 3s
     reducedMotionFadeDuration: 300, // Canvas element opacity crossfade

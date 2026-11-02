@@ -1,7 +1,7 @@
 /**
  * QuantX Hero Canvas Particle Morphing System
  *
- * Implements a fixed pool of square particles that morph between scenes, dissolve transitions with
+ * Implements a fixed pool of square particles that morph between states, dissolve transitions with
  * seeded PRNG stagger, and uniform linear whole-cell snapping.
  */
 
@@ -23,6 +23,7 @@ export function createPRNG(seed: number): () => number {
 export class ParticlePool {
   private particles: Particle[] = [];
   private readonly poolSize: number;
+  private currentDissolveDuration = 800;
 
   constructor(poolSize = CANVAS_CONFIG.poolSize) {
     this.poolSize = poolSize;
@@ -94,13 +95,17 @@ export class ParticlePool {
 
   /**
    * Starts a dissolve transition to new targets. Particles break loose with random stagger up to
-   * maxStaggerDelay (seeded PRNG) and travel in straight lines to target positions over duration
-   * (0.8s).
+   * maxStaggerDelay (seeded PRNG) and travel in straight lines to target positions over duration.
    */
-  startDissolve(targets: ReadonlyArray<Cell>, seed: number = CANVAS_CONFIG.prngSeed): void {
+  startDissolve(
+    targets: ReadonlyArray<Cell>,
+    durationMs = 800,
+    seed: number = CANVAS_CONFIG.prngSeed,
+  ): void {
+    this.currentDissolveDuration = durationMs;
     const prng = createPRNG(seed);
     const targetCount = targets.length;
-    const maxStagger = CANVAS_CONFIG.timings.maxStaggerDelay;
+    const maxStagger = Math.min(CANVAS_CONFIG.timings.maxStaggerDelay, durationMs * 0.5);
 
     for (let i = 0; i < this.poolSize; i++) {
       const p = this.particles[i];
@@ -136,7 +141,7 @@ export class ParticlePool {
    * ticks/second.
    */
   updateDissolve(progress: number): void {
-    const totalDuration = CANVAS_CONFIG.timings.transition;
+    const totalDuration = this.currentDissolveDuration;
     const elapsed = progress * totalDuration;
 
     for (const p of this.particles) {

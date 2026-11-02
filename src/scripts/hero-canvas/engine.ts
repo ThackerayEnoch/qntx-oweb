@@ -2,21 +2,20 @@
  * QuantX Hero Canvas Engine
  *
  * Implements fixed square grid layout, 30 ticks/second mechanical timestep accumulator,
- * stage-to-real-grid projection with horizontal compression factor k, crisp pixel alignment,
- * reduced-motion handling, and lifecycle cleanup.
+ * stage-to-real-grid projection with horizontal compression factor k = max(0.6, realCols / 128),
+ * integer pixel alignment, reduced-motion handling, and lifecycle cleanup.
  */
 
 import { CANVAS_CONFIG } from "./config";
 import { ParticlePool } from "./particles";
 import {
   getQntxFrame,
-  getReducedMotionPayFrame,
-  getScene1EarnFrame,
-  getScene2PayFrame,
-  getScene3ScaleFrame,
+  getReducedMotionScene1Frame,
+  getScene1PaymentFrame,
+  getScene2CrowdFrame,
 } from "./scenes";
 import { CanvasTimeline, type TimelinePhase, type TimelineState } from "./timeline";
-import type { Cell, SceneIndex } from "./types";
+import type { Cell } from "./types";
 
 export class HeroCanvasEngine {
   private readonly canvas: HTMLCanvasElement;
@@ -44,22 +43,19 @@ export class HeroCanvasEngine {
   private isVisible = true;
   private isReducedMotion = false;
   private reducedMotionTimer = 0;
-  private reducedMotionFrame: "QNTX" | "PAY" = "QNTX";
+  private reducedMotionFrame: "QNTX" | "SCENE_1" = "QNTX";
   private reducedMotionOpacity = 1.0;
 
   // Phase transition tracking
   private previousPhase: TimelinePhase = "INTRO_BUILD";
-  private scene3RegatherTriggered = false;
+  private scene2RegatherTriggered = false;
 
   // Observers & Listeners
   private intersectionObserver?: IntersectionObserver;
   private resizeObserver?: ResizeObserver;
   private resizeDebounceTimer?: number;
 
-  constructor(
-    canvas: HTMLCanvasElement,
-    onProgressChange?: (activeScene: SceneIndex | undefined) => void,
-  ) {
+  constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     const context = canvas.getContext("2d");
     if (context === null) {
@@ -67,7 +63,7 @@ export class HeroCanvasEngine {
     }
     this.ctx = context;
 
-    this.timeline = new CanvasTimeline(onProgressChange);
+    this.timeline = new CanvasTimeline();
     this.particlePool = new ParticlePool(CANVAS_CONFIG.poolSize);
 
     this.checkReducedMotion();
@@ -112,9 +108,10 @@ export class HeroCanvasEngine {
     this.realCols = Math.max(CANVAS_CONFIG.grid.minCols, Math.floor((cssW + this.gap) / cellStep));
     this.realRows = Math.max(CANVAS_CONFIG.grid.minRows, Math.floor((cssH + this.gap) / cellStep));
 
-    // Horizontal compression factor k = realCols / 128 (k <= 1.0)
+    // Horizontal compression factor k = max(0.6, realCols / 128)
+    const ratio = this.realCols / CANVAS_CONFIG.stage.cols;
     this.compressionK =
-      this.realCols >= CANVAS_CONFIG.stage.cols ? 1.0 : this.realCols / CANVAS_CONFIG.stage.cols;
+      this.realCols >= CANVAS_CONFIG.stage.cols ? 1.0 : Math.max(CANVAS_CONFIG.grid.minK, ratio);
 
     const gridTotalW = this.realCols * this.cellSize + (this.realCols - 1) * this.gap;
     const gridTotalH = this.realRows * this.cellSize + (this.realRows - 1) * this.gap;
@@ -135,9 +132,6 @@ export class HeroCanvasEngine {
       this.timeline.resume();
     });
 
-    // Keyboard navigation when canvas or progress squares have focus
-    window.addEventListener("keydown", this.handleKeyDown);
-
     // Page visibility
     document.addEventListener("visibilitychange", this.handleVisibilityChange);
   }
@@ -149,27 +143,6 @@ export class HeroCanvasEngine {
     this.resizeDebounceTimer = window.setTimeout(() => {
       this.initGrid();
     }, 100);
-  };
-
-  private readonly handleKeyDown = (e: KeyboardEvent): void => {
-    // Only step scenes if canvas or progress indicator elements have focus
-    const active = document.activeElement;
-    const isCanvasFocused = active === this.canvas;
-    const isProgressFocused =
-      active instanceof HTMLElement &&
-      active.closest(`#${CANVAS_CONFIG.progressContainerId}`) !== null;
-
-    if (!isCanvasFocused && !isProgressFocused) {
-      return;
-    }
-
-    if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      this.timeline.prevScene();
-    } else if (e.key === "ArrowRight") {
-      e.preventDefault();
-      this.timeline.nextScene();
-    }
   };
 
   private readonly handleVisibilityChange = (): void => {
@@ -220,27 +193,15 @@ export class HeroCanvasEngine {
         ({ cells } = getQntxFrame(state.elapsedInPhase, false, this.compressionK));
         break;
       }
-      case "DISSOLVE_TO_SCENE_1": {
-        ({ cells } = getScene1EarnFrame(0, this.compressionK));
-        break;
-      }
       case "SCENE_1": {
-        ({ cells } = getScene1EarnFrame(state.elapsedInPhase, this.compressionK));
+        ({ cells } = getScene1PaymentFrame(state.elapsedInPhase, this.compressionK));
         break;
       }
       case "SCENE_2": {
-        ({ cells } = getScene2PayFrame(state.elapsedInPhase, this.compressionK));
-        break;
-      }
-      case "DISSOLVE_TO_SCENE_3": {
-        ({ cells } = getScene3ScaleFrame(0, this.isMobile, this.compressionK));
-        break;
-      }
-      case "SCENE_3": {
-        if (state.elapsedInPhase >= 3400) {
+        if (state.elapsedInPhase >= 3200) {
           ({ cells } = getQntxFrame(0, false, this.compressionK));
         } else {
-          ({ cells } = getScene3ScaleFrame(state.elapsedInPhase, this.isMobile, this.compressionK));
+          ({ cells } = getScene2CrowdFrame(state.elapsedInPhase, this.isMobile, this.compressionK));
         }
         break;
       }
@@ -275,32 +236,29 @@ export class HeroCanvasEngine {
 
     // Detect phase transitions for starting dissolve transitions
     if (state.phase !== this.previousPhase) {
-      const prev = this.previousPhase;
       this.previousPhase = state.phase;
-      this.scene3RegatherTriggered = false;
+      this.scene2RegatherTriggered = false;
 
-      if (state.phase === "DISSOLVE_TO_SCENE_1") {
-        const targets = getScene1EarnFrame(0, this.compressionK).cells;
-        this.particlePool.startDissolve(targets, 1111);
-      } else if (state.phase === "DISSOLVE_TO_SCENE_3") {
-        const targets = getScene3ScaleFrame(0, this.isMobile, this.compressionK).cells;
-        this.particlePool.startDissolve(targets, 3333);
-      } else if (state.phase === "SCENE_2" && prev !== "SCENE_1") {
-        // Jumped directly to Scene 2 via progress button: snap immediately to initial state
-        const targets = getScene2PayFrame(0, this.compressionK).cells;
-        this.particlePool.setImmediateTargets(targets);
+      if (state.phase === "SCENE_1") {
+        // Dissolve from QNTX into Scene 1's agents A and B (0.8s)
+        const { cells: targets } = getScene1PaymentFrame(800, this.compressionK);
+        this.particlePool.startDissolve(targets, CANVAS_CONFIG.timings.scene1Dissolve, 1111);
+      } else if (state.phase === "SCENE_2") {
+        // Dissolve from Scene 1 end into one centered agent (0.6s)
+        const { cells: targets } = getScene2CrowdFrame(0, this.isMobile, this.compressionK);
+        this.particlePool.startDissolve(targets, CANVAS_CONFIG.timings.scene2Dissolve, 2222);
       }
     }
 
-    // Scene 3 end dissolve into QNTX wordmark at t=3400ms
+    // Scene 2 end dissolve into QNTX wordmark at t=3200ms (0.8s)
     if (
-      state.phase === "SCENE_3" &&
-      state.elapsedInPhase >= 3400 &&
-      !this.scene3RegatherTriggered
+      state.phase === "SCENE_2" &&
+      state.elapsedInPhase >= 3200 &&
+      !this.scene2RegatherTriggered
     ) {
-      this.scene3RegatherTriggered = true;
-      const targets = getQntxFrame(0, false, this.compressionK).cells;
-      this.particlePool.startDissolve(targets, 5555);
+      this.scene2RegatherTriggered = true;
+      const { cells: targets } = getQntxFrame(0, false, this.compressionK);
+      this.particlePool.startDissolve(targets, CANVAS_CONFIG.timings.scene2DissolveOut, 3333);
     }
 
     // Update particles based on active phase
@@ -371,7 +329,7 @@ export class HeroCanvasEngine {
 
     if (this.reducedMotionTimer >= interval) {
       this.reducedMotionTimer = 0;
-      this.reducedMotionFrame = this.reducedMotionFrame === "QNTX" ? "PAY" : "QNTX";
+      this.reducedMotionFrame = this.reducedMotionFrame === "QNTX" ? "SCENE_1" : "QNTX";
     }
 
     const fadeDur = CANVAS_CONFIG.timings.reducedMotionFadeDuration;
@@ -399,7 +357,7 @@ export class HeroCanvasEngine {
     const frameCells =
       this.reducedMotionFrame === "QNTX"
         ? getQntxFrame(0, false, this.compressionK).cells
-        : getReducedMotionPayFrame(this.compressionK).cells;
+        : getReducedMotionScene1Frame(this.compressionK).cells;
 
     const cellStep = this.cellSize + this.gap;
     const realCenterCol = Math.floor(this.realCols / 2);
@@ -431,7 +389,6 @@ export class HeroCanvasEngine {
     }
 
     window.removeEventListener("resize", this.handleResize);
-    window.removeEventListener("keydown", this.handleKeyDown);
     document.removeEventListener("visibilitychange", this.handleVisibilityChange);
 
     if (this.intersectionObserver !== undefined) {

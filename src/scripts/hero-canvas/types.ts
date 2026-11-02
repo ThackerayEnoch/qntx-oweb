@@ -1,7 +1,7 @@
 /**
  * QuantX Hero Canvas Type Definitions
  *
- * Strict TypeScript types for cells, sprites, scenes, particles, and network packets.
+ * Strict TypeScript types for cells, sprites, beats, and particles.
  */
 
 export type CellState = "filled" | "hollow" | "none";
@@ -21,20 +21,19 @@ export type Sprite = {
   readonly rows: ReadonlyArray<string>;
 };
 
-export type SceneIndex = 0 | 1 | 2;
-// 0: EARN
-// 1: PAY
-// 2: SCALE (ends by assembling QNTX, followed by QNTX hold)
+export type SceneIndex = 0 | 1;
+// 0: Scene 1 (x402 Payment)
+// 1: Scene 2 (Crowd & Trading)
 
 export function isSceneIndex(val: number): val is SceneIndex {
-  return val === 0 || val === 1 || val === 2;
+  return val === 0 || val === 1;
 }
 
-/** Definition of a narrative scene */
-export type Scene = {
-  readonly id: SceneIndex;
+/** Timed beat descriptor for data-driven scene choreography */
+export type Beat = {
   readonly name: string;
-  readonly duration: number; // Duration in milliseconds
+  readonly startMs: number;
+  readonly endMs: number;
 };
 
 /** Dynamic particle unit in the morphing pool */
@@ -51,21 +50,6 @@ export type Particle = {
   fromScale: number;
   targetScale: number;
   delay: number;
-  active: boolean;
-};
-
-/** Network trading coin packet moving between agents */
-export type Packet = {
-  readonly fromAgent: number;
-  readonly toAgent: number;
-  col: number;
-  row: number;
-  readonly startCol: number;
-  readonly startRow: number;
-  readonly targetCol: number;
-  readonly targetRow: number;
-  readonly startTime: number;
-  readonly duration: number;
   active: boolean;
 };
 
