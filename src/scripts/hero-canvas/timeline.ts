@@ -1,52 +1,41 @@
 /**
  * QuantX Hero Canvas Timeline Controller
  *
- * Coordinates playback, scene progression (EARN -> PAY -> SCALE -> QNTX hold), looping, keyboard
- * navigation, and button invert flash during QNTX hold.
+ * Coordinates playback, scene progression, looping, keyboard navigation, progress square indicator
+ * state, and the hero:cta-flash DOM event.
  */
 
 import { CANVAS_CONFIG } from "./config";
 import { isSceneIndex, type SceneIndex } from "./types";
 
+export type TimelinePhase =
+  | "INTRO_BUILD" // First load 0.8s column-by-column build
+  | "QNTX_HOLD" // 2.0s hold with double X flash and CTA event
+  | "DISSOLVE_TO_SCENE_1" // 0.8s dissolve into Scene 1
+  | "SCENE_1" // 4.0s EARN
+  | "SCENE_2" // 4.5s PAY (direct continuation, NO dissolve)
+  | "DISSOLVE_TO_SCENE_3" // 0.8s dissolve into Scene 3
+  | "SCENE_3"; // 4.2s SCALE (multiplies, trades, dissolves to QNTX)
+
 export type TimelineState = {
-  currentScene: SceneIndex;
-  elapsedInScene: number;
-  isIntro: boolean;
-  isQNTXHold: boolean;
+  phase: TimelinePhase;
+  currentScene: SceneIndex | undefined; // undefined during QNTX hold and dissolve transitions
+  elapsedInPhase: number;
+  isPaused: boolean;
   isTransitioning: boolean;
   transitionProgress: number; // 0..1
 };
 
 export class CanvasTimeline {
-  private currentScene: SceneIndex = 0;
-  private elapsedInScene = 0;
-  private isIntro = true;
+  private phase: TimelinePhase = "INTRO_BUILD";
+  private elapsedInPhase = 0;
   private isPaused = false;
-  private isTransitioning = false;
-  private transitionElapsed = 0;
-  private isButtonFlashing = false;
+  private hasEmittedCtaFlash = false;
 
-  private readonly sceneDurations: ReadonlyArray<number>;
-  private readonly onSceneChangeCallback?: (scene: SceneIndex) => void;
-  private readonly onButtonFlashCallback?: (flashing: boolean) => void;
+  private readonly onProgressChange?: (activeScene: SceneIndex | undefined) => void;
 
-  constructor(
-    onSceneChange?: (scene: SceneIndex) => void,
-    onButtonFlash?: (flashing: boolean) => void,
-  ) {
-    this.onSceneChangeCallback = onSceneChange;
-    this.onButtonFlashCallback = onButtonFlash;
-
-    // Scene 2 includes the 4s SCALE crowd scene + 2s QNTX hold = 6000ms
-    this.sceneDurations = [
-      CANVAS_CONFIG.timings.sceneEarn,
-      CANVAS_CONFIG.timings.scenePay,
-      CANVAS_CONFIG.timings.sceneScale + CANVAS_CONFIG.timings.qntxHold,
-    ];
-  }
-
-  getScene(): SceneIndex {
-    return this.currentScene;
+  constructor(onProgressChange?: (activeScene: SceneIndex | undefined) => void) {
+    this.onProgressChange = onProgressChange;
   }
 
   isPausedState(): boolean {
@@ -65,101 +54,185 @@ export class CanvasTimeline {
     this.isPaused = !this.isPaused;
   }
 
-  gotoScene(scene: SceneIndex): void {
-    this.isIntro = false;
-    this.setButtonFlash(false);
+  getPhase(): TimelinePhase {
+    return this.phase;
+  }
 
-    if (scene === this.currentScene && !this.isTransitioning) {
-      return;
+  getCurrentScene(): SceneIndex | undefined {
+    if (this.phase === "SCENE_1") {
+      return 0;
+    }
+    if (this.phase === "SCENE_2") {
+      return 1;
+    }
+    if (this.phase === "SCENE_3") {
+      return 2;
+    }
+    return undefined; // None filled during QNTX hold or dissolve
+  }
+
+  /**
+   * Jump directly to a scene from progress indicator buttons or arrow keys. As specified: Scene 1
+   * and 3 start with dissolve; Scene 2 starts without dissolve.
+   */
+  gotoScene(scene: SceneIndex): void {
+    this.hasEmittedCtaFlash = false;
+
+    if (scene === 0) {
+      this.phase = "DISSOLVE_TO_SCENE_1";
+      this.elapsedInPhase = 0;
+    } else if (scene === 1) {
+      // Scene 2 starts directly without dissolve
+      this.phase = "SCENE_2";
+      this.elapsedInPhase = 0;
+    } else if (scene === 2) {
+      this.phase = "DISSOLVE_TO_SCENE_3";
+      this.elapsedInPhase = 0;
     }
 
-    this.currentScene = scene;
-    this.elapsedInScene = 0;
-    this.isTransitioning = true;
-    this.transitionElapsed = 0;
-
-    if (this.onSceneChangeCallback !== undefined) {
-      this.onSceneChangeCallback(this.currentScene);
+    if (this.onProgressChange !== undefined) {
+      this.onProgressChange(this.getCurrentScene());
     }
   }
 
   nextScene(): void {
-    const next = (this.currentScene + 1) % 3;
+    const current = this.getCurrentScene();
+    const next = current === undefined ? 0 : (current + 1) % 3;
     if (isSceneIndex(next)) {
       this.gotoScene(next);
     }
   }
 
   prevScene(): void {
-    const prev = (this.currentScene + 2) % 3;
+    const current = this.getCurrentScene();
+    const prev = current === undefined ? 2 : (current + 2) % 3;
     if (isSceneIndex(prev)) {
       this.gotoScene(prev);
     }
   }
 
-  private setButtonFlash(flashing: boolean): void {
-    if (this.isButtonFlashing !== flashing) {
-      this.isButtonFlashing = flashing;
-      if (this.onButtonFlashCallback !== undefined) {
-        this.onButtonFlashCallback(flashing);
-      }
+  private emitCtaFlash(): void {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("hero:cta-flash"));
     }
   }
 
   update(deltaMs: number): TimelineState {
     if (!this.isPaused) {
-      // Intro QNTX playback (first load only, 2s)
-      if (this.isIntro) {
-        this.elapsedInScene += deltaMs;
-        if (this.elapsedInScene >= CANVAS_CONFIG.timings.qntxIntro) {
-          this.isIntro = false;
-          this.gotoScene(0); // Proceed to Scene 0 (EARN)
-        }
-      } else {
-        if (this.isTransitioning) {
-          this.transitionElapsed += deltaMs;
-          if (this.transitionElapsed >= CANVAS_CONFIG.timings.transition) {
-            this.isTransitioning = false;
-            this.transitionElapsed = CANVAS_CONFIG.timings.transition;
+      this.elapsedInPhase += deltaMs;
+
+      switch (this.phase) {
+        case "INTRO_BUILD": {
+          if (this.elapsedInPhase >= CANVAS_CONFIG.timings.qntxIntroBuild) {
+            this.phase = "QNTX_HOLD";
+            this.elapsedInPhase = 0;
+            this.hasEmittedCtaFlash = false;
+            if (this.onProgressChange !== undefined) {
+              this.onProgressChange(undefined);
+            }
           }
+          break;
         }
 
-        this.elapsedInScene += deltaMs;
-        const duration = this.sceneDurations[this.currentScene] ?? 4000;
+        case "QNTX_HOLD": {
+          // Emit hero:cta-flash event at t=0.3s
+          if (
+            !this.hasEmittedCtaFlash &&
+            this.elapsedInPhase >= CANVAS_CONFIG.timings.qntxXFlashStart
+          ) {
+            this.hasEmittedCtaFlash = true;
+            this.emitCtaFlash();
+          }
 
-        // Button invert flash check during QNTX hold in Scene 2
-        if (this.currentScene === 2 && this.elapsedInScene >= CANVAS_CONFIG.timings.sceneScale) {
-          const holdElapsed = this.elapsedInScene - CANVAS_CONFIG.timings.sceneScale;
-          const flashStart = 400;
-          const flashEnd = flashStart + CANVAS_CONFIG.timings.buttonFlashDuration;
-          const shouldFlash = holdElapsed >= flashStart && holdElapsed <= flashEnd;
-          this.setButtonFlash(shouldFlash);
-        } else {
-          this.setButtonFlash(false);
+          if (this.elapsedInPhase >= CANVAS_CONFIG.timings.qntxHold) {
+            this.phase = "DISSOLVE_TO_SCENE_1";
+            this.elapsedInPhase = 0;
+            if (this.onProgressChange !== undefined) {
+              this.onProgressChange(undefined);
+            }
+          }
+          break;
         }
 
-        if (this.elapsedInScene >= duration) {
-          this.setButtonFlash(false);
-          this.nextScene();
+        case "DISSOLVE_TO_SCENE_1": {
+          if (this.elapsedInPhase >= CANVAS_CONFIG.timings.transition) {
+            this.phase = "SCENE_1";
+            this.elapsedInPhase = 0;
+            if (this.onProgressChange !== undefined) {
+              this.onProgressChange(0);
+            }
+          }
+          break;
+        }
+
+        case "SCENE_1": {
+          if (this.elapsedInPhase >= CANVAS_CONFIG.timings.scene1Earn) {
+            // Continues directly to Scene 2 (NO dissolve)
+            this.phase = "SCENE_2";
+            this.elapsedInPhase = 0;
+            if (this.onProgressChange !== undefined) {
+              this.onProgressChange(1);
+            }
+          }
+          break;
+        }
+
+        case "SCENE_2": {
+          if (this.elapsedInPhase >= CANVAS_CONFIG.timings.scene2Pay) {
+            // Dissolve into Scene 3
+            this.phase = "DISSOLVE_TO_SCENE_3";
+            this.elapsedInPhase = 0;
+            if (this.onProgressChange !== undefined) {
+              this.onProgressChange(undefined);
+            }
+          }
+          break;
+        }
+
+        case "DISSOLVE_TO_SCENE_3": {
+          if (this.elapsedInPhase >= CANVAS_CONFIG.timings.transition) {
+            this.phase = "SCENE_3";
+            this.elapsedInPhase = 0;
+            if (this.onProgressChange !== undefined) {
+              this.onProgressChange(2);
+            }
+          }
+          break;
+        }
+
+        case "SCENE_3": {
+          if (this.elapsedInPhase >= CANVAS_CONFIG.timings.scene3Scale) {
+            // Loops back to QNTX hold
+            this.phase = "QNTX_HOLD";
+            this.elapsedInPhase = 0;
+            this.hasEmittedCtaFlash = false;
+            if (this.onProgressChange !== undefined) {
+              this.onProgressChange(undefined);
+            }
+          }
+          break;
         }
       }
     }
 
-    const isQNTXHold =
-      !this.isIntro &&
-      this.currentScene === 2 &&
-      this.elapsedInScene >= CANVAS_CONFIG.timings.sceneScale;
+    const isTransitioning =
+      this.phase === "DISSOLVE_TO_SCENE_1" ||
+      this.phase === "DISSOLVE_TO_SCENE_3" ||
+      (this.phase === "SCENE_3" && this.elapsedInPhase >= 3400);
 
-    const transitionProgress = this.isTransitioning
-      ? Math.min(1, this.transitionElapsed / CANVAS_CONFIG.timings.transition)
-      : 1;
+    let transitionProgress = 1.0;
+    if (this.phase === "DISSOLVE_TO_SCENE_1" || this.phase === "DISSOLVE_TO_SCENE_3") {
+      transitionProgress = Math.min(1.0, this.elapsedInPhase / CANVAS_CONFIG.timings.transition);
+    } else if (this.phase === "SCENE_3" && this.elapsedInPhase >= 3400) {
+      transitionProgress = Math.min(1.0, (this.elapsedInPhase - 3400) / 800);
+    }
 
     return {
-      currentScene: this.currentScene,
-      elapsedInScene: this.elapsedInScene,
-      isIntro: this.isIntro,
-      isQNTXHold,
-      isTransitioning: this.isTransitioning,
+      phase: this.phase,
+      currentScene: this.getCurrentScene(),
+      elapsedInPhase: this.elapsedInPhase,
+      isPaused: this.isPaused,
+      isTransitioning,
       transitionProgress,
     };
   }

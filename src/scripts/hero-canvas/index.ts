@@ -1,13 +1,87 @@
 /**
- * QuantX Hero Canvas Main Entrypoint
+ * QuantX Hero Canvas Main Entrypoint & DOM Wiring
  *
- * Initializes the canvas engine and handles Astro view transition lifecycles.
+ * Coordinates engine lifecycle, progress indicator buttons, CTA flash listener, and Astro view
+ * transitions.
  */
 
 import { CANVAS_CONFIG } from "./config";
 import { HeroCanvasEngine } from "./engine";
+import { isSceneIndex, type SceneIndex } from "./types";
 
 let currentEngine: HeroCanvasEngine | undefined = undefined;
+let ctaFlashCleanup: (() => void) | undefined = undefined;
+
+/** Updates the 3 small square progress buttons */
+function updateProgressIndicator(activeScene: SceneIndex | undefined): void {
+  const buttons = document.querySelectorAll<HTMLButtonElement>("[data-scene-btn]");
+  buttons.forEach((btn) => {
+    const btnIndexStr = btn.getAttribute("data-scene-btn");
+    const btnIndex = btnIndexStr !== null && btnIndexStr !== "" ? parseInt(btnIndexStr, 10) : -1;
+
+    if (activeScene !== undefined && btnIndex === activeScene) {
+      btn.classList.add("bg-black");
+      btn.classList.remove("bg-transparent");
+      btn.setAttribute("aria-current", "true");
+    } else {
+      btn.classList.remove("bg-black");
+      btn.classList.add("bg-transparent");
+      btn.removeAttribute("aria-current");
+    }
+  });
+}
+
+/** Sets up progress buttons click events */
+function wireProgressButtons(engine: HeroCanvasEngine): void {
+  const buttons = document.querySelectorAll<HTMLButtonElement>("[data-scene-btn]");
+  buttons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const idxStr = btn.getAttribute("data-scene-btn");
+      if (idxStr !== null && idxStr !== "") {
+        const sceneIdx = parseInt(idxStr, 10);
+        if (isSceneIndex(sceneIdx)) {
+          engine.getTimeline().gotoScene(sceneIdx);
+        }
+      }
+    });
+  });
+}
+
+/** Sets up GET STARTED button color inversion on hero:cta-flash event */
+function wireCtaFlash(): void {
+  if (ctaFlashCleanup !== undefined) {
+    ctaFlashCleanup();
+    ctaFlashCleanup = undefined;
+  }
+
+  const { ctaBtnSelector, timings } = CANVAS_CONFIG;
+  const ctaBtn = document.querySelector<HTMLElement>(ctaBtnSelector);
+  if (ctaBtn === null) {
+    return;
+  }
+
+  let flashTimer: number | undefined = undefined;
+
+  const handleFlash = (): void => {
+    ctaBtn.classList.add("!bg-black", "!text-white");
+    if (flashTimer !== undefined) {
+      clearTimeout(flashTimer);
+    }
+    flashTimer = window.setTimeout(() => {
+      ctaBtn.classList.remove("!bg-black", "!text-white");
+    }, timings.ctaFlashDuration);
+  };
+
+  window.addEventListener("hero:cta-flash", handleFlash);
+
+  ctaFlashCleanup = (): void => {
+    window.removeEventListener("hero:cta-flash", handleFlash);
+    if (flashTimer !== undefined) {
+      clearTimeout(flashTimer);
+    }
+    ctaBtn.classList.remove("!bg-black", "!text-white");
+  };
+}
 
 export function initHeroCanvas(): HeroCanvasEngine | undefined {
   if (typeof window === "undefined") {
@@ -25,13 +99,22 @@ export function initHeroCanvas(): HeroCanvasEngine | undefined {
     return undefined;
   }
 
-  const engine = new HeroCanvasEngine(canvasEl);
+  // Initialize progress state to none filled
+  updateProgressIndicator(undefined);
+
+  const engine = new HeroCanvasEngine(canvasEl, (activeScene) => {
+    updateProgressIndicator(activeScene);
+  });
+
   currentEngine = engine;
+
+  wireProgressButtons(engine);
+  wireCtaFlash();
 
   return engine;
 }
 
-// Lifecycle integration with Astro
+// Astro lifecycle integration
 if (typeof window !== "undefined") {
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
@@ -49,6 +132,10 @@ if (typeof window !== "undefined") {
     if (currentEngine !== undefined) {
       currentEngine.destroy();
       currentEngine = undefined;
+    }
+    if (ctaFlashCleanup !== undefined) {
+      ctaFlashCleanup();
+      ctaFlashCleanup = undefined;
     }
   });
 }

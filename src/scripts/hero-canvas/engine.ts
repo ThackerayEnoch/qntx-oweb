@@ -1,12 +1,13 @@
 /**
  * QuantX Hero Canvas Engine
  *
- * Implements the fixed square grid, particle dissolve-and-regather morphing, mechanical
- * linear/uniform movement (whole-cell stepped), crisp integer pixel alignment, and reduced-motion
- * handling.
+ * Implements fixed square grid layout, 30 ticks/second mechanical timestep accumulator,
+ * stage-to-real-grid projection with horizontal compression factor k, crisp pixel alignment,
+ * reduced-motion handling, and lifecycle cleanup.
  */
 
 import { CANVAS_CONFIG } from "./config";
+import { ParticlePool } from "./particles";
 import {
   getQntxFrame,
   getReducedMotionPayFrame,
@@ -14,39 +15,51 @@ import {
   getScene2PayFrame,
   getScene3ScaleFrame,
 } from "./scenes";
-import { CanvasTimeline, type TimelineState } from "./timeline";
-import type { Particle, SceneFrame, SceneIndex, TargetCell } from "./types";
+import { CanvasTimeline, type TimelinePhase, type TimelineState } from "./timeline";
+import type { Cell, SceneIndex } from "./types";
 
 export class HeroCanvasEngine {
   private readonly canvas: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
   private readonly timeline: CanvasTimeline;
-  private particles: Particle[] = [];
+  private readonly particlePool: ParticlePool;
 
   // Grid dimensions
-  private cols = 96;
-  private rows = 44;
-  private cellSize = 8;
+  private realCols = 128;
+  private realRows = 40;
+  private cellSize = CANVAS_CONFIG.grid.cellSize; // 6
+  private gap = CANVAS_CONFIG.grid.gap; // 1
   private originX = 0;
   private originY = 0;
   private dpr = 1;
+  private compressionK = 1.0;
+  private isMobile = false;
 
   // Animation Loop State
   private rafId: number | undefined = undefined;
   private lastTime = 0;
+  private accumulator = 0;
+  private readonly tickDuration = 1000 / CANVAS_CONFIG.tickRate; // 33.333ms
+
   private isVisible = true;
   private isReducedMotion = false;
   private reducedMotionTimer = 0;
   private reducedMotionFrame: "QNTX" | "PAY" = "QNTX";
   private reducedMotionOpacity = 1.0;
-  private wasTransitioning = false;
+
+  // Phase transition tracking
+  private previousPhase: TimelinePhase = "INTRO_BUILD";
+  private scene3RegatherTriggered = false;
 
   // Observers & Listeners
   private intersectionObserver?: IntersectionObserver;
   private resizeObserver?: ResizeObserver;
   private resizeDebounceTimer?: number;
 
-  constructor(canvas: HTMLCanvasElement, onSceneChange?: (scene: SceneIndex) => void) {
+  constructor(
+    canvas: HTMLCanvasElement,
+    onProgressChange?: (activeScene: SceneIndex | undefined) => void,
+  ) {
     this.canvas = canvas;
     const context = canvas.getContext("2d");
     if (context === null) {
@@ -54,22 +67,20 @@ export class HeroCanvasEngine {
     }
     this.ctx = context;
 
-    this.timeline = new CanvasTimeline(onSceneChange, (flashing: boolean) => {
-      this.handleButtonFlash(flashing);
-    });
+    this.timeline = new CanvasTimeline(onProgressChange);
+    this.particlePool = new ParticlePool(CANVAS_CONFIG.poolSize);
 
     this.checkReducedMotion();
     this.initGrid();
-    this.initParticlePool();
     this.setupListeners();
     this.setupObservers();
 
-    // Start with Intro QNTX
-    const initialFrame = getQntxFrame(this.cols, this.rows, 0, true);
-    this.setTargets(initialFrame.cells, false);
+    // Start with Intro QNTX Frame
+    const initialFrame = getQntxFrame(0, true, this.compressionK);
+    this.particlePool.setImmediateTargets(initialFrame.cells);
 
     this.lastTime = performance.now();
-    this.rafId = requestAnimationFrame(this.tick);
+    this.rafId = requestAnimationFrame(this.renderLoop);
   }
 
   getTimeline(): CanvasTimeline {
@@ -82,17 +93,6 @@ export class HeroCanvasEngine {
     }
   }
 
-  private handleButtonFlash(flashing: boolean): void {
-    const btn = document.getElementById(CANVAS_CONFIG.getStartedBtnId);
-    if (btn !== null) {
-      if (flashing) {
-        btn.classList.add("!bg-black", "!text-white");
-      } else {
-        btn.classList.remove("!bg-black", "!text-white");
-      }
-    }
-  }
-
   private initGrid(): void {
     const rect = this.canvas.getBoundingClientRect();
     const cssW = Math.max(rect.width, 300);
@@ -102,71 +102,43 @@ export class HeroCanvasEngine {
     this.canvas.width = Math.floor(cssW * this.dpr);
     this.canvas.height = Math.floor(cssH * this.dpr);
 
-    // Responsive grid column/row limits
-    const isMobile = cssW < CANVAS_CONFIG.mobile.breakpoint;
-    this.cols = isMobile ? CANVAS_CONFIG.mobile.cols : CANVAS_CONFIG.desktop.cols;
+    this.isMobile = cssW < CANVAS_CONFIG.grid.mobileBreakpoint;
+    this.cellSize = CANVAS_CONFIG.grid.cellSize;
+    this.gap = CANVAS_CONFIG.grid.gap;
 
-    const { gap } = CANVAS_CONFIG;
-    const availableW = cssW - 16;
-    const availableH = cssH - 16;
+    const cellStep = this.cellSize + this.gap;
 
-    // Cell size driven by available width to fill canvas horizontally
-    const wCell = Math.floor((availableW - (this.cols - 1) * gap) / this.cols);
-    const hCell = Math.floor((availableH - (20 - 1) * gap) / 20);
-    this.cellSize = Math.max(3, Math.min(wCell, hCell));
+    // Compute real columns and rows from canvas size
+    this.realCols = Math.max(CANVAS_CONFIG.grid.minCols, Math.floor((cssW + this.gap) / cellStep));
+    this.realRows = Math.max(CANVAS_CONFIG.grid.minRows, Math.floor((cssH + this.gap) / cellStep));
 
-    // Dynamic row count to cleanly fill vertical space
-    this.rows = Math.max(20, Math.floor((availableH + gap) / (this.cellSize + gap)));
+    // Horizontal compression factor k = realCols / 128 (k <= 1.0)
+    this.compressionK =
+      this.realCols >= CANVAS_CONFIG.stage.cols ? 1.0 : this.realCols / CANVAS_CONFIG.stage.cols;
 
-    const gridW = this.cols * this.cellSize + (this.cols - 1) * gap;
-    const gridH = this.rows * this.cellSize + (this.rows - 1) * gap;
+    const gridTotalW = this.realCols * this.cellSize + (this.realCols - 1) * this.gap;
+    const gridTotalH = this.realRows * this.cellSize + (this.realRows - 1) * this.gap;
 
-    this.originX = Math.floor((cssW - gridW) / 2);
-    this.originY = Math.floor((cssH - gridH) / 2);
-  }
-
-  private initParticlePool(): void {
-    this.particles = [];
-    const { poolSize } = CANVAS_CONFIG;
-
-    for (let i = 0; i < poolSize; i++) {
-      const col = Math.floor(Math.random() * this.cols);
-      const row = Math.floor(Math.random() * this.rows);
-      this.particles.push({
-        col,
-        row,
-        fromCol: col,
-        fromRow: row,
-        targetCol: col,
-        targetRow: row,
-        state: "filled",
-        targetState: "filled",
-        scale: 0,
-        fromScale: 0,
-        targetScale: 0,
-        delay: 0,
-        active: false,
-      });
-    }
+    // Origin centers the real grid perfectly inside canvas CSS bounds
+    this.originX = Math.floor((cssW - gridTotalW) / 2);
+    this.originY = Math.floor((cssH - gridTotalH) / 2);
   }
 
   private setupListeners(): void {
-    // Window resize with debounce
     window.addEventListener("resize", this.handleResize);
 
-    // Canvas Mouse Events: Pause timeline on hover, resume on leave
+    // Canvas Hover: pause timeline, leave resumes
     this.canvas.addEventListener("mouseenter", () => {
       this.timeline.pause();
     });
-
     this.canvas.addEventListener("mouseleave", () => {
       this.timeline.resume();
     });
 
-    // Keyboard navigation (ArrowLeft = prev, ArrowRight = next)
+    // Keyboard navigation when canvas or progress squares have focus
     window.addEventListener("keydown", this.handleKeyDown);
 
-    // Tab visibility
+    // Page visibility
     document.addEventListener("visibilitychange", this.handleVisibilityChange);
   }
 
@@ -180,9 +152,17 @@ export class HeroCanvasEngine {
   };
 
   private readonly handleKeyDown = (e: KeyboardEvent): void => {
-    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+    // Only step scenes if canvas or progress indicator elements have focus
+    const active = document.activeElement;
+    const isCanvasFocused = active === this.canvas;
+    const isProgressFocused =
+      active instanceof HTMLElement &&
+      active.closest(`#${CANVAS_CONFIG.progressContainerId}`) !== null;
+
+    if (!isCanvasFocused && !isProgressFocused) {
       return;
     }
+
     if (e.key === "ArrowLeft") {
       e.preventDefault();
       this.timeline.prevScene();
@@ -198,6 +178,7 @@ export class HeroCanvasEngine {
     } else {
       this.isVisible = true;
       this.lastTime = performance.now();
+      this.accumulator = 0;
     }
   };
 
@@ -210,6 +191,7 @@ export class HeroCanvasEngine {
             this.isVisible = entry.isIntersecting;
             if (this.isVisible) {
               this.lastTime = performance.now();
+              this.accumulator = 0;
             }
           }
         },
@@ -226,66 +208,47 @@ export class HeroCanvasEngine {
     }
   }
 
-  /** Gets the target scene frame based on timeline state */
-  private getFrameForState(state: TimelineState): SceneFrame {
-    if (state.isIntro) {
-      return getQntxFrame(this.cols, this.rows, state.elapsedInScene, true);
-    }
-
-    if (state.currentScene === 0) {
-      return getScene1EarnFrame(this.cols, this.rows, state.elapsedInScene);
-    }
-
-    if (state.currentScene === 1) {
-      return getScene2PayFrame(this.cols, this.rows, state.elapsedInScene);
-    }
-
-    // Scene 2: SCALE (4s) followed by QNTX hold (2s)
-    if (state.elapsedInScene < CANVAS_CONFIG.timings.sceneScale) {
-      return getScene3ScaleFrame(this.cols, this.rows, state.elapsedInScene);
-    }
-
-    const holdElapsed = state.elapsedInScene - CANVAS_CONFIG.timings.sceneScale;
-    return getQntxFrame(this.cols, this.rows, holdElapsed, false);
-  }
-
-  /** Assigns targets to particles with random stagger delays for dissolve-and-regather */
-  private setTargets(targets: ReadonlyArray<TargetCell>, isNewScene: boolean): void {
-    const targetCount = targets.length;
-    const poolSize = this.particles.length;
-
-    for (let i = 0; i < poolSize; i++) {
-      const p = this.particles[i];
-      if (p === undefined) {
-        continue;
+  /** Gets target cells for a specific timeline state */
+  private getTargetCellsForState(state: TimelineState): ReadonlyArray<Cell> {
+    let cells: ReadonlyArray<Cell>;
+    switch (state.phase) {
+      case "INTRO_BUILD": {
+        ({ cells } = getQntxFrame(state.elapsedInPhase, true, this.compressionK));
+        break;
       }
-
-      if (i < targetCount) {
-        const t = targets[i];
-        if (t !== undefined) {
-          p.fromCol = p.col;
-          p.fromRow = p.row;
-          p.fromScale = p.scale;
-          p.targetCol = t.col;
-          p.targetRow = t.row;
-          p.targetState = t.state ?? "filled";
-          p.targetScale = t.scale ?? 1.0;
-          p.delay = isNewScene ? Math.random() * CANVAS_CONFIG.timings.maxStaggerDelay : 0;
-          p.active = true;
+      case "QNTX_HOLD": {
+        ({ cells } = getQntxFrame(state.elapsedInPhase, false, this.compressionK));
+        break;
+      }
+      case "DISSOLVE_TO_SCENE_1": {
+        ({ cells } = getScene1EarnFrame(0, this.compressionK));
+        break;
+      }
+      case "SCENE_1": {
+        ({ cells } = getScene1EarnFrame(state.elapsedInPhase, this.compressionK));
+        break;
+      }
+      case "SCENE_2": {
+        ({ cells } = getScene2PayFrame(state.elapsedInPhase, this.compressionK));
+        break;
+      }
+      case "DISSOLVE_TO_SCENE_3": {
+        ({ cells } = getScene3ScaleFrame(0, this.isMobile, this.compressionK));
+        break;
+      }
+      case "SCENE_3": {
+        if (state.elapsedInPhase >= 3400) {
+          ({ cells } = getQntxFrame(0, false, this.compressionK));
+        } else {
+          ({ cells } = getScene3ScaleFrame(state.elapsedInPhase, this.isMobile, this.compressionK));
         }
-      } else {
-        // Unused particle parks at scale 0
-        p.fromCol = p.col;
-        p.fromRow = p.row;
-        p.fromScale = p.scale;
-        p.targetScale = 0;
-        p.delay = isNewScene ? Math.random() * (CANVAS_CONFIG.timings.maxStaggerDelay / 2) : 0;
-        p.active = false;
+        break;
       }
     }
+    return cells;
   }
 
-  private readonly tick = (timestamp: number): void => {
+  private readonly renderLoop = (timestamp: number): void => {
     const deltaMs = Math.min(100, timestamp - this.lastTime);
     this.lastTime = timestamp;
 
@@ -294,156 +257,58 @@ export class HeroCanvasEngine {
         this.updateReducedMotion(deltaMs);
         this.renderReducedMotion();
       } else {
-        this.update(deltaMs);
+        // Fixed 30 ticks/second accumulator
+        this.accumulator += deltaMs;
+        while (this.accumulator >= this.tickDuration) {
+          this.step(this.tickDuration);
+          this.accumulator -= this.tickDuration;
+        }
         this.render();
       }
     }
 
-    this.rafId = requestAnimationFrame(this.tick);
+    this.rafId = requestAnimationFrame(this.renderLoop);
   };
 
-  private updateReducedMotion(deltaMs: number): void {
-    this.reducedMotionTimer += deltaMs;
-    const interval = CANVAS_CONFIG.timings.reducedMotionInterval;
-    if (this.reducedMotionTimer >= interval) {
-      this.reducedMotionTimer = 0;
-      this.reducedMotionFrame = this.reducedMotionFrame === "QNTX" ? "PAY" : "QNTX";
+  private step(tickMs: number): void {
+    const state = this.timeline.update(tickMs);
+
+    // Detect phase transitions for starting dissolve transitions
+    if (state.phase !== this.previousPhase) {
+      const prev = this.previousPhase;
+      this.previousPhase = state.phase;
+      this.scene3RegatherTriggered = false;
+
+      if (state.phase === "DISSOLVE_TO_SCENE_1") {
+        const targets = getScene1EarnFrame(0, this.compressionK).cells;
+        this.particlePool.startDissolve(targets, 1111);
+      } else if (state.phase === "DISSOLVE_TO_SCENE_3") {
+        const targets = getScene3ScaleFrame(0, this.isMobile, this.compressionK).cells;
+        this.particlePool.startDissolve(targets, 3333);
+      } else if (state.phase === "SCENE_2" && prev !== "SCENE_1") {
+        // Jumped directly to Scene 2 via progress button: snap immediately to initial state
+        const targets = getScene2PayFrame(0, this.compressionK).cells;
+        this.particlePool.setImmediateTargets(targets);
+      }
     }
 
-    // Crossfade opacity
-    const fadeDuration = 600;
-    if (this.reducedMotionTimer < fadeDuration) {
-      this.reducedMotionOpacity = this.reducedMotionTimer / fadeDuration;
-    } else if (this.reducedMotionTimer > interval - fadeDuration) {
-      this.reducedMotionOpacity = (interval - this.reducedMotionTimer) / fadeDuration;
-    } else {
-      this.reducedMotionOpacity = 1.0;
-    }
-  }
-
-  private renderReducedMotion(): void {
-    const { width, height } = this.canvas;
-    const cssW = width / this.dpr;
-    const cssH = height / this.dpr;
-
-    this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-    this.ctx.fillStyle = CANVAS_CONFIG.colors.bg;
-    this.ctx.fillRect(0, 0, cssW, cssH);
-
-    const frameCells =
-      this.reducedMotionFrame === "QNTX"
-        ? getQntxFrame(this.cols, this.rows, 0, false).cells
-        : getReducedMotionPayFrame(this.cols, this.rows).cells;
-
-    this.ctx.globalAlpha = Math.max(0.1, Math.min(1, this.reducedMotionOpacity));
-    this.ctx.fillStyle = CANVAS_CONFIG.colors.fg;
-
-    const { gap } = CANVAS_CONFIG;
-    for (const cell of frameCells) {
-      const px = this.originX + cell.col * (this.cellSize + gap);
-      const py = this.originY + cell.row * (this.cellSize + gap);
-      this.ctx.fillRect(px, py, this.cellSize, this.cellSize);
+    // Scene 3 end dissolve into QNTX wordmark at t=3400ms
+    if (
+      state.phase === "SCENE_3" &&
+      state.elapsedInPhase >= 3400 &&
+      !this.scene3RegatherTriggered
+    ) {
+      this.scene3RegatherTriggered = true;
+      const targets = getQntxFrame(0, false, this.compressionK).cells;
+      this.particlePool.startDissolve(targets, 5555);
     }
 
-    this.ctx.globalAlpha = 1.0;
-  }
-
-  private update(deltaMs: number): void {
-    const state = this.timeline.update(deltaMs);
-
+    // Update particles based on active phase
     if (state.isTransitioning) {
-      if (!this.wasTransitioning) {
-        this.wasTransitioning = true;
-
-        // Snapshot origin coordinates and assign random stagger delays
-        for (const p of this.particles) {
-          p.fromCol = p.col;
-          p.fromRow = p.row;
-          p.fromScale = p.scale;
-          p.delay = Math.random() * CANVAS_CONFIG.timings.maxStaggerDelay;
-        }
-
-        // Fetch targets for the new scene
-        const targetFrame = this.getFrameForState(state);
-        const targetCount = targetFrame.cells.length;
-        const poolSize = this.particles.length;
-
-        for (let i = 0; i < poolSize; i++) {
-          const p = this.particles[i];
-          if (p === undefined) {
-            continue;
-          }
-
-          if (i < targetCount) {
-            const t = targetFrame.cells[i];
-            if (t !== undefined) {
-              p.targetCol = t.col;
-              p.targetRow = t.row;
-              p.targetState = t.state ?? "filled";
-              p.targetScale = t.scale ?? 1.0;
-              p.active = true;
-            }
-          } else {
-            p.targetScale = 0;
-            p.active = false;
-          }
-        }
-      }
-
-      // Staggered dissolve-and-regather transition progression
-      const transDuration = CANVAS_CONFIG.timings.transition;
-      const transElapsed = state.transitionProgress * transDuration;
-
-      for (const p of this.particles) {
-        if (!p.active && p.scale <= 0.01 && p.fromScale <= 0.01) {
-          continue;
-        }
-
-        if (transElapsed < p.delay) {
-          p.col = p.fromCol;
-          p.row = p.fromRow;
-          p.scale = p.fromScale;
-        } else {
-          const effectiveDuration = Math.max(50, transDuration - p.delay);
-          const t = Math.min(1, (transElapsed - p.delay) / effectiveDuration);
-
-          p.col = Math.round(p.fromCol + (p.targetCol - p.fromCol) * t);
-          p.row = Math.round(p.fromRow + (p.targetRow - p.fromRow) * t);
-          p.scale = p.fromScale + (p.targetScale - p.fromScale) * t;
-
-          if (t >= 0.5) {
-            p.state = p.targetState;
-          }
-        }
-      }
+      this.particlePool.updateDissolve(state.transitionProgress);
     } else {
-      this.wasTransitioning = false;
-
-      // Normal in-scene playback
-      const frame = this.getFrameForState(state);
-      const targetCount = frame.cells.length;
-      const poolSize = this.particles.length;
-
-      for (let i = 0; i < poolSize; i++) {
-        const p = this.particles[i];
-        if (p === undefined) {
-          continue;
-        }
-
-        if (i < targetCount) {
-          const t = frame.cells[i];
-          if (t !== undefined) {
-            p.col = t.col;
-            p.row = t.row;
-            p.scale = t.scale ?? 1.0;
-            p.state = t.state ?? "filled";
-            p.active = true;
-          }
-        } else {
-          p.scale = 0;
-          p.active = false;
-        }
-      }
+      const targets = this.getTargetCellsForState(state);
+      this.particlePool.setImmediateTargets(targets);
     }
   }
 
@@ -454,27 +319,35 @@ export class HeroCanvasEngine {
 
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
 
-    // Clear with crisp background
+    // Clean canvas background
     this.ctx.fillStyle = CANVAS_CONFIG.colors.bg;
     this.ctx.fillRect(0, 0, cssW, cssH);
 
-    const { gap } = CANVAS_CONFIG;
-    const { cellSize } = this;
+    const cellStep = this.cellSize + this.gap;
+    const realCenterCol = Math.floor(this.realCols / 2);
+    const realCenterRow = Math.floor(this.realRows / 2);
+    const stageRowOffset = realCenterRow - CANVAS_CONFIG.stage.centerRow; // 20
 
-    for (const p of this.particles) {
+    const particles = this.particlePool.getParticles();
+
+    for (const p of particles) {
       if (p.scale < 0.05) {
         continue;
       }
 
-      // Keep within grid boundaries
-      if (p.col < 0 || p.col >= this.cols || p.row < 0 || p.row >= this.rows) {
+      // Project stage coordinate to real grid
+      // col 64 maps to realCenterCol
+      const realCol = realCenterCol + (p.col - CANVAS_CONFIG.stage.centerCol);
+      const realRow = stageRowOffset + p.row;
+
+      if (realCol < 0 || realCol >= this.realCols || realRow < 0 || realRow >= this.realRows) {
         continue;
       }
 
-      const px = this.originX + p.col * (cellSize + gap);
-      const py = this.originY + p.row * (cellSize + gap);
-      const size = Math.max(1, Math.round(cellSize * p.scale));
-      const offset = Math.floor((cellSize - size) / 2);
+      const px = this.originX + realCol * cellStep;
+      const py = this.originY + realRow * cellStep;
+      const size = Math.max(1, Math.round(this.cellSize * p.scale));
+      const offset = Math.floor((this.cellSize - size) / 2);
 
       const renderX = px + offset;
       const renderY = py + offset;
@@ -488,14 +361,64 @@ export class HeroCanvasEngine {
         this.ctx.strokeStyle = CANVAS_CONFIG.colors.fg;
         this.ctx.lineWidth = 1;
         this.ctx.strokeRect(renderX + 0.5, renderY + 0.5, size - 1, size - 1);
-      } else if (p.state === "inverted") {
-        // Inverted flash: white cell with black outline for high-contrast punch
-        this.ctx.fillStyle = CANVAS_CONFIG.colors.bg;
-        this.ctx.fillRect(renderX, renderY, size, size);
-        this.ctx.strokeStyle = CANVAS_CONFIG.colors.fg;
-        this.ctx.lineWidth = 1;
-        this.ctx.strokeRect(renderX + 0.5, renderY + 0.5, size - 1, size - 1);
       }
+    }
+  }
+
+  private updateReducedMotion(deltaMs: number): void {
+    this.reducedMotionTimer += deltaMs;
+    const interval = CANVAS_CONFIG.timings.reducedMotionInterval;
+
+    if (this.reducedMotionTimer >= interval) {
+      this.reducedMotionTimer = 0;
+      this.reducedMotionFrame = this.reducedMotionFrame === "QNTX" ? "PAY" : "QNTX";
+    }
+
+    const fadeDur = CANVAS_CONFIG.timings.reducedMotionFadeDuration;
+    if (this.reducedMotionTimer < fadeDur) {
+      this.reducedMotionOpacity = this.reducedMotionTimer / fadeDur;
+    } else if (this.reducedMotionTimer > interval - fadeDur) {
+      this.reducedMotionOpacity = (interval - this.reducedMotionTimer) / fadeDur;
+    } else {
+      this.reducedMotionOpacity = 1.0;
+    }
+
+    // Set canvas element opacity directly
+    this.canvas.style.opacity = Math.max(0, Math.min(1, this.reducedMotionOpacity)).toString();
+  }
+
+  private renderReducedMotion(): void {
+    const { width, height } = this.canvas;
+    const cssW = width / this.dpr;
+    const cssH = height / this.dpr;
+
+    this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    this.ctx.fillStyle = CANVAS_CONFIG.colors.bg;
+    this.ctx.fillRect(0, 0, cssW, cssH);
+
+    const frameCells =
+      this.reducedMotionFrame === "QNTX"
+        ? getQntxFrame(0, false, this.compressionK).cells
+        : getReducedMotionPayFrame(this.compressionK).cells;
+
+    const cellStep = this.cellSize + this.gap;
+    const realCenterCol = Math.floor(this.realCols / 2);
+    const realCenterRow = Math.floor(this.realRows / 2);
+    const stageRowOffset = realCenterRow - CANVAS_CONFIG.stage.centerRow;
+
+    this.ctx.fillStyle = CANVAS_CONFIG.colors.fg;
+
+    for (const c of frameCells) {
+      const realCol = realCenterCol + (c.col - CANVAS_CONFIG.stage.centerCol);
+      const realRow = stageRowOffset + c.row;
+
+      if (realCol < 0 || realCol >= this.realCols || realRow < 0 || realRow >= this.realRows) {
+        continue;
+      }
+
+      const px = this.originX + realCol * cellStep;
+      const py = this.originY + realRow * cellStep;
+      this.ctx.fillRect(px, py, this.cellSize, this.cellSize);
     }
   }
 
@@ -506,6 +429,7 @@ export class HeroCanvasEngine {
     if (this.resizeDebounceTimer !== undefined) {
       clearTimeout(this.resizeDebounceTimer);
     }
+
     window.removeEventListener("resize", this.handleResize);
     window.removeEventListener("keydown", this.handleKeyDown);
     document.removeEventListener("visibilitychange", this.handleVisibilityChange);
