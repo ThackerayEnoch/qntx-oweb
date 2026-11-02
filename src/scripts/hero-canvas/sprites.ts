@@ -9,27 +9,28 @@ import { CANVAS_CONFIG } from "./config";
 import { createPRNG } from "./particles";
 import type { Cell, CellState, Sprite } from "./types";
 
-/** Full-size Agent (11x8) silhouette */
+/** Full-size Piggy-Bank Agent (9x9) silhouette with top coin slot */
 export const SPRITE_AGENT: Sprite = {
-  width: 11,
-  height: 8,
+  width: 9,
+  height: 9,
   rows: [
-    ".#########.",
-    ".##.###.##.",
-    ".##.###.##.",
-    "###########",
-    "###########",
-    ".#########.",
-    "..#.#.#.#..",
-    "..#.#.#.#..",
+    "###...###",
+    "#########",
+    "##.###.##",
+    "##.###.##",
+    "#########",
+    "#########",
+    "#########",
+    ".##...##.",
+    ".##...##.",
   ],
 };
 
-/** Mini Agent (7x5) for Scene 2 crowd */
+/** Mini Piggy-Bank Agent (7x6) for Scene 2 crowd */
 export const SPRITE_MINI_AGENT: Sprite = {
   width: 7,
-  height: 5,
-  rows: [".#####.", ".#.#.#.", "#######", ".#####.", ".#.#.#."],
+  height: 6,
+  rows: ["##...##", "#######", "#.###.#", "#######", "#######", ".#...#."],
 };
 
 /** Coin (5x5) */
@@ -123,13 +124,14 @@ export function spriteToCells(
 }
 
 /**
- * Returns cells for the 11x8 Agent sprite with dynamic eye state and FLASH support. Eye cells
- * (local): (3,1), (3,2), (7,1), (7,2).
+ * Returns cells for the 9x9 Agent sprite with dynamic eye state, FLASH and jump support. Eye cells
+ * (local): (2,2), (2,3), (6,2), (6,3).
  *
  * - OPEN: eyes empty
  * - BLINK: all four eye cells filled
- * - HAPPY: upper eyes (3,1), (7,1) filled; lower ones (3,2), (7,2) open
+ * - HAPPY: upper eyes (2,2), (6,2) filled; lower ones (2,3), (6,3) open (squint-smile)
  * - FLASH: all cells switch to "hollow" for 120ms
+ * - Optional jump: moves up 1 cell
  */
 export function getAgentCells(
   topCol: number,
@@ -137,22 +139,24 @@ export function getAgentCells(
   eyeState: "open" | "blink" | "happy" = "open",
   isFlash = false,
   scale = 1.0,
+  isJumping = false,
 ): Cell[] {
   const cells: Cell[] = [];
   const state: CellState = isFlash ? "hollow" : "filled";
+  const effectiveTopRow = isJumping ? topRow - 1 : topRow;
 
-  for (let r = 0; r < 8; r++) {
+  for (let r = 0; r < 9; r++) {
     const rowStr = SPRITE_AGENT.rows[r] ?? "";
-    for (let c = 0; c < 11; c++) {
+    for (let c = 0; c < 9; c++) {
       let filled = rowStr[c] === "#";
 
-      // Eye cells check: (3,1), (3,2), (7,1), (7,2)
-      if ((c === 3 || c === 7) && (r === 1 || r === 2)) {
+      // Eye cells check: (2,2), (2,3), (6,2), (6,3)
+      if ((c === 2 || c === 6) && (r === 2 || r === 3)) {
         if (eyeState === "blink") {
-          filled = true; // Blink: eyes filled
+          filled = true; // Blink: all 4 eye cells filled
         } else if (eyeState === "happy") {
-          // Happy: upper eyes filled (r === 1), lower eyes open (r === 2)
-          filled = r === 1;
+          // Happy squint: upper eye cells filled, lower ones open
+          filled = r === 2;
         } else {
           // Open: eyes empty
           filled = false;
@@ -162,7 +166,7 @@ export function getAgentCells(
       if (filled) {
         cells.push({
           col: topCol + c,
-          row: topRow + r,
+          row: effectiveTopRow + r,
           state,
           scale,
         });
@@ -173,7 +177,7 @@ export function getAgentCells(
   return cells;
 }
 
-/** Returns cells for the 7x5 Mini Agent sprite */
+/** Returns cells for the 7x6 Mini Agent sprite */
 export function getMiniAgentCells(
   topCol: number,
   topRow: number,
@@ -183,7 +187,7 @@ export function getMiniAgentCells(
   const cells: Cell[] = [];
   const state: CellState = isFlash ? "hollow" : "filled";
 
-  for (let r = 0; r < 5; r++) {
+  for (let r = 0; r < 6; r++) {
     const rowStr = SPRITE_MINI_AGENT.rows[r] ?? "";
     for (let c = 0; c < 7; c++) {
       if (rowStr[c] === "#") {
@@ -201,7 +205,7 @@ export function getMiniAgentCells(
 }
 
 /**
- * Three single thinking cells: row = agent top row - 3, columns = agent center col + 7, +9, +11.
+ * Three single thinking cells: row = agent top row - 3, columns = agent center col + 6, +8, +10.
  * Cycles every 200ms (1 dot -> 2 dots -> 3 dots -> loop).
  */
 export function getThinkingDots(
@@ -211,7 +215,7 @@ export function getThinkingDots(
 ): Cell[] {
   const cells: Cell[] = [];
   const row = agentTopRow - 3;
-  const dotCols = [agentCenterCol + 7, agentCenterCol + 9, agentCenterCol + 11];
+  const dotCols = [agentCenterCol + 6, agentCenterCol + 8, agentCenterCol + 10];
   const phase = Math.floor(elapsedMs / 200) % 3; // 0, 1, 2
 
   for (let i = 0; i <= phase; i++) {
@@ -226,6 +230,114 @@ export function getThinkingDots(
     }
   }
 
+  return cells;
+}
+
+/**
+ * Paying emergence (0.1s): Cells emerge one by one from the slot cell (center col, slot row 25) and
+ * move straight up, forming a vertical bar of 1 column x 5 rows standing directly above the sprite
+ * (rows top-5..top-1: rows 20-24).
+ */
+export function getCoinEmergenceCells(
+  slotCenterCol: number,
+  slotRow: number,
+  progress: number,
+): Cell[] {
+  const cells: Cell[] = [];
+  const p = Math.max(0, Math.min(1, progress));
+  const numCells = Math.min(5, Math.max(1, Math.ceil(p * 5)));
+  for (let i = 0; i < numCells; i++) {
+    const targetRow = slotRow - 5 + i; // 20, 21, 22, 23, 24
+    const r = Math.round(slotRow - (5 - i) * p);
+    const row = Math.max(targetRow, Math.min(slotRow - 1, r));
+    cells.push({
+      col: slotCenterCol,
+      row,
+      state: "filled",
+      scale: 1.0,
+    });
+  }
+  return cells;
+}
+
+/** Bar unfolds into 5x5 coin at centerCol, center row 22 (rows 20-24) over ~0.1s. */
+export function getCoinUnfoldCells(centerCol: number, centerRow: number, progress: number): Cell[] {
+  const cells: Cell[] = [];
+  const p = Math.max(0, Math.min(1, progress));
+  const topRow = centerRow - 2; // 20
+  const leftCol = centerCol - 2;
+
+  for (let r = 0; r < 5; r++) {
+    const rowStr = SPRITE_COIN.rows[r] ?? "";
+    for (let c = 0; c < 5; c++) {
+      if (rowStr[c] === "#") {
+        const targetCol = leftCol + c;
+        const targetRow = topRow + r;
+        const currentCol = Math.round(centerCol + (targetCol - centerCol) * p);
+        cells.push({
+          col: currentCol,
+          row: targetRow,
+          state: "filled",
+          scale: 1.0,
+        });
+      }
+    }
+  }
+  return cells;
+}
+
+/** 5x5 coin squashes into 1x5 vertical bar standing directly above slot (rows 20-24) over ~0.1s. */
+export function getCoinSquashCells(centerCol: number, centerRow: number, progress: number): Cell[] {
+  const cells: Cell[] = [];
+  const p = Math.max(0, Math.min(1, progress));
+  const topRow = centerRow - 2; // 20
+  const leftCol = centerCol - 2;
+
+  for (let r = 0; r < 5; r++) {
+    const rowStr = SPRITE_COIN.rows[r] ?? "";
+    for (let c = 0; c < 5; c++) {
+      if (rowStr[c] === "#") {
+        const targetCol = leftCol + c;
+        const targetRow = topRow + r;
+        const currentCol = Math.round(targetCol + (centerCol - targetCol) * p);
+        cells.push({
+          col: currentCol,
+          row: targetRow,
+          state: "filled",
+          scale: 1.0,
+        });
+      }
+    }
+  }
+  return cells;
+}
+
+/**
+ * 1x5 bar descends 1 cell per tick straight down into the slot, vanishing into the head. Cells that
+ * have reached or passed the slot row (top row: 25) are no longer rendered.
+ */
+export function getCoinDescendCells(
+  slotCenterCol: number,
+  slotRow: number,
+  progress: number,
+): Cell[] {
+  const cells: Cell[] = [];
+  const p = Math.max(0, Math.min(1, progress));
+  // In 0.2s (6 ticks), bar descends 5-6 rows
+  const shift = Math.round(p * 5);
+
+  for (let i = 0; i < 5; i++) {
+    const initialRow = slotRow - 5 + i; // 20, 21, 22, 23, 24
+    const row = initialRow + shift;
+    if (row < slotRow) {
+      cells.push({
+        col: slotCenterCol,
+        row,
+        state: "filled",
+        scale: 1.0,
+      });
+    }
+  }
   return cells;
 }
 

@@ -1,20 +1,23 @@
 /**
  * QuantX Hero Canvas Scene Frame Generator
  *
- * Implements the two-scene narrative: QNTX Wordmark -> Scene 1 (x402 Payment, 8.0s) -> Scene 2
- * (Crowd & Trading, 4.0s) -> QNTX Hold.
+ * Implements the two-scene narrative: QUANTX Wordmark -> Scene 1 (x402 Payment via Piggy-Bank Slot,
+ * 8.0s) -> Scene 2 (Crowd Division & High-Frequency Trading, 4.0s) -> QUANTX Hold.
  *
  * Strict grid alignment, whole-cell snapping, and deterministic PRNG.
  */
 
-import { QNTX_SQUARES } from "../qntx-data";
+import { QUANTX_SQUARES } from "../qntx-data";
 import { CANVAS_CONFIG } from "./config";
 import { createPRNG } from "./particles";
 import {
   applyBuildEffect,
   applyVanishEffect,
   getAgentCells,
-  getGlyphTextCells,
+  getCoinDescendCells,
+  getCoinEmergenceCells,
+  getCoinSquashCells,
+  getCoinUnfoldCells,
   getMiniAgentCells,
   getPaymentBubbleContentCells,
   getSpeechBubbleCells,
@@ -37,15 +40,17 @@ export const SCENE_1_BEATS: ReadonlyArray<Beat> = [
   { name: "PAYMENT_BUBBLE_BUILD", startMs: 2300, endMs: 2600 },
   { name: "PAYMENT_BUBBLE_MOVE", startMs: 2600, endMs: 3400 },
   { name: "PAYMENT_BUBBLE_HOLD", startMs: 3400, endMs: 4500 },
-  { name: "PAYMENT_BUBBLE_VANISH_TEXT", startMs: 4500, endMs: 4700 },
-  { name: "COIN_DROP_TO_LINE", startMs: 4700, endMs: 4800 },
-  { name: "COIN_TRAVEL_TO_B", startMs: 4800, endMs: 5200 },
-  { name: "COIN_MERGE_B_FLASH", startMs: 5200, endMs: 5300 },
-  { name: "B_THINKING", startMs: 5300, endMs: 6000 },
-  { name: "PICTURE_BUILD", startMs: 6000, endMs: 6300 },
-  { name: "PICTURE_MOVE_TO_A", startMs: 6300, endMs: 7100 },
-  { name: "CHECK_MARK_BUILD", startMs: 7100, endMs: 7400 },
-  { name: "A_HAPPY_HOLD", startMs: 7400, endMs: 8000 },
+  { name: "PAYMENT_BUBBLE_VANISH", startMs: 4500, endMs: 4700 },
+  { name: "A_PAY_SLOT_EMERGE", startMs: 4700, endMs: 4800 },
+  { name: "COIN_UNFOLD", startMs: 4800, endMs: 4900 },
+  { name: "COIN_TRAVEL_TO_B", startMs: 4900, endMs: 5300 },
+  { name: "COIN_SQUASH", startMs: 5300, endMs: 5400 },
+  { name: "BAR_DESCEND_INTO_SLOT", startMs: 5400, endMs: 5600 },
+  { name: "B_FLASH_AND_THINKING", startMs: 5600, endMs: 6200 },
+  { name: "PICTURE_BUILD", startMs: 6200, endMs: 6500 },
+  { name: "PICTURE_MOVE_TO_A", startMs: 6500, endMs: 7300 },
+  { name: "CHECK_MARK_BUILD", startMs: 7300, endMs: 7600 },
+  { name: "A_HAPPY_HOLD", startMs: 7600, endMs: 8000 },
 ];
 
 /**
@@ -60,26 +65,27 @@ export function getCompressedCol(stageCol: number, k: number): number {
 }
 
 /**
- * Centered QNTX Wordmark Frame (reusing exact QNTX_SQUARES cell data). On first page load: builds
- * column by column over 0.8s. During hold: letter X flashes twice at t=0.3s (120ms hollow, 120ms
- * filled, 120ms hollow).
+ * Centered QUANTX Wordmark Frame (using 123x18 QUANTX_SQUARES). On first page load: builds column
+ * by column over 0.8s. During hold: letter X flashes twice at t=0.3s (120ms hollow, 120ms filled,
+ * 120ms hollow).
  */
 export function getQntxFrame(elapsedMs: number, isIntro: boolean, k: number): SceneFrame {
   const cells: Cell[] = [];
-  // QNTX wordmark is 84 wide x 18 tall. Centered on stage:
-  // startCol = 64 - 42 = 22, startRow = 20 - 9 = 11.
-  const baseStartCol = 22;
+  // QUANTX wordmark is 123 wide x 18 tall. Centered on stage:
+  // startCol = Math.floor((128 - 123) / 2) = 2, startRow = Math.floor((40 - 18) / 2) = 11.
+  const baseStartCol = 2;
   const startRow = 11;
+  const totalCols = 123;
 
   // Intro: column-by-column build from left to right over 0.8s
-  let maxColAllowed = 84;
+  let maxColAllowed = totalCols;
   if (isIntro) {
     const progress = Math.min(1, elapsedMs / CANVAS_CONFIG.timings.qntxIntroBuild);
-    maxColAllowed = Math.floor(progress * 84);
+    maxColAllowed = Math.floor(progress * totalCols);
   }
 
   // Double flash on letter X during hold (starting at t=300ms)
-  // Letter X is columns 66..83
+  // Letter X starts at local column 105
   let isXFlashing = false;
   if (!isIntro) {
     const { qntxXFlashStart, flashDuration } = CANVAS_CONFIG.timings;
@@ -90,12 +96,12 @@ export function getQntxFrame(elapsedMs: number, isIntro: boolean, k: number): Sc
     isXFlashing = inFlash1 || inFlash2;
   }
 
-  for (const [localCol, localRow] of QNTX_SQUARES) {
+  for (const [localCol, localRow] of QUANTX_SQUARES) {
     if (isIntro && localCol > maxColAllowed) {
       continue;
     }
 
-    const isLetterX = localCol >= 66;
+    const isLetterX = localCol >= 105;
     const state = isLetterX && isXFlashing ? "hollow" : "filled";
 
     // Stage column centered with compression factor k
@@ -116,20 +122,23 @@ export function getQntxFrame(elapsedMs: number, isIntro: boolean, k: number): Sc
 
 /**
  * Scene 1: x402 PAYMENT (8.0s) Story: A asks B for an image. B answers "payment required, x402". A
- * pays with a coin. B delivers the picture and check mark.
+ * pays with a coin via its head slot (slot emergence -> travel -> squash -> descend into B's slot).
+ * B delivers the picture and check mark.
  */
 export function getScene1PaymentFrame(elapsedMs: number, k: number): SceneFrame {
   const cells: Cell[] = [];
-  const { agentRow, checkMarkColStart, checkMarkRowStart } = CANVAS_CONFIG.positions;
+  const { agentRow, checkMarkColStart, checkMarkRowStart, jumpOnReceive } = CANVAS_CONFIG.positions;
   const centerA = getCompressedCol(40, k);
-  const topColA = centerA - 5; // 11 wide -> topCol = center - 5
+  const topColA = centerA - 4; // 9 wide -> topCol = center - 4
   const centerB = getCompressedCol(88, k);
-  const topColB = centerB - 5;
+  const topColB = centerB - 4;
 
   let eyeA: "open" | "blink" | "happy" = "open";
   let eyeB: "open" | "blink" | "happy" = "open";
   let flashA = false;
   let flashB = false;
+  let jumpA = false;
+  let jumpB = false;
 
   // 1. Request Bubble (A wants an image) (0.8s - 2.3s)
   if (elapsedMs >= 800 && elapsedMs < 1100) {
@@ -181,85 +190,124 @@ export function getScene1PaymentFrame(elapsedMs: number, k: number): SceneFrame 
       eyeA = "blink";
     }
   } else if (elapsedMs >= 4500 && elapsedMs < 4700) {
-    // 4.5-4.7s: border, tail and "x402" text vanish; coin stays!
+    // 4.5-4.7s: speech bubble and text vanish completely
     const bubbleCells = getSpeechBubbleCells(centerA);
-    const textCells = getGlyphTextCells(centerA - 4, 10);
-    const vanishing = [...bubbleCells, ...textCells];
+    const contentCells = getPaymentBubbleContentCells(centerA, 10);
+    const vanishing = [...bubbleCells, ...contentCells];
     cells.push(...applyVanishEffect(vanishing, (elapsedMs - 4500) / 200, 202));
-
-    // Coin stays still at row 10
-    cells.push(...spriteToCells(SPRITE_COIN, centerA - 11, 10));
   }
 
-  // 3. Coin Payment (4.7s - 5.3s)
+  // 3. Coin Slot Payment & Travel (4.7s - 5.6s)
   if (elapsedMs >= 4700 && elapsedMs < 4800) {
-    // 4.7-4.8s: moves straight down to row 22, aligned with center A
+    // 4.7-4.8s: Agent A FLASHes; 1x5 vertical bar emerges from A's slot
+    if (elapsedMs < 4700 + CANVAS_CONFIG.timings.flashDuration) {
+      flashA = true;
+    }
     const p = (elapsedMs - 4700) / 100;
-    const currentRow = Math.round(10 + (20 - 10) * p);
-    const currentCol = Math.round(centerA - 11 + (centerA - 2 - (centerA - 11)) * p);
-    cells.push(...spriteToCells(SPRITE_COIN, currentCol, currentRow));
-  } else if (elapsedMs >= 4800 && elapsedMs < 5200) {
-    // 4.8-5.2s: moves right at constant speed (4 cells per tick) until centered above B
-    const p = (elapsedMs - 4800) / 400;
-    const currentCol = Math.round(centerA - 2 + (centerB - 2 - (centerA - 2)) * p);
-    cells.push(...spriteToCells(SPRITE_COIN, currentCol, 20));
-  } else if (elapsedMs >= 5200 && elapsedMs < 5300) {
-    // 5.2-5.3s: cells shrink to 0 into B while B FLASHes
-    const p = (elapsedMs - 5200) / 100;
-    const scale = Math.max(0, 1.0 - p);
-    cells.push(...spriteToCells(SPRITE_COIN, centerB - 2, 20, "filled", scale));
-    flashB = true;
+    cells.push(...getCoinEmergenceCells(centerA, agentRow, p));
+  } else if (elapsedMs >= 4800 && elapsedMs < 4900) {
+    // 4.8-4.9s: bar unfolds into 5x5 coin at center col 40, center row 22
+    const p = (elapsedMs - 4800) / 100;
+    cells.push(...getCoinUnfoldCells(centerA, 22, p));
+  } else if (elapsedMs >= 4900 && elapsedMs < 5300) {
+    // 4.9-5.3s: coin travels right at 4 cells/tick to center col 88, center row 22
+    const p = (elapsedMs - 4900) / 400;
+    const currentCol = Math.round(centerA + (centerB - centerA) * p);
+    cells.push(...spriteToCells(SPRITE_COIN, currentCol - 2, 20));
+  } else if (elapsedMs >= 5300 && elapsedMs < 5400) {
+    // 5.3-5.4s: coin squashes into 1x5 vertical bar at col 88, rows 20-24
+    const p = (elapsedMs - 5300) / 100;
+    cells.push(...getCoinSquashCells(centerB, 22, p));
+  } else if (elapsedMs >= 5400 && elapsedMs < 5600) {
+    // 5.4-5.6s: bar descends into Agent B's slot
+    const p = (elapsedMs - 5400) / 200;
+    cells.push(...getCoinDescendCells(centerB, agentRow, p));
   }
 
-  // 4. B Thinking (5.3s - 6.0s)
-  if (elapsedMs >= 5300 && elapsedMs < 6000) {
-    cells.push(...getThinkingDots(centerB, agentRow, elapsedMs - 5300));
-    if (elapsedMs >= 5700 && elapsedMs < 5800) {
-      eyeB = "blink";
+  // 4. B Receives, Flashes & Thinks (5.6s - 6.2s)
+  if (elapsedMs >= 5600) {
+    if (elapsedMs < 5600 + CANVAS_CONFIG.timings.flashDuration) {
+      flashB = true;
+      if (jumpOnReceive && elapsedMs < 5600 + 66) {
+        jumpB = true;
+      }
+    }
+    if (elapsedMs < 6200) {
+      // 5.6-6.2s: Agent B thinks (thinking dots above B: rows 22, cols 94, 96, 98)
+      cells.push(...getThinkingDots(centerB, agentRow, elapsedMs - 5600));
+      // Agent B blinks once at 5.9s
+      if (elapsedMs >= 5900 && elapsedMs < 6000) {
+        eyeB = "blink";
+      }
     }
   }
 
-  // 5. Picture Icon Delivery (6.0s - 7.1s)
-  if (elapsedMs >= 6000 && elapsedMs < 6300) {
-    // 6.0-6.3s: builds above B at rows 11-19
+  // 5. Picture Icon Delivery (6.2s - 7.3s)
+  if (elapsedMs >= 6200 && elapsedMs < 6500) {
+    // 6.2-6.5s: picture icon builds in place above Agent B
     const picCells = spriteToCells(SPRITE_PICTURE_ICON, centerB - 5, 11);
-    cells.push(...applyBuildEffect(picCells, centerB, agentRow, (elapsedMs - 6000) / 300));
-  } else if (elapsedMs >= 6300 && elapsedMs < 7100) {
-    // 6.3-7.1s: moves left at constant speed (2 cells per tick) to above A
-    const p = (elapsedMs - 6300) / 800;
-    const currentCenter = Math.round(centerB + (centerA - centerB) * p);
-    cells.push(...spriteToCells(SPRITE_PICTURE_ICON, currentCenter - 5, 11));
-  } else if (elapsedMs >= 7100) {
+    cells.push(...applyBuildEffect(picCells, centerB, agentRow, (elapsedMs - 6200) / 300));
+  } else if (elapsedMs >= 6500 && elapsedMs < 7300) {
+    // 6.5-7.3s: picture icon moves left across to above Agent A (at 2 cells/tick)
+    const p = (elapsedMs - 6500) / 800;
+    const currentCol = Math.round(centerB + (centerA - centerB) * p);
+    cells.push(...spriteToCells(SPRITE_PICTURE_ICON, currentCol - 5, 11));
+  } else if (elapsedMs >= 7300) {
     // Holds above A
     cells.push(...spriteToCells(SPRITE_PICTURE_ICON, centerA - 5, 11));
   }
 
-  // 6. Check Mark & A Happy (7.1s - 8.0s)
-  if (elapsedMs >= 7100) {
+  // 6. Check Mark & A Turns Happy (7.3s - 8.0s)
+  if (elapsedMs >= 7300) {
     const checkTarget = spriteToCells(
       SPRITE_CHECK_MARK,
       getCompressedCol(checkMarkColStart, k),
       checkMarkRowStart,
     );
 
-    if (elapsedMs < 7400) {
-      // 7.1-7.4s: check mark builds
-      cells.push(...applyBuildEffect(checkTarget, centerA, agentRow, (elapsedMs - 7100) / 300));
+    if (elapsedMs < 7600) {
+      // 7.3-7.6s: check mark builds in place beside Agent A
+      cells.push(...applyBuildEffect(checkTarget, centerA, agentRow, (elapsedMs - 7300) / 300));
     } else {
+      // 7.6-8.0s: hold, A turns HAPPY and FLASHes
       cells.push(...checkTarget);
       eyeA = "happy";
-      if (elapsedMs < 7400 + CANVAS_CONFIG.timings.flashDuration) {
+      if (elapsedMs < 7600 + CANVAS_CONFIG.timings.flashDuration) {
         flashA = true;
+        if (jumpOnReceive && elapsedMs < 7600 + 66) {
+          jumpA = true;
+        }
       }
     }
   }
 
   // Agents A and B
-  cells.push(...getAgentCells(topColA, agentRow, eyeA, flashA));
-  cells.push(...getAgentCells(topColB, agentRow, eyeB, flashB));
+  cells.push(...getAgentCells(topColA, agentRow, eyeA, flashA, 1.0, jumpA));
+  cells.push(...getAgentCells(topColB, agentRow, eyeB, flashB, 1.0, jumpB));
 
   return { cells };
 }
+
+/** 16 staggered grid coordinates for the crowd in Scene 2 */
+export const CROWD_COORDS_STAGGERED: ReadonlyArray<{ readonly col: number; readonly row: number }> =
+  [
+    { col: 22, row: 7 },
+    { col: 50, row: 7 },
+    { col: 78, row: 7 },
+    { col: 106, row: 7 },
+    { col: 36, row: 15 },
+    { col: 64, row: 15 },
+    { col: 92, row: 15 },
+    { col: 120, row: 15 },
+    { col: 22, row: 23 },
+    { col: 50, row: 23 },
+    { col: 78, row: 23 },
+    { col: 106, row: 23 },
+    { col: 36, row: 31 },
+    { col: 64, row: 31 },
+    { col: 92, row: 31 },
+    { col: 120, row: 31 },
+  ];
 
 /** Precomputed deterministic trading transactions for Scene 2 */
 type ScheduledTrade = {
@@ -268,35 +316,31 @@ type ScheduledTrade = {
   toIdx: number;
 };
 
-function generateTradingSchedule(
-  numCols: number,
-  numRows: number,
-  seed: number = CANVAS_CONFIG.prngSeed,
-): ScheduledTrade[] {
+function generateTradingSchedule(seed: number = CANVAS_CONFIG.prngSeed): ScheduledTrade[] {
   const prng = createPRNG(seed);
   const trades: ScheduledTrade[] = [];
   const startMs = 1800;
   const endMs = 3200;
-  const interval = CANVAS_CONFIG.timings.scene2CoinInterval; // 120ms
+  const interval = CANVAS_CONFIG.timings.scene2CoinInterval; // 60ms
 
   for (let t = startMs; t < endMs; t += interval) {
-    const r = Math.floor(prng() * numRows);
-    const c = Math.floor(prng() * numCols);
-    const fromIdx = r * numCols + c;
+    const fromIdx = Math.floor(prng() * 16);
+    const r = Math.floor(fromIdx / 4);
+    const c = fromIdx % 4;
 
-    // Pick a valid orthogonal neighbor
+    // Pick a valid neighbor in the 4x4 grid
     const neighbors: number[] = [];
     if (c > 0) {
-      neighbors.push(r * numCols + (c - 1)); // Left
+      neighbors.push(r * 4 + (c - 1));
     }
-    if (c < numCols - 1) {
-      neighbors.push(r * numCols + (c + 1)); // Right
+    if (c < 3) {
+      neighbors.push(r * 4 + (c + 1));
     }
     if (r > 0) {
-      neighbors.push((r - 1) * numCols + c); // Up
+      neighbors.push((r - 1) * 4 + c);
     }
-    if (r < numRows - 1) {
-      neighbors.push((r + 1) * numCols + c); // Down
+    if (r < 3) {
+      neighbors.push((r + 1) * 4 + c);
     }
 
     if (neighbors.length > 0) {
@@ -310,111 +354,132 @@ function generateTradingSchedule(
 }
 
 /**
- * Scene 2: A CROWD OF AGENTS (4.0s) 0.0-0.6s: Dissolve from Scene 1 into ONE full-size agent
- * centered at (59, 16). 0.6-1.8s: Multiplies in 3 steps: 1 -> 3 -> 9 -> 27 MINI agents. 1.8-3.2s:
- * Trading! Mini coins (2x2) fly between adjacent agents; receivers FLASH on arrival. 3.2-4.0s:
- * Dissolve into QNTX wordmark.
+ * Scene 2: A CROWD OF AGENTS & TRADING (4.0s) 0.0-0.6s: Starts with a SINGLE 9x9 agent centered on
+ * stage (col 60, row 16; center col 64, center row 20). 0.6-1.8s: Cell division: agent splits into
+ * 2, 4, 8, 16 mini agents on 4x4 staggered grid. For 2 ticks (~66ms) in each split, center column
+ * scales to 0, then cells fly outward. 1.8-3.2s: High-frequency trading! Mini coins fly between
+ * neighbors; receiver FLASHes on arrival. 3.2-4.0s: Dissolve into QUANTX wordmark.
  */
-export function getScene2CrowdFrame(elapsedMs: number, isMobile: boolean, k: number): SceneFrame {
+export function getScene2CrowdFrame(elapsedMs: number, _isMobile: boolean, k: number): SceneFrame {
   const cells: Cell[] = [];
-  const numRows = 3;
-  const rowCenters = [9, 20, 31];
+  const crowdCoords = CROWD_COORDS_STAGGERED.map((coord) => ({
+    col: getCompressedCol(coord.col, k),
+    row: coord.row,
+  }));
 
-  // Grid columns
-  const standardCols = [16, 28, 40, 52, 64, 76, 88, 100, 112];
-  const mobileCols = [16, 40, 64, 88, 112];
-  const colCenters = (isMobile ? mobileCols : standardCols).map((c) => getCompressedCol(c, k));
-  const numCols = colCenters.length;
-
+  // 0.0-0.6s: Single 9x9 agent centered on stage (col 60, row 16)
   if (elapsedMs < 600) {
-    // 0.0-0.6s: Single full-size agent centered at (59, 16)
     const centerCol = getCompressedCol(64, k);
-    cells.push(...getAgentCells(centerCol - 5, 16, "open", false));
+    cells.push(...getAgentCells(centerCol - 4, 16, "open", false));
     return { cells };
   }
 
-  if (elapsedMs < 1000) {
-    // Step 1 (0.6-1.0s): 1 -> 3 mini agents on middle row (row 20)
-    const p = (elapsedMs - 600) / 400;
-    const midCol = getCompressedCol(64, k);
-    const leftTarget = getCompressedCol(52, k);
-    const rightTarget = getCompressedCol(76, k);
+  // 0.6-1.8s: Cell Division (1 -> 2 -> 4 -> 8 -> 16 mini agents)
+  if (elapsedMs < 1800) {
+    const divisionElapsed = elapsedMs - 600; // 0..1200ms
 
-    // Center agent shrinks to mini: top-left = center - (3, 2)
-    cells.push(...getMiniAgentCells(midCol - 3, 18));
+    if (divisionElapsed < 300) {
+      // Step 1: 1 -> 2 mini agents horizontally (middle row 20)
+      const p = divisionElapsed / 300;
+      const isDividingTick = divisionElapsed < 66;
+      const midCol = getCompressedCol(64, k);
+      const targetLeft = getCompressedCol(50, k);
+      const targetRight = getCompressedCol(78, k);
 
-    // Left and right peel from center
-    const leftCol = Math.round(midCol + (leftTarget - midCol) * p);
-    const rightCol = Math.round(midCol + (rightTarget - midCol) * p);
-    cells.push(...getMiniAgentCells(leftCol - 3, 18));
-    cells.push(...getMiniAgentCells(rightCol - 3, 18));
+      const curLeft = Math.round(midCol + (targetLeft - midCol) * p);
+      const curRight = Math.round(midCol + (targetRight - midCol) * p);
 
-    return { cells };
-  }
-
-  if (elapsedMs < 1400) {
-    // Step 2 (1.0-1.4s): 3 -> 9 mini agents (3x3 grid)
-    const p = (elapsedMs - 1000) / 400;
-    const cols3 = [getCompressedCol(40, k), getCompressedCol(64, k), getCompressedCol(88, k)];
-
-    for (const c of cols3) {
-      // Middle row
-      cells.push(...getMiniAgentCells(c - 3, 18));
-
-      // Top row peels up from 20 to 9
-      const topRow = Math.round(20 + (9 - 20) * p);
-      cells.push(...getMiniAgentCells(c - 3, topRow - 2));
-
-      // Bottom row peels down from 20 to 31
-      const bottomRow = Math.round(20 + (31 - 20) * p);
-      cells.push(...getMiniAgentCells(c - 3, bottomRow - 2));
+      const scale = isDividingTick ? 0.8 : 1.0;
+      cells.push(...getMiniAgentCells(curLeft - 3, 17, false, scale));
+      cells.push(...getMiniAgentCells(curRight - 3, 17, false, scale));
+      return { cells };
     }
 
-    return { cells };
-  }
+    if (divisionElapsed < 600) {
+      // Step 2: 2 -> 4 mini agents (2x2 grid)
+      const p = (divisionElapsed - 300) / 300;
+      const isDividingTick = divisionElapsed - 300 < 66;
+      const cols = [getCompressedCol(50, k), getCompressedCol(78, k)];
 
-  if (elapsedMs < 1800) {
-    // Step 3 (1.4-1.8s): 9 -> 27 mini agents crowd
-    const p = (elapsedMs - 1400) / 400;
-    for (let r = 0; r < numRows; r++) {
-      const rowCenter = rowCenters[r] ?? 20;
-      for (let c = 0; c < numCols; c++) {
-        const targetCol = colCenters[c] ?? 64;
+      const topRow = Math.round(20 + (15 - 20) * p);
+      const bottomRow = Math.round(20 + (23 - 20) * p);
+      const scale = isDividingTick ? 0.8 : 1.0;
+
+      for (const c of cols) {
+        cells.push(...getMiniAgentCells(c - 3, topRow - 3, false, scale));
+        cells.push(...getMiniAgentCells(c - 3, bottomRow - 3, false, scale));
+      }
+      return { cells };
+    }
+
+    if (divisionElapsed < 900) {
+      // Step 3: 4 -> 8 mini agents
+      const p = (divisionElapsed - 600) / 300;
+      const isDividingTick = divisionElapsed - 600 < 66;
+      const scale = isDividingTick ? 0.8 : 1.0;
+      const indices8 = [1, 2, 5, 6, 9, 10, 13, 14];
+
+      for (const idx of indices8) {
+        const target = crowdCoords[idx];
+        if (target !== undefined) {
+          const startCol = getCompressedCol(64, k);
+          const startRow = 20;
+          const curCol = Math.round(startCol + (target.col - startCol) * p);
+          const curRow = Math.round(startRow + (target.row - startRow) * p);
+          cells.push(...getMiniAgentCells(curCol - 3, curRow - 3, false, scale));
+        }
+      }
+      return { cells };
+    }
+
+    // Step 4: 8 -> 16 mini agents
+    const p = (divisionElapsed - 900) / 300;
+    const isDividingTick = divisionElapsed - 900 < 66;
+    const scale = isDividingTick ? 0.8 : 1.0;
+
+    for (let i = 0; i < 16; i++) {
+      const target = crowdCoords[i];
+      if (target !== undefined) {
         const startCol = getCompressedCol(64, k);
-        const currentCol = Math.round(startCol + (targetCol - startCol) * p);
-        cells.push(...getMiniAgentCells(currentCol - 3, rowCenter - 2));
+        const startRow = 20;
+        const curCol = Math.round(startCol + (target.col - startCol) * p);
+        const curRow = Math.round(startRow + (target.row - startRow) * p);
+        cells.push(...getMiniAgentCells(curCol - 3, curRow - 3, false, scale));
       }
     }
     return { cells };
   }
 
-  // 1.8-3.2s: Trading Phase
-  const trades = generateTradingSchedule(numCols, numRows);
-  const coinDur = CANVAS_CONFIG.timings.scene2CoinDuration; // 280ms
+  // 1.8-3.2s: High-Frequency Trading Phase
+  const trades = generateTradingSchedule();
+  const coinDur = CANVAS_CONFIG.timings.scene2CoinDuration; // 240ms
   const flashDur = CANVAS_CONFIG.timings.flashDuration; // 120ms
 
-  // Track which agents are flashing at this timestamp
+  // Track which agents are flashing at this timestamp (paying or receiving)
   const flashingAgents = new Set<number>();
 
   for (const trade of trades) {
     const elapsedTrade = elapsedMs - trade.spawnMs;
+    // Paying agent flashes at trade launch (first 120ms)
+    if (elapsedTrade >= 0 && elapsedTrade < flashDur) {
+      flashingAgents.add(trade.fromIdx);
+    }
+    // Receiving agent flashes upon arrival (coinDur .. coinDur + flashDur)
     if (elapsedTrade >= coinDur && elapsedTrade < coinDur + flashDur) {
       flashingAgents.add(trade.toIdx);
     }
   }
 
-  // Draw all mini agents in the crowd
-  for (let r = 0; r < numRows; r++) {
-    const rowCenter = rowCenters[r] ?? 20;
-    for (let c = 0; c < numCols; c++) {
-      const agentIdx = r * numCols + c;
-      const colCenter = colCenters[c] ?? 64;
-      const isFlash = flashingAgents.has(agentIdx);
-      cells.push(...getMiniAgentCells(colCenter - 3, rowCenter - 2, isFlash));
+  // Draw all 16 mini agents
+  for (let i = 0; i < 16; i++) {
+    const coord = crowdCoords[i];
+    if (coord !== undefined) {
+      const isFlash = flashingAgents.has(i);
+      cells.push(...getMiniAgentCells(coord.col - 3, coord.row - 3, isFlash));
     }
   }
 
-  // Draw active traveling 2x2 mini coins (max 10 in flight)
+  // Draw active traveling 2x2 mini coins (max 16 in flight)
   let activeCoins = 0;
   for (const trade of trades) {
     const elapsedTrade = elapsedMs - trade.spawnMs;
@@ -425,20 +490,21 @@ export function getScene2CrowdFrame(elapsedMs: number, isMobile: boolean, k: num
       activeCoins++;
 
       const p = elapsedTrade / coinDur;
-      const fromR = Math.floor(trade.fromIdx / numCols);
-      const fromC = trade.fromIdx % numCols;
-      const toR = Math.floor(trade.toIdx / numCols);
-      const toC = trade.toIdx % numCols;
+      const fromCoord = crowdCoords[trade.fromIdx];
+      const toCoord = crowdCoords[trade.toIdx];
 
-      const fromX = colCenters[fromC] ?? 64;
-      const fromY = rowCenters[fromR] ?? 20;
-      const toX = colCenters[toC] ?? 64;
-      const toY = rowCenters[toR] ?? 20;
+      if (fromCoord !== undefined && toCoord !== undefined) {
+        // Coin travels from sender slot to receiver slot
+        const fromX = fromCoord.col;
+        const fromY = fromCoord.row - 3;
+        const toX = toCoord.col;
+        const toY = toCoord.row - 3;
 
-      const coinX = Math.round(fromX + (toX - fromX) * p);
-      const coinY = Math.round(fromY + (toY - fromY) * p);
+        const coinX = Math.round(fromX + (toX - fromX) * p);
+        const coinY = Math.round(fromY + (toY - fromY) * p);
 
-      cells.push(...spriteToCells(SPRITE_MINI_COIN, coinX - 1, coinY - 1));
+        cells.push(...spriteToCells(SPRITE_MINI_COIN, coinX - 1, coinY - 1));
+      }
     }
   }
 
@@ -452,10 +518,10 @@ export function getReducedMotionScene1Frame(k: number): SceneFrame {
   const centerA = getCompressedCol(40, k);
   const centerB = getCompressedCol(88, k);
 
-  // Agent A with blink at 3.9s
-  cells.push(...getAgentCells(centerA - 5, agentRow, "blink", false));
+  // Agent A with blink at 3.9s (width 9 -> topCol = center - 4)
+  cells.push(...getAgentCells(centerA - 4, agentRow, "blink", false));
   // Agent B open
-  cells.push(...getAgentCells(centerB - 5, agentRow, "open", false));
+  cells.push(...getAgentCells(centerB - 4, agentRow, "open", false));
 
   // Payment-required bubble held still above Agent A
   cells.push(...getSpeechBubbleCells(centerA));

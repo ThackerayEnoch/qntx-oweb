@@ -27,8 +27,8 @@ export const CANVAS_CONFIG = {
     minK: 0.6, // k = max(0.6, realCols / 128)
   },
 
-  // Fixed particle pool size (covers wordmark 920 cells + headroom)
-  poolSize: 950,
+  // Fixed particle pool size (covers wordmark 1446 cells + headroom)
+  poolSize: 1600,
 
   // Mechanical 30 ticks/second fixed timestep accumulator
   tickRate: 30,
@@ -39,10 +39,11 @@ export const CANVAS_CONFIG = {
   // Stage Coordinates
   positions: {
     groundRow: 33, // Ground line (bottom row of agents: row 33)
-    agentRow: 26, // Full-size agent top row (rows 26-33, height 8)
-    agentACol: 35, // Agent A top-left col (center col 40, width 11)
-    agentBCol: 83, // Agent B top-left col (center col 88, width 11)
+    agentRow: 25, // Full-size agent top row (rows 25-33, height 9)
+    agentACol: 36, // Agent A top-left col (center col 40, width 9)
+    agentBCol: 84, // Agent B top-left col (center col 88, width 9)
     coinRow: 22, // Coin travel line center row (rows 20-24)
+    jumpOnReceive: false, // Optional jump on receiving coin/icon
     bubbleRowStart: 6, // Speech bubble outer box rows 6-18 (height 13)
     bubbleRowEnd: 18,
     bubbleTailRow1: 19,
@@ -53,8 +54,8 @@ export const CANVAS_CONFIG = {
     checkMarkColEnd: 55,
     checkMarkRowStart: 13, // Check mark rows 13-17 (height 5)
     checkMarkRowEnd: 17,
-    scene2AgentRow: 16, // Scene 2 centered initial agent top-left (59, 16)
-    scene2AgentCol: 59,
+    scene2AgentRow: 16, // Scene 2 centered initial agent top-left (60, 16)
+    scene2AgentCol: 60,
   },
 
   // Speeds in integer cells per tick (at 30 ticks/second)
@@ -79,9 +80,9 @@ export const CANVAS_CONFIG = {
     scene2Dissolve: 600, // Dissolve into one centered agent (0.6s)
     scene2DissolveOut: 800, // Dissolve crowd into QNTX wordmark (0.8s)
 
-    scene2CoinInterval: 120, // Spawn mini coin every 120ms
-    scene2CoinDuration: 280, // Coin travel duration between neighbors
-    scene2MaxCoins: 10, // Max 10 coins in flight
+    scene2CoinInterval: 60, // Spawn mini coin every 60ms (high interaction frequency)
+    scene2CoinDuration: 240, // Coin travel duration between neighbors
+    scene2MaxCoins: 16, // Max 16 coins in flight
 
     maxStaggerDelay: 400, // Max random stagger delay (up to 400ms)
     objectBuildDuration: 300, // Flyout build from sender head (~0.3s)
