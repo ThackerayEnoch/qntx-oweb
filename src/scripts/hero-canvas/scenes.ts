@@ -288,26 +288,27 @@ export function getScene1PaymentFrame(elapsedMs: number, k: number): SceneFrame 
   return { cells };
 }
 
-/** 16 staggered grid coordinates for the crowd in Scene 2 */
-export const CROWD_COORDS_STAGGERED: ReadonlyArray<{ readonly col: number; readonly row: number }> =
+/** 16 grid coordinates for the crowd in Scene 2, horizontally and vertically centered */
+export const CROWD_COORDS: ReadonlyArray<{ readonly col: number; readonly row: number }> =
   [
     { col: 22, row: 7 },
     { col: 50, row: 7 },
     { col: 78, row: 7 },
     { col: 106, row: 7 },
-    { col: 36, row: 15 },
-    { col: 64, row: 15 },
-    { col: 92, row: 15 },
-    { col: 120, row: 15 },
+    { col: 22, row: 15 },
+    { col: 50, row: 15 },
+    { col: 78, row: 15 },
+    { col: 106, row: 15 },
     { col: 22, row: 23 },
     { col: 50, row: 23 },
     { col: 78, row: 23 },
     { col: 106, row: 23 },
-    { col: 36, row: 31 },
-    { col: 64, row: 31 },
-    { col: 92, row: 31 },
-    { col: 120, row: 31 },
+    { col: 22, row: 31 },
+    { col: 50, row: 31 },
+    { col: 78, row: 31 },
+    { col: 106, row: 31 },
   ];
+export const CROWD_COORDS_STAGGERED = CROWD_COORDS;
 
 /** Precomputed deterministic trading transactions for Scene 2 */
 type ScheduledTrade = {
@@ -356,13 +357,13 @@ function generateTradingSchedule(seed: number = CANVAS_CONFIG.prngSeed): Schedul
 /**
  * Scene 2: A CROWD OF AGENTS & TRADING (4.0s) 0.0-0.6s: Starts with a SINGLE 9x9 agent centered on
  * stage (col 60, row 16; center col 64, center row 20). 0.6-1.8s: Cell division: agent splits into
- * 2, 4, 8, 16 mini agents on 4x4 staggered grid. For 2 ticks (~66ms) in each split, center column
+ * 2, 4, 8, 16 mini agents on 4x4 centered grid. For 2 ticks (~66ms) in each split, center column
  * scales to 0, then cells fly outward. 1.8-3.2s: High-frequency trading! Mini coins fly between
  * neighbors; receiver FLASHes on arrival. 3.2-4.0s: Dissolve into QNTX wordmark.
  */
 export function getScene2CrowdFrame(elapsedMs: number, _isMobile: boolean, k: number): SceneFrame {
   const cells: Cell[] = [];
-  const crowdCoords = CROWD_COORDS_STAGGERED.map((coord) => ({
+  const crowdCoords = CROWD_COORDS.map((coord) => ({
     col: getCompressedCol(coord.col, k),
     row: coord.row,
   }));
