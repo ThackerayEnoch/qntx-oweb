@@ -27,7 +27,7 @@ export const CANVAS_CONFIG = {
     minK: 0.6, // k = max(0.6, realCols / 128)
   },
 
-  // Fixed particle pool size (covers wordmark 1446 cells + headroom)
+  // Fixed particle pool size (covers wordmark + headroom)
   poolSize: 1600,
 
   // Mechanical 30 ticks/second fixed timestep accumulator

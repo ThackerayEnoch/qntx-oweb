@@ -1,13 +1,13 @@
 /**
  * QuantX Hero Canvas Scene Frame Generator
  *
- * Implements the two-scene narrative: QUANTX Wordmark -> Scene 1 (x402 Payment via Piggy-Bank Slot,
- * 8.0s) -> Scene 2 (Crowd Division & High-Frequency Trading, 4.0s) -> QUANTX Hold.
+ * Implements the two-scene narrative: QNTX Wordmark -> Scene 1 (x402 Payment via Piggy-Bank Slot,
+ * 8.0s) -> Scene 2 (Crowd Division & High-Frequency Trading, 4.0s) -> QNTX Hold.
  *
  * Strict grid alignment, whole-cell snapping, and deterministic PRNG.
  */
 
-import { QUANTX_SQUARES } from "../qntx-data";
+import { QNTX_SQUARES } from "../qntx-data";
 import { CANVAS_CONFIG } from "./config";
 import { createPRNG } from "./particles";
 import {
@@ -65,17 +65,17 @@ export function getCompressedCol(stageCol: number, k: number): number {
 }
 
 /**
- * Centered QUANTX Wordmark Frame (using 123x18 QUANTX_SQUARES). On first page load: builds column
- * by column over 0.8s. During hold: letter X flashes twice at t=0.3s (120ms hollow, 120ms filled,
+ * Centered QNTX Wordmark Frame (using 84x18 QNTX_SQUARES). On first page load: builds column by
+ * column over 0.8s. During hold: letter X flashes twice at t=0.3s (120ms hollow, 120ms filled,
  * 120ms hollow).
  */
 export function getQntxFrame(elapsedMs: number, isIntro: boolean, k: number): SceneFrame {
   const cells: Cell[] = [];
-  // QUANTX wordmark is 123 wide x 18 tall. Centered on stage:
-  // startCol = Math.floor((128 - 123) / 2) = 2, startRow = Math.floor((40 - 18) / 2) = 11.
-  const baseStartCol = 2;
+  // QNTX wordmark is 84 wide x 18 tall. Centered on stage:
+  // startCol = Math.floor((128 - 84) / 2) = 22, startRow = Math.floor((40 - 18) / 2) = 11.
+  const baseStartCol = 22;
   const startRow = 11;
-  const totalCols = 123;
+  const totalCols = 84;
 
   // Intro: column-by-column build from left to right over 0.8s
   let maxColAllowed = totalCols;
@@ -85,7 +85,7 @@ export function getQntxFrame(elapsedMs: number, isIntro: boolean, k: number): Sc
   }
 
   // Double flash on letter X during hold (starting at t=300ms)
-  // Letter X starts at local column 105
+  // Letter X starts at local column 66 (columns 66..83)
   let isXFlashing = false;
   if (!isIntro) {
     const { qntxXFlashStart, flashDuration } = CANVAS_CONFIG.timings;
@@ -96,12 +96,12 @@ export function getQntxFrame(elapsedMs: number, isIntro: boolean, k: number): Sc
     isXFlashing = inFlash1 || inFlash2;
   }
 
-  for (const [localCol, localRow] of QUANTX_SQUARES) {
+  for (const [localCol, localRow] of QNTX_SQUARES) {
     if (isIntro && localCol > maxColAllowed) {
       continue;
     }
 
-    const isLetterX = localCol >= 105;
+    const isLetterX = localCol >= 66;
     const state = isLetterX && isXFlashing ? "hollow" : "filled";
 
     // Stage column centered with compression factor k
@@ -358,7 +358,7 @@ function generateTradingSchedule(seed: number = CANVAS_CONFIG.prngSeed): Schedul
  * stage (col 60, row 16; center col 64, center row 20). 0.6-1.8s: Cell division: agent splits into
  * 2, 4, 8, 16 mini agents on 4x4 staggered grid. For 2 ticks (~66ms) in each split, center column
  * scales to 0, then cells fly outward. 1.8-3.2s: High-frequency trading! Mini coins fly between
- * neighbors; receiver FLASHes on arrival. 3.2-4.0s: Dissolve into QUANTX wordmark.
+ * neighbors; receiver FLASHes on arrival. 3.2-4.0s: Dissolve into QNTX wordmark.
  */
 export function getScene2CrowdFrame(elapsedMs: number, _isMobile: boolean, k: number): SceneFrame {
   const cells: Cell[] = [];
