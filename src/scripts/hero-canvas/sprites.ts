@@ -33,12 +33,20 @@ export const SPRITE_MINI_AGENT: Sprite = {
   rows: ["##...##", "#######", "#.###.#", "#######", "#######", ".#...#."],
 };
 
-/** Coin (5x5) */
-export const SPRITE_COIN: Sprite = {
+/** Coin / Dollar Money Icon (5x5) referenced from money.svg */
+export const SPRITE_MONEY_ICON: Sprite = {
   width: 5,
   height: 5,
-  rows: [".###.", "#...#", "#.#.#", "#...#", ".###."],
+  rows: [
+    ".###.",
+    "##.#.",
+    ".###.",
+    ".#.##",
+    ".###.",
+  ],
 };
+
+export const SPRITE_COIN: Sprite = SPRITE_MONEY_ICON;
 
 /** Mini Coin (2x2 solid) for Scene 2 trading */
 export const SPRITE_MINI_COIN: Sprite = {
@@ -47,24 +55,43 @@ export const SPRITE_MINI_COIN: Sprite = {
   rows: ["##", "##"],
 };
 
-/** Picture Icon (11x9) */
-export const SPRITE_PICTURE_ICON: Sprite = {
+/** Task / Checklist Icon (11x9) referenced from request.svg */
+export const SPRITE_TASK_ICON: Sprite = {
   width: 11,
   height: 9,
   rows: [
     "###########",
-    "#.........#",
-    "#.##......#",
-    "#.##......#",
-    "#.....#...#",
-    "#....###..#",
-    "#...#####.#",
-    "#.........#",
+    "#...#.####.#",
+    "#.#.#.####.#",
+    "#..#.......#",
+    "#..........#",
+    "#.###.####.#",
+    "#.#.#.####.#",
+    "#.###......#",
     "###########",
   ],
 };
 
-/** Check Mark (7x5) */
+export const SPRITE_PICTURE_ICON: Sprite = SPRITE_TASK_ICON;
+
+/** Success Checkmark Icon (11x9) referenced from success.svg */
+export const SPRITE_SUCCESS_ICON: Sprite = {
+  width: 11,
+  height: 9,
+  rows: [
+    ".........#.",
+    "........##.",
+    ".......###.",
+    "......###..",
+    "##...###...",
+    ".##.###....",
+    "..####.....",
+    "...##......",
+    "...........",
+  ],
+};
+
+/** Check Mark (7x5) - kept for compatibility */
 export const SPRITE_CHECK_MARK: Sprite = {
   width: 7,
   height: 5,
@@ -392,15 +419,15 @@ export function getGlyphTextCells(startCol: number, startRow: number, scale = 1.
 }
 
 /**
- * Payment-Required Bubble Content: COIN (5 wide) + 2 empty cols + "x402" text (15 wide) = 22 wide x
+ * Payment-Required Bubble Content: Dollar Money Icon (5 wide) + 2 empty cols + "x402" text (15 wide) = 22 wide x
  * 5 tall. Centered horizontally inside bubble centered at centerCol.
  */
 export function getPaymentBubbleContentCells(centerCol: number, topRow = 10, scale = 1.0): Cell[] {
   const cells: Cell[] = [];
   const startCol = centerCol - 11; // 22 wide centered: start at center - 11
 
-  // 1. Coin (5x5) at cols startCol .. startCol + 4
-  cells.push(...spriteToCells(SPRITE_COIN, startCol, topRow, "filled", scale));
+  // 1. Dollar Money Icon (5x5) at cols startCol .. startCol + 4
+  cells.push(...spriteToCells(SPRITE_MONEY_ICON, startCol, topRow, "filled", scale));
 
   // 2. "x402" text at cols startCol + 7 .. startCol + 21
   cells.push(...getGlyphTextCells(startCol + 7, topRow, scale));

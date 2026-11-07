@@ -25,7 +25,10 @@ import {
   SPRITE_CHECK_MARK,
   SPRITE_COIN,
   SPRITE_MINI_COIN,
+  SPRITE_MONEY_ICON,
   SPRITE_PICTURE_ICON,
+  SPRITE_SUCCESS_ICON,
+  SPRITE_TASK_ICON,
   spriteToCells,
 } from "./sprites";
 import type { Beat, Cell, SceneFrame } from "./types";
@@ -47,10 +50,9 @@ export const SCENE_1_BEATS: ReadonlyArray<Beat> = [
   { name: "COIN_SQUASH", startMs: 5300, endMs: 5400 },
   { name: "BAR_DESCEND_INTO_SLOT", startMs: 5400, endMs: 5600 },
   { name: "B_FLASH_AND_THINKING", startMs: 5600, endMs: 6200 },
-  { name: "PICTURE_BUILD", startMs: 6200, endMs: 6500 },
-  { name: "PICTURE_MOVE_TO_A", startMs: 6500, endMs: 7300 },
-  { name: "CHECK_MARK_BUILD", startMs: 7300, endMs: 7600 },
-  { name: "A_HAPPY_HOLD", startMs: 7600, endMs: 8000 },
+  { name: "SUCCESS_BUILD", startMs: 6200, endMs: 6500 },
+  { name: "SUCCESS_MOVE_TO_A", startMs: 6500, endMs: 7300 },
+  { name: "A_HAPPY_HOLD", startMs: 7300, endMs: 8000 },
 ];
 
 /**
@@ -121,13 +123,17 @@ export function getQntxFrame(elapsedMs: number, isIntro: boolean, k: number): Sc
 }
 
 /**
- * Scene 1: x402 PAYMENT (8.0s) Story: A asks B for an image. B answers "payment required, x402". A
- * pays with a coin via its head slot (slot emergence -> travel -> squash -> descend into B's slot).
- * B delivers the picture and check mark.
+ * Scene 1: x402 PAYMENT (8.0s)
+ * Story:
+ * 1. Agent A sends Task Icon (from request.svg) in speech bubble to Agent B.
+ * 2. Agent B replies with "x402" payment-required bubble carrying Dollar Money Icon (from money.svg).
+ * 3. Agent A pays by submitting Dollar Money Icon into Agent B's head slot.
+ * 4. Agent B receives, flashes & thinks, then delivers Success Icon (from success.svg) to Agent A.
+ * 5. Agent A happily receives Success Icon and flashes.
  */
 export function getScene1PaymentFrame(elapsedMs: number, k: number): SceneFrame {
   const cells: Cell[] = [];
-  const { agentRow, checkMarkColStart, checkMarkRowStart, jumpOnReceive } = CANVAS_CONFIG.positions;
+  const { agentRow, jumpOnReceive } = CANVAS_CONFIG.positions;
   const centerA = getCompressedCol(40, k);
   const topColA = centerA - 4; // 9 wide -> topCol = center - 4
   const centerB = getCompressedCol(88, k);
@@ -140,36 +146,36 @@ export function getScene1PaymentFrame(elapsedMs: number, k: number): SceneFrame 
   let jumpA = false;
   let jumpB = false;
 
-  // 1. Request Bubble (A wants an image) (0.8s - 2.3s)
+  // 1. Request Bubble (A sends Task Icon to B) (0.8s - 2.3s)
   if (elapsedMs >= 800 && elapsedMs < 1100) {
     // 0.8-1.1s: builds above A
     const bubbleCells = getSpeechBubbleCells(centerA);
-    const picCells = spriteToCells(SPRITE_PICTURE_ICON, centerA - 5, 8);
-    const combined = [...bubbleCells, ...picCells];
+    const taskCells = spriteToCells(SPRITE_TASK_ICON, centerA - 5, 8);
+    const combined = [...bubbleCells, ...taskCells];
     cells.push(...applyBuildEffect(combined, centerA, agentRow, (elapsedMs - 800) / 300));
   } else if (elapsedMs >= 1100 && elapsedMs < 1900) {
     // 1.1-1.9s: moves horizontally right to B (2 cells per tick)
     const p = (elapsedMs - 1100) / 800;
     const currentCenter = Math.round(centerA + (centerB - centerA) * p);
     cells.push(...getSpeechBubbleCells(currentCenter));
-    cells.push(...spriteToCells(SPRITE_PICTURE_ICON, currentCenter - 5, 8));
+    cells.push(...spriteToCells(SPRITE_TASK_ICON, currentCenter - 5, 8));
   } else if (elapsedMs >= 1900 && elapsedMs < 2000) {
     // 1.9-2.0s: arrives above B, B FLASHes
     cells.push(...getSpeechBubbleCells(centerB));
-    cells.push(...spriteToCells(SPRITE_PICTURE_ICON, centerB - 5, 8));
+    cells.push(...spriteToCells(SPRITE_TASK_ICON, centerB - 5, 8));
     flashB = true;
   } else if (elapsedMs >= 2000 && elapsedMs < 2300) {
     // 2.0-2.3s: bubble vanishes
     const bubbleCells = getSpeechBubbleCells(centerB);
-    const picCells = spriteToCells(SPRITE_PICTURE_ICON, centerB - 5, 8);
-    const combined = [...bubbleCells, ...picCells];
+    const taskCells = spriteToCells(SPRITE_TASK_ICON, centerB - 5, 8);
+    const combined = [...bubbleCells, ...taskCells];
     cells.push(...applyVanishEffect(combined, (elapsedMs - 2000) / 300, 101));
     if (elapsedMs < 1900 + CANVAS_CONFIG.timings.flashDuration) {
       flashB = true;
     }
   }
 
-  // 2. Payment-Required Bubble (B answers "x402") (2.3s - 4.7s)
+  // 2. Payment-Required Bubble (B answers "x402" with Dollar Money Icon) (2.3s - 4.7s)
   if (elapsedMs >= 2300 && elapsedMs < 2600) {
     // 2.3-2.6s: builds above B
     const bubbleCells = getSpeechBubbleCells(centerB);
@@ -197,7 +203,7 @@ export function getScene1PaymentFrame(elapsedMs: number, k: number): SceneFrame 
     cells.push(...applyVanishEffect(vanishing, (elapsedMs - 4500) / 200, 202));
   }
 
-  // 3. Coin Slot Payment & Travel (4.7s - 5.6s)
+  // 3. Dollar Coin Slot Payment & Travel (4.7s - 5.6s)
   if (elapsedMs >= 4700 && elapsedMs < 4800) {
     // 4.7-4.8s: Agent A FLASHes; 1x5 vertical bar emerges from A's slot
     if (elapsedMs < 4700 + CANVAS_CONFIG.timings.flashDuration) {
@@ -206,16 +212,16 @@ export function getScene1PaymentFrame(elapsedMs: number, k: number): SceneFrame 
     const p = (elapsedMs - 4700) / 100;
     cells.push(...getCoinEmergenceCells(centerA, agentRow, p));
   } else if (elapsedMs >= 4800 && elapsedMs < 4900) {
-    // 4.8-4.9s: bar unfolds into 5x5 coin at center col 40, center row 22
+    // 4.8-4.9s: bar unfolds into 5x5 dollar coin at center col 40, center row 22
     const p = (elapsedMs - 4800) / 100;
     cells.push(...getCoinUnfoldCells(centerA, 22, p));
   } else if (elapsedMs >= 4900 && elapsedMs < 5300) {
-    // 4.9-5.3s: coin travels right at 4 cells/tick to center col 88, center row 22
+    // 4.9-5.3s: dollar coin travels right at 4 cells/tick to center col 88, center row 22
     const p = (elapsedMs - 4900) / 400;
     const currentCol = Math.round(centerA + (centerB - centerA) * p);
-    cells.push(...spriteToCells(SPRITE_COIN, currentCol - 2, 20));
+    cells.push(...spriteToCells(SPRITE_MONEY_ICON, currentCol - 2, 20));
   } else if (elapsedMs >= 5300 && elapsedMs < 5400) {
-    // 5.3-5.4s: coin squashes into 1x5 vertical bar at col 88, rows 20-24
+    // 5.3-5.4s: dollar coin squashes into 1x5 vertical bar at col 88, rows 20-24
     const p = (elapsedMs - 5300) / 100;
     cells.push(...getCoinSquashCells(centerB, 22, p));
   } else if (elapsedMs >= 5400 && elapsedMs < 5600) {
@@ -242,41 +248,24 @@ export function getScene1PaymentFrame(elapsedMs: number, k: number): SceneFrame 
     }
   }
 
-  // 5. Picture Icon Delivery (6.2s - 7.3s)
+  // 5. Success Icon Delivery & A Turns Happy (6.2s - 8.0s)
   if (elapsedMs >= 6200 && elapsedMs < 6500) {
-    // 6.2-6.5s: picture icon builds in place above Agent B
-    const picCells = spriteToCells(SPRITE_PICTURE_ICON, centerB - 5, 11);
-    cells.push(...applyBuildEffect(picCells, centerB, agentRow, (elapsedMs - 6200) / 300));
+    // 6.2-6.5s: success icon builds in place above Agent B
+    const successCells = spriteToCells(SPRITE_SUCCESS_ICON, centerB - 5, 11);
+    cells.push(...applyBuildEffect(successCells, centerB, agentRow, (elapsedMs - 6200) / 300));
   } else if (elapsedMs >= 6500 && elapsedMs < 7300) {
-    // 6.5-7.3s: picture icon moves left across to above Agent A (at 2 cells/tick)
+    // 6.5-7.3s: success icon moves left across to above Agent A (at 2 cells/tick)
     const p = (elapsedMs - 6500) / 800;
     const currentCol = Math.round(centerB + (centerA - centerB) * p);
-    cells.push(...spriteToCells(SPRITE_PICTURE_ICON, currentCol - 5, 11));
+    cells.push(...spriteToCells(SPRITE_SUCCESS_ICON, currentCol - 5, 11));
   } else if (elapsedMs >= 7300) {
-    // Holds above A
-    cells.push(...spriteToCells(SPRITE_PICTURE_ICON, centerA - 5, 11));
-  }
-
-  // 6. Check Mark & A Turns Happy (7.3s - 8.0s)
-  if (elapsedMs >= 7300) {
-    const checkTarget = spriteToCells(
-      SPRITE_CHECK_MARK,
-      getCompressedCol(checkMarkColStart, k),
-      checkMarkRowStart,
-    );
-
-    if (elapsedMs < 7600) {
-      // 7.3-7.6s: check mark builds in place beside Agent A
-      cells.push(...applyBuildEffect(checkTarget, centerA, agentRow, (elapsedMs - 7300) / 300));
-    } else {
-      // 7.6-8.0s: hold, A turns HAPPY and FLASHes
-      cells.push(...checkTarget);
-      eyeA = "happy";
-      if (elapsedMs < 7600 + CANVAS_CONFIG.timings.flashDuration) {
-        flashA = true;
-        if (jumpOnReceive && elapsedMs < 7600 + 66) {
-          jumpA = true;
-        }
+    // 7.3-8.0s: Success icon holds above Agent A; A turns HAPPY and FLASHes
+    cells.push(...spriteToCells(SPRITE_SUCCESS_ICON, centerA - 5, 11));
+    eyeA = "happy";
+    if (elapsedMs < 7300 + CANVAS_CONFIG.timings.flashDuration) {
+      flashA = true;
+      if (jumpOnReceive && elapsedMs < 7300 + 66) {
+        jumpA = true;
       }
     }
   }
