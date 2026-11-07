@@ -124,14 +124,6 @@ export class HeroCanvasEngine {
   private setupListeners(): void {
     window.addEventListener("resize", this.handleResize);
 
-    // Canvas Hover: pause timeline, leave resumes
-    this.canvas.addEventListener("mouseenter", () => {
-      this.timeline.pause();
-    });
-    this.canvas.addEventListener("mouseleave", () => {
-      this.timeline.resume();
-    });
-
     // Page visibility
     document.addEventListener("visibilitychange", this.handleVisibilityChange);
   }
