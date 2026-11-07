@@ -33,16 +33,18 @@ export const SPRITE_MINI_AGENT: Sprite = {
   rows: ["##...##", "#######", "#.###.#", "#######", "#######", ".#...#."],
 };
 
-/** Coin / Dollar Money Icon (5x5) referenced from money.svg */
+/** Pure Dollar Sign Icon (7x7 borderless symbol) */
 export const SPRITE_MONEY_ICON: Sprite = {
-  width: 5,
-  height: 5,
+  width: 7,
+  height: 7,
   rows: [
-    ".###.",
-    "##.#.",
-    ".###.",
-    ".#.##",
-    ".###.",
+    "...#...",
+    ".######",
+    "##.#...",
+    ".#####.",
+    "...#.##",
+    "######.",
+    "...#...",
   ],
 };
 
@@ -55,19 +57,19 @@ export const SPRITE_MINI_COIN: Sprite = {
   rows: ["##", "##"],
 };
 
-/** Task / Checklist Icon (11x9) referenced from request.svg */
+/** Task / Folded Document Icon (11x9 borderless silhouette) */
 export const SPRITE_TASK_ICON: Sprite = {
   width: 11,
   height: 9,
   rows: [
-    "###########",
-    "#...#.####.#",
-    "#.#.#.####.#",
-    "#..#.......#",
-    "#..........#",
-    "#.###.####.#",
-    "#.#.#.####.#",
-    "#.###......#",
+    "########...",
+    "#......##..",
+    "#.....#####",
+    "#....#....#",
+    "#.#.#.###.#",
+    "#..#..###.#",
+    "#.........#",
+    "#.##..###.#",
     "###########",
   ],
 };
@@ -262,8 +264,8 @@ export function getThinkingDots(
 
 /**
  * Paying emergence (0.1s): Cells emerge one by one from the slot cell (center col, slot row 25) and
- * move straight up, forming a vertical bar of 1 column x 5 rows standing directly above the sprite
- * (rows top-5..top-1: rows 20-24).
+ * move straight up, forming a vertical bar of 1 column x 7 rows standing directly above the sprite
+ * (rows top-7..top-1: rows 18-24).
  */
 export function getCoinEmergenceCells(
   slotCenterCol: number,
@@ -272,10 +274,10 @@ export function getCoinEmergenceCells(
 ): Cell[] {
   const cells: Cell[] = [];
   const p = Math.max(0, Math.min(1, progress));
-  const numCells = Math.min(5, Math.max(1, Math.ceil(p * 5)));
+  const numCells = Math.min(7, Math.max(1, Math.ceil(p * 7)));
   for (let i = 0; i < numCells; i++) {
-    const targetRow = slotRow - 5 + i; // 20, 21, 22, 23, 24
-    const r = Math.round(slotRow - (5 - i) * p);
+    const targetRow = slotRow - 7 + i; // 18, 19, 20, 21, 22, 23, 24
+    const r = Math.round(slotRow - (7 - i) * p);
     const row = Math.max(targetRow, Math.min(slotRow - 1, r));
     cells.push({
       col: slotCenterCol,
@@ -287,16 +289,16 @@ export function getCoinEmergenceCells(
   return cells;
 }
 
-/** Bar unfolds into 5x5 coin at centerCol, center row 22 (rows 20-24) over ~0.1s. */
+/** Bar unfolds into 7x7 dollar icon at centerCol, center row 21 (rows 18-24) over ~0.1s. */
 export function getCoinUnfoldCells(centerCol: number, centerRow: number, progress: number): Cell[] {
   const cells: Cell[] = [];
   const p = Math.max(0, Math.min(1, progress));
-  const topRow = centerRow - 2; // 20
-  const leftCol = centerCol - 2;
+  const topRow = centerRow - 3; // 18
+  const leftCol = centerCol - 3;
 
-  for (let r = 0; r < 5; r++) {
+  for (let r = 0; r < 7; r++) {
     const rowStr = SPRITE_COIN.rows[r] ?? "";
-    for (let c = 0; c < 5; c++) {
+    for (let c = 0; c < 7; c++) {
       if (rowStr[c] === "#") {
         const targetCol = leftCol + c;
         const targetRow = topRow + r;
@@ -313,16 +315,16 @@ export function getCoinUnfoldCells(centerCol: number, centerRow: number, progres
   return cells;
 }
 
-/** 5x5 coin squashes into 1x5 vertical bar standing directly above slot (rows 20-24) over ~0.1s. */
+/** 7x7 dollar icon squashes into 1x7 vertical bar standing directly above slot (rows 18-24) over ~0.1s. */
 export function getCoinSquashCells(centerCol: number, centerRow: number, progress: number): Cell[] {
   const cells: Cell[] = [];
   const p = Math.max(0, Math.min(1, progress));
-  const topRow = centerRow - 2; // 20
-  const leftCol = centerCol - 2;
+  const topRow = centerRow - 3; // 18
+  const leftCol = centerCol - 3;
 
-  for (let r = 0; r < 5; r++) {
+  for (let r = 0; r < 7; r++) {
     const rowStr = SPRITE_COIN.rows[r] ?? "";
-    for (let c = 0; c < 5; c++) {
+    for (let c = 0; c < 7; c++) {
       if (rowStr[c] === "#") {
         const targetCol = leftCol + c;
         const targetRow = topRow + r;
@@ -340,7 +342,7 @@ export function getCoinSquashCells(centerCol: number, centerRow: number, progres
 }
 
 /**
- * 1x5 bar descends 1 cell per tick straight down into the slot, vanishing into the head. Cells that
+ * 1x7 bar descends 1 cell per tick straight down into the slot, vanishing into the head. Cells that
  * have reached or passed the slot row (top row: 25) are no longer rendered.
  */
 export function getCoinDescendCells(
@@ -350,11 +352,11 @@ export function getCoinDescendCells(
 ): Cell[] {
   const cells: Cell[] = [];
   const p = Math.max(0, Math.min(1, progress));
-  // In 0.2s (6 ticks), bar descends 5-6 rows
-  const shift = Math.round(p * 5);
+  // In 0.2s (6 ticks), bar descends 7 rows
+  const shift = Math.round(p * 7);
 
-  for (let i = 0; i < 5; i++) {
-    const initialRow = slotRow - 5 + i; // 20, 21, 22, 23, 24
+  for (let i = 0; i < 7; i++) {
+    const initialRow = slotRow - 7 + i; // 18..24
     const row = initialRow + shift;
     if (row < slotRow) {
       cells.push({
@@ -419,18 +421,18 @@ export function getGlyphTextCells(startCol: number, startRow: number, scale = 1.
 }
 
 /**
- * Payment-Required Bubble Content: Dollar Money Icon (5 wide) + 2 empty cols + "x402" text (15 wide) = 22 wide x
- * 5 tall. Centered horizontally inside bubble centered at centerCol.
+ * Payment-Required Bubble Content: Pure Dollar Icon (7 wide) + 1 empty col + "x402" text (15 wide) = 23 wide x
+ * 7 tall. Centered horizontally and vertically inside bubble centered at centerCol.
  */
 export function getPaymentBubbleContentCells(centerCol: number, topRow = 10, scale = 1.0): Cell[] {
   const cells: Cell[] = [];
-  const startCol = centerCol - 11; // 22 wide centered: start at center - 11
+  const startCol = centerCol - 11; // 23 wide centered: cols center-11 .. center+11
 
-  // 1. Dollar Money Icon (5x5) at cols startCol .. startCol + 4
-  cells.push(...spriteToCells(SPRITE_MONEY_ICON, startCol, topRow, "filled", scale));
+  // 1. Pure Dollar Icon (7x7) at cols startCol .. startCol + 6, rows topRow - 1 .. topRow + 5 (rows 9..15)
+  cells.push(...spriteToCells(SPRITE_MONEY_ICON, startCol, topRow - 1, "filled", scale));
 
-  // 2. "x402" text at cols startCol + 7 .. startCol + 21
-  cells.push(...getGlyphTextCells(startCol + 7, topRow, scale));
+  // 2. "x402" text at cols startCol + 8 .. startCol + 22 (rows 10..14)
+  cells.push(...getGlyphTextCells(startCol + 8, topRow, scale));
 
   return cells;
 }

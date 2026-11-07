@@ -205,25 +205,25 @@ export function getScene1PaymentFrame(elapsedMs: number, k: number): SceneFrame 
 
   // 3. Dollar Coin Slot Payment & Travel (4.7s - 5.6s)
   if (elapsedMs >= 4700 && elapsedMs < 4800) {
-    // 4.7-4.8s: Agent A FLASHes; 1x5 vertical bar emerges from A's slot
+    // 4.7-4.8s: Agent A FLASHes; 1x7 vertical bar emerges from A's slot
     if (elapsedMs < 4700 + CANVAS_CONFIG.timings.flashDuration) {
       flashA = true;
     }
     const p = (elapsedMs - 4700) / 100;
     cells.push(...getCoinEmergenceCells(centerA, agentRow, p));
   } else if (elapsedMs >= 4800 && elapsedMs < 4900) {
-    // 4.8-4.9s: bar unfolds into 5x5 dollar coin at center col 40, center row 22
+    // 4.8-4.9s: bar unfolds into 7x7 pure dollar icon at center col 40, center row 21
     const p = (elapsedMs - 4800) / 100;
-    cells.push(...getCoinUnfoldCells(centerA, 22, p));
+    cells.push(...getCoinUnfoldCells(centerA, 21, p));
   } else if (elapsedMs >= 4900 && elapsedMs < 5300) {
-    // 4.9-5.3s: dollar coin travels right at 4 cells/tick to center col 88, center row 22
+    // 4.9-5.3s: pure dollar icon travels right at 4 cells/tick to center col 88, center row 21
     const p = (elapsedMs - 4900) / 400;
     const currentCol = Math.round(centerA + (centerB - centerA) * p);
-    cells.push(...spriteToCells(SPRITE_MONEY_ICON, currentCol - 2, 20));
+    cells.push(...spriteToCells(SPRITE_MONEY_ICON, currentCol - 3, 18));
   } else if (elapsedMs >= 5300 && elapsedMs < 5400) {
-    // 5.3-5.4s: dollar coin squashes into 1x5 vertical bar at col 88, rows 20-24
+    // 5.3-5.4s: pure dollar icon squashes into 1x7 vertical bar at col 88, rows 18-24
     const p = (elapsedMs - 5300) / 100;
-    cells.push(...getCoinSquashCells(centerB, 22, p));
+    cells.push(...getCoinSquashCells(centerB, 21, p));
   } else if (elapsedMs >= 5400 && elapsedMs < 5600) {
     // 5.4-5.6s: bar descends into Agent B's slot
     const p = (elapsedMs - 5400) / 200;
