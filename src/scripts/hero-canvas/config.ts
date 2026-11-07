@@ -80,9 +80,9 @@ export const CANVAS_CONFIG = {
     scene2Dissolve: 600, // Dissolve into one centered agent (0.6s)
     scene2DissolveOut: 800, // Dissolve crowd into QNTX wordmark (0.8s)
 
-    scene2CoinInterval: 60, // Spawn mini coin every 60ms (high interaction frequency)
+    scene2CoinInterval: 40, // Spawn mini coin every 40ms (high interaction frequency)
     scene2CoinDuration: 240, // Coin travel duration between neighbors
-    scene2MaxCoins: 16, // Max 16 coins in flight
+    scene2MaxCoins: 24, // Max 24 coins in flight
 
     maxStaggerDelay: 400, // Max random stagger delay (up to 400ms)
     objectBuildDuration: 300, // Flyout build from sender head (~0.3s)

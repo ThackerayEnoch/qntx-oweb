@@ -322,10 +322,22 @@ function generateTradingSchedule(seed: number = CANVAS_CONFIG.prngSeed): Schedul
   const trades: ScheduledTrade[] = [];
   const startMs = 1800;
   const endMs = 3200;
-  const interval = CANVAS_CONFIG.timings.scene2CoinInterval; // 60ms
+  const interval = CANVAS_CONFIG.timings.scene2CoinInterval; // 40ms
 
   for (let t = startMs; t < endMs; t += interval) {
-    const fromIdx = Math.floor(prng() * 16);
+    // Boosted selection for the last row (r = 3: indices 12, 13, 14, 15)
+    // 55% of trades involve row 3 (either sent from row 3 or received by row 3)
+    const prioritizeLastRow = prng() < 0.55;
+    let fromIdx: number;
+
+    if (prioritizeLastRow) {
+      const col = Math.floor(prng() * 4);
+      // 70% from row 3 agent, 30% from row 2 neighbor trading down into row 3
+      fromIdx = prng() < 0.7 ? 12 + col : 8 + col;
+    } else {
+      fromIdx = Math.floor(prng() * 16);
+    }
+
     const r = Math.floor(fromIdx / 4);
     const c = fromIdx % 4;
 
@@ -345,8 +357,19 @@ function generateTradingSchedule(seed: number = CANVAS_CONFIG.prngSeed): Schedul
     }
 
     if (neighbors.length > 0) {
-      const neighborIdx = Math.floor(prng() * neighbors.length);
-      const toIdx = neighbors[neighborIdx] ?? fromIdx;
+      let toIdx: number;
+      if (prioritizeLastRow && r === 2 && neighbors.includes(12 + c)) {
+        // Trade directly down into the last row
+        toIdx = 12 + c;
+      } else if (prioritizeLastRow && r === 3) {
+        // Trade either along the last row or upward to row 2
+        const neighborIdx = Math.floor(prng() * neighbors.length);
+        toIdx = neighbors[neighborIdx] ?? fromIdx;
+      } else {
+        const neighborIdx = Math.floor(prng() * neighbors.length);
+        toIdx = neighbors[neighborIdx] ?? fromIdx;
+      }
+
       trades.push({ spawnMs: t, fromIdx, toIdx });
     }
   }
@@ -356,10 +379,11 @@ function generateTradingSchedule(seed: number = CANVAS_CONFIG.prngSeed): Schedul
 
 /**
  * Scene 2: A CROWD OF AGENTS & TRADING (4.0s) 0.0-0.6s: Starts with a SINGLE 9x9 agent centered on
- * stage (col 60, row 16; center col 64, center row 20). 0.6-1.8s: Cell division: agent splits into
- * 2, 4, 8, 16 mini agents on 4x4 centered grid. For 2 ticks (~66ms) in each split, center column
- * scales to 0, then cells fly outward. 1.8-3.2s: High-frequency trading! Mini coins fly between
- * neighbors; receiver FLASHes on arrival. 3.2-4.0s: Dissolve into QNTX wordmark.
+ * stage (col 60, row 16; center col 64, center row 20). 0.6-1.8s: Seamless mitotic cell division
+ * (1 -> 2 -> 4 -> 8 -> 16 mini agents on 4x4 centered grid). Each daughter cell branches cleanly
+ * from its parent position without interrupting or resetting. 1.8-3.2s: High-frequency trading!
+ * Mini coins fly between neighbors; receiver FLASHes on arrival (with boosted last-row exchange
+ * density). 3.2-4.0s: Dissolve into QNTX wordmark.
  */
 export function getScene2CrowdFrame(elapsedMs: number, _isMobile: boolean, k: number): SceneFrame {
   const cells: Cell[] = [];
@@ -380,7 +404,7 @@ export function getScene2CrowdFrame(elapsedMs: number, _isMobile: boolean, k: nu
     const divisionElapsed = elapsedMs - 600; // 0..1200ms
 
     if (divisionElapsed < 300) {
-      // Step 1: 1 -> 2 mini agents horizontally (middle row 20)
+      // Step 1 (0..300ms): 1 -> 2 mini agents horizontally (center row 20, topRow = 17)
       const p = divisionElapsed / 300;
       const isDividingTick = divisionElapsed < 66;
       const midCol = getCompressedCol(64, k);
@@ -397,56 +421,83 @@ export function getScene2CrowdFrame(elapsedMs: number, _isMobile: boolean, k: nu
     }
 
     if (divisionElapsed < 600) {
-      // Step 2: 2 -> 4 mini agents (2x2 grid)
+      // Step 2 (300..600ms): 2 -> 4 mini agents vertically (cols 50 & 78 split from row 20 to rows 15 & 23)
       const p = (divisionElapsed - 300) / 300;
       const isDividingTick = divisionElapsed - 300 < 66;
-      const cols = [getCompressedCol(50, k), getCompressedCol(78, k)];
+      const colLeft = getCompressedCol(50, k);
+      const colRight = getCompressedCol(78, k);
 
       const topRow = Math.round(20 + (15 - 20) * p);
       const bottomRow = Math.round(20 + (23 - 20) * p);
       const scale = isDividingTick ? 0.8 : 1.0;
 
-      for (const c of cols) {
-        cells.push(...getMiniAgentCells(c - 3, topRow - 3, false, scale));
-        cells.push(...getMiniAgentCells(c - 3, bottomRow - 3, false, scale));
-      }
+      cells.push(...getMiniAgentCells(colLeft - 3, topRow - 3, false, scale));
+      cells.push(...getMiniAgentCells(colRight - 3, topRow - 3, false, scale));
+      cells.push(...getMiniAgentCells(colLeft - 3, bottomRow - 3, false, scale));
+      cells.push(...getMiniAgentCells(colRight - 3, bottomRow - 3, false, scale));
       return { cells };
     }
 
     if (divisionElapsed < 900) {
-      // Step 3: 4 -> 8 mini agents
+      // Step 3 (600..900ms): 4 -> 8 mini agents horizontally (rows 15 & 23 branch outward to cols 22 & 106)
       const p = (divisionElapsed - 600) / 300;
       const isDividingTick = divisionElapsed - 600 < 66;
       const scale = isDividingTick ? 0.8 : 1.0;
-      const indices8 = [1, 2, 5, 6, 9, 10, 13, 14];
 
-      for (const idx of indices8) {
-        const target = crowdCoords[idx];
-        if (target !== undefined) {
-          const startCol = getCompressedCol(64, k);
-          const startRow = 20;
-          const curCol = Math.round(startCol + (target.col - startCol) * p);
-          const curRow = Math.round(startRow + (target.row - startRow) * p);
-          cells.push(...getMiniAgentCells(curCol - 3, curRow - 3, false, scale));
-        }
-      }
+      const col22 = getCompressedCol(22, k);
+      const col50 = getCompressedCol(50, k);
+      const col78 = getCompressedCol(78, k);
+      const col106 = getCompressedCol(106, k);
+
+      const row1 = 15;
+      const row2 = 23;
+
+      // Existing 4 agents stay steadily at (50, 15), (78, 15), (50, 23), (78, 23)
+      cells.push(...getMiniAgentCells(col50 - 3, row1 - 3, false, scale));
+      cells.push(...getMiniAgentCells(col78 - 3, row1 - 3, false, scale));
+      cells.push(...getMiniAgentCells(col50 - 3, row2 - 3, false, scale));
+      cells.push(...getMiniAgentCells(col78 - 3, row2 - 3, false, scale));
+
+      // 4 daughter agents branch outward towards outer columns 22 and 106
+      const curCol22 = Math.round(col50 + (col22 - col50) * p);
+      const curCol106 = Math.round(col78 + (col106 - col78) * p);
+
+      cells.push(...getMiniAgentCells(curCol22 - 3, row1 - 3, false, scale));
+      cells.push(...getMiniAgentCells(curCol106 - 3, row1 - 3, false, scale));
+      cells.push(...getMiniAgentCells(curCol22 - 3, row2 - 3, false, scale));
+      cells.push(...getMiniAgentCells(curCol106 - 3, row2 - 3, false, scale));
       return { cells };
     }
 
-    // Step 4: 8 -> 16 mini agents
+    // Step 4 (900..1200ms): 8 -> 16 mini agents vertically
+    // Row 15 spawns Row 7 upwards; Row 23 spawns Row 31 (LAST ROW) downwards smoothly
     const p = (divisionElapsed - 900) / 300;
     const isDividingTick = divisionElapsed - 900 < 66;
     const scale = isDividingTick ? 0.8 : 1.0;
 
-    for (let i = 0; i < 16; i++) {
-      const target = crowdCoords[i];
-      if (target !== undefined) {
-        const startCol = getCompressedCol(64, k);
-        const startRow = 20;
-        const curCol = Math.round(startCol + (target.col - startCol) * p);
-        const curRow = Math.round(startRow + (target.row - startRow) * p);
-        cells.push(...getMiniAgentCells(curCol - 3, curRow - 3, false, scale));
-      }
+    const row0 = 7;
+    const row1 = 15;
+    const row2 = 23;
+    const row3 = 31; // LAST ROW
+
+    const curRow0 = Math.round(row1 + (row0 - row1) * p);
+    const curRow3 = Math.round(row2 + (row3 - row2) * p);
+
+    const cols = [
+      getCompressedCol(22, k),
+      getCompressedCol(50, k),
+      getCompressedCol(78, k),
+      getCompressedCol(106, k),
+    ];
+
+    // The 8 middle agents stay at row 15 and row 23
+    for (const c of cols) {
+      cells.push(...getMiniAgentCells(c - 3, row1 - 3, false, scale));
+      cells.push(...getMiniAgentCells(c - 3, row2 - 3, false, scale));
+      // Top row 0 branching smoothly upward from row 15 to row 7
+      cells.push(...getMiniAgentCells(c - 3, curRow0 - 3, false, scale));
+      // Bottom row 3 (LAST ROW) branching smoothly downward from row 23 to row 31 without interruption
+      cells.push(...getMiniAgentCells(c - 3, curRow3 - 3, false, scale));
     }
     return { cells };
   }
