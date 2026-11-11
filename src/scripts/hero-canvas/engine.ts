@@ -190,7 +190,9 @@ export class HeroCanvasEngine {
         break;
       }
       case "SCENE_2": {
-        if (state.elapsedInPhase >= 3200) {
+        const dissolveStart =
+          CANVAS_CONFIG.timings.scene2Duration - CANVAS_CONFIG.timings.scene2DissolveOut;
+        if (state.elapsedInPhase >= dissolveStart) {
           ({ cells } = getQntxFrame(0, false, this.compressionK));
         } else {
           ({ cells } = getScene2CrowdFrame(state.elapsedInPhase, this.isMobile, this.compressionK));
@@ -242,10 +244,12 @@ export class HeroCanvasEngine {
       }
     }
 
-    // Scene 2 end dissolve into QNTX wordmark at t=3200ms (0.8s)
+    // Scene 2 end dissolve into QNTX wordmark at t=(scene2Duration - scene2DissolveOut)
+    const scene2DissolveStart =
+      CANVAS_CONFIG.timings.scene2Duration - CANVAS_CONFIG.timings.scene2DissolveOut;
     if (
       state.phase === "SCENE_2" &&
-      state.elapsedInPhase >= 3200 &&
+      state.elapsedInPhase >= scene2DissolveStart &&
       !this.scene2RegatherTriggered
     ) {
       this.scene2RegatherTriggered = true;

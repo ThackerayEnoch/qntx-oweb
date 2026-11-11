@@ -127,17 +127,19 @@ export class CanvasTimeline {
         this.elapsedInPhase / CANVAS_CONFIG.timings.scene1Dissolve,
       );
     } else if (this.phase === "SCENE_2") {
+      const dissolveStart =
+        CANVAS_CONFIG.timings.scene2Duration - CANVAS_CONFIG.timings.scene2DissolveOut;
       if (this.elapsedInPhase < CANVAS_CONFIG.timings.scene2Dissolve) {
         isTransitioning = true;
         transitionProgress = Math.min(
           1.0,
           this.elapsedInPhase / CANVAS_CONFIG.timings.scene2Dissolve,
         );
-      } else if (this.elapsedInPhase >= 3200) {
+      } else if (this.elapsedInPhase >= dissolveStart) {
         isTransitioning = true;
         transitionProgress = Math.min(
           1.0,
-          (this.elapsedInPhase - 3200) / CANVAS_CONFIG.timings.scene2DissolveOut,
+          (this.elapsedInPhase - dissolveStart) / CANVAS_CONFIG.timings.scene2DissolveOut,
         );
       }
     }

@@ -76,7 +76,7 @@ export const CANVAS_CONFIG = {
     scene1Duration: 8000, // Scene 1 duration (8.0s)
     scene1Dissolve: 800, // Dissolve from QNTX into agents A and B (0.8s)
 
-    scene2Duration: 4000, // Scene 2 duration (4.0s)
+    scene2Duration: 6000, // Scene 2 duration (6.0s, extended trading interaction)
     scene2Dissolve: 600, // Dissolve into one centered agent (0.6s)
     scene2DissolveOut: 800, // Dissolve crowd into QNTX wordmark (0.8s)
 

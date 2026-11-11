@@ -310,7 +310,7 @@ function generateTradingSchedule(seed: number = CANVAS_CONFIG.prngSeed): Schedul
   const prng = createPRNG(seed);
   const trades: ScheduledTrade[] = [];
   const startMs = 1800;
-  const endMs = 3200;
+  const endMs = CANVAS_CONFIG.timings.scene2Duration - CANVAS_CONFIG.timings.scene2DissolveOut;
   const interval = CANVAS_CONFIG.timings.scene2CoinInterval; // 40ms
 
   for (let t = startMs; t < endMs; t += interval) {
@@ -365,6 +365,8 @@ function generateTradingSchedule(seed: number = CANVAS_CONFIG.prngSeed): Schedul
 
   return trades;
 }
+
+const SCENE_2_TRADES: ScheduledTrade[] = generateTradingSchedule();
 
 /**
  * Scene 2: A CROWD OF AGENTS & TRADING (4.0s) 0.0-0.6s: Starts with a SINGLE 9x9 agent centered on
@@ -491,8 +493,8 @@ export function getScene2CrowdFrame(elapsedMs: number, _isMobile: boolean, k: nu
     return { cells };
   }
 
-  // 1.8-3.2s: High-Frequency Trading Phase
-  const trades = generateTradingSchedule();
+  // 1.8s - Dissolve Out: High-Frequency Trading Phase
+  const trades = SCENE_2_TRADES;
   const coinDur = CANVAS_CONFIG.timings.scene2CoinDuration; // 240ms
   const flashDur = CANVAS_CONFIG.timings.flashDuration; // 120ms
 
